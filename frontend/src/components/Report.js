@@ -431,6 +431,74 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         </div>
 
+        {/* Rating & Feedback Section */}
+        <div className="glass-card rounded-2xl p-6 fade-in" data-testid="rating-section">
+          <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 text-center">
+            Your Feedback Matters
+          </h3>
+          <p className="font-body text-text-secondary text-sm text-center mb-6">
+            Help us and others make better water choices
+          </p>
+          
+          {!hasRated ? (
+            <div className="grid grid-cols-2 gap-4">
+              {/* Drink Again Option */}
+              <button
+                data-testid="drink-again-btn"
+                onClick={() => handleRating('drink_again')}
+                className="p-6 bg-background-subtle hover:bg-primary/10 border-2 border-transparent hover:border-primary rounded-2xl transition-all group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                    <ThumbsUp className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-body font-semibold text-text-primary mb-1">
+                      Likely to Drink Again
+                    </p>
+                    <p className="font-body text-xs text-text-muted">
+                      Happy with this water quality
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Upgrade Option */}
+              <button
+                data-testid="upgrade-water-btn"
+                onClick={() => handleRating('upgrade')}
+                className="p-6 bg-background-subtle hover:bg-primary/10 border-2 border-transparent hover:border-primary rounded-2xl transition-all group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                    <TrendingUp className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-body font-semibold text-text-primary mb-1">
+                      Looking to Upgrade
+                    </p>
+                    <p className="font-body text-xs text-text-muted">
+                      Want better water quality
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          ) : (
+            <div className="text-center p-8 bg-primary/5 rounded-2xl">
+              <CheckCircle className="w-12 h-12 text-primary mx-auto mb-3" />
+              <p className="font-body font-semibold text-text-primary mb-2">
+                Thanks for your feedback!
+              </p>
+              <p className="font-body text-sm text-text-secondary">
+                {userRating === 'drink_again' 
+                  ? 'Great choice! This water meets your quality standards.' 
+                  : 'We\'ll help you find better water options in your area.'}
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Footer */}
         <div className="text-center py-4">
           <p className="font-body text-text-muted text-sm">
