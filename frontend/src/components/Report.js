@@ -236,9 +236,9 @@ const Report = ({ scanResult, onClose }) => {
             <div className="w-1 h-6 bg-primary rounded-full"></div>
             PFAS Analysis
           </h3>
-          <div className="mb-4 p-4 bg-status-safe/10 rounded-xl border border-status-safe/20">
+          <div className="mb-4 p-4 bg-primary/10 rounded-xl border border-primary/20">
             <p className="font-body text-sm text-text-primary">
-              <strong className="text-status-safe">Good News:</strong> All PFAS compounds are well below EPA advisory levels. PFAS (Per- and polyfluoroalkyl substances) are synthetic chemicals found in many products.
+              <strong className="text-primary">Good News:</strong> All PFAS compounds are well below EPA advisory levels. PFAS (Per- and polyfluoroalkyl substances) are synthetic chemicals found in many products.
             </p>
           </div>
           <div className="space-y-3">
@@ -357,7 +357,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
           </div>
           
-          <div className="mt-6 pt-4 border-t border-white/10">
+          <div className="mt-6 pt-4 border-t border-secondary/20">
             <p className="font-body text-xs text-text-muted text-center">
               Data sourced from EPA Master Database • State Title 21 Reports • EWG Water Quality Database
             </p>
