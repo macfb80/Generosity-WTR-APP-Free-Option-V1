@@ -95,14 +95,25 @@ const Scanner = ({ onClose, onScan }) => {
     <div className="fixed inset-0 z-50 bg-white flex flex-col" data-testid="scanner-overlay">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-secondary/20">
-        <h2 className="font-sans text-xl font-semibold text-text-primary">Scan Barcode</h2>
-        <button
-          data-testid="close-scanner-btn"
-          onClick={onClose}
-          className="p-2 rounded-full hover:bg-white/10 transition-colors"
-        >
-          <X className="w-6 h-6 text-text-primary" />
-        </button>
+        <div className="flex-1"></div>
+        
+        {/* Centered Logo */}
+        <img 
+          src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/x3fjl9t4_image.png" 
+          alt="Generosity Logo" 
+          className="h-12 w-auto"
+          data-testid="scanner-logo"
+        />
+        
+        <div className="flex-1 flex justify-end">
+          <button
+            data-testid="close-scanner-btn"
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-white/10 transition-colors"
+          >
+            <X className="w-6 h-6 text-text-primary" />
+          </button>
+        </div>
       </div>
 
       {/* Mode Toggle */}
