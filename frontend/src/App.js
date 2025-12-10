@@ -37,21 +37,33 @@ function App() {
   const handleScan = async (barcode) => {
     setShowScanner(false);
     setIsLoading(true);
-    toast.loading('Analyzing water quality with AI...', { id: 'scan' });
+    toast.loading('🔍 Scanning barcode...', { id: 'scan' });
 
     try {
+      // Brief delay to show scanning message
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      toast.loading('🧪 Analyzing water quality with AI...', { id: 'scan' });
+      
       const response = await axios.post(`${API}/scan`, { barcode }, {
         timeout: 60000, // 60 second timeout for AI processing
       });
+      
       setScanResult(response.data);
       setLatestScan(response.data);
-      setShowReport(true);
-      toast.success('Report generated!', { id: 'scan' });
+      
+      toast.success('✅ Water Quality Report Ready!', { id: 'scan' });
+      
+      // Automatically show report
+      setTimeout(() => {
+        setShowReport(true);
+      }, 500);
+      
       fetchHistory();
     } catch (error) {
       console.error('Scan error:', error);
       toast.error(
-        error.response?.data?.detail || 'Failed to scan. Try another barcode.',
+        error.response?.data?.detail || '❌ Failed to analyze. Please try again.',
         { id: 'scan' }
       );
     } finally {
