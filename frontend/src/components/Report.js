@@ -76,8 +76,17 @@ const Report = ({ scanResult, onClose }) => {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-secondary/20">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h2 className="font-sans text-xl font-semibold text-text-primary">Water Quality Report</h2>
-          <div className="flex items-center gap-2">
+          <div className="flex-1"></div>
+          
+          {/* Centered Logo */}
+          <img 
+            src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/x3fjl9t4_image.png" 
+            alt="Generosity Logo" 
+            className="h-12 w-auto"
+            data-testid="report-logo"
+          />
+          
+          <div className="flex-1 flex items-center justify-end gap-2">
             <button
               data-testid="share-report-btn"
               onClick={handleShare}
