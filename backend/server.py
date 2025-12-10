@@ -149,6 +149,60 @@ WATER_BRANDS_DATA = [
     }
 ]
 
+def calculate_trust_score_and_badges(quality_score: int, contaminants: dict, compliance: dict, source_type: str, baseline_tds: int) -> tuple:
+    """
+    Calculate WTR Trust Score™ grade and badges based on water quality data.
+    Returns: (trust_grade: str, trust_badges: List[str])
+    """
+    trust_badges = []
+    
+    # Calculate trust grade from quality score
+    if quality_score >= 90:
+        trust_grade = "A"
+    elif quality_score >= 80:
+        trust_grade = "B"
+    elif quality_score >= 70:
+        trust_grade = "C"
+    elif quality_score >= 60:
+        trust_grade = "D"
+    else:
+        trust_grade = "F"
+    
+    # Award badges based on specific criteria
+    
+    # Clean & Safe - High quality score + EPA compliant
+    if quality_score >= 85 and compliance.get("epa_compliant", False):
+        trust_badges.append("Clean & Safe")
+    
+    # Better Than Tap - Purified source with low contaminants
+    if source_type in ["Purified", "Vapor Distilled"] and contaminants.get("lead_ppb", 0) < 5:
+        trust_badges.append("Better Than Tap")
+    
+    # Source Verified - Natural sources (Spring, Artesian)
+    if source_type in ["Spring", "Artesian"]:
+        trust_badges.append("Source Verified")
+    
+    # Microplastics Risk - High microplastics
+    if contaminants.get("microplastics", "Low") in ["High", "Medium"]:
+        trust_badges.append("Microplastics Risk")
+    
+    # High Mineral Content - TDS > 200
+    if baseline_tds and baseline_tds > 200:
+        trust_badges.append("High Mineral Content")
+    
+    # Recheck Brand Transparency - Low EWG rating or non-compliant
+    ewg_rating = compliance.get("ewg_rating", "Good")
+    if ewg_rating in ["Poor", "Fair"] or not compliance.get("state_compliant", True):
+        trust_badges.append("Recheck Brand Transparency")
+    
+    # Ultra Pure - Very low contaminants across the board
+    if (contaminants.get("lead_ppb", 0) < 1 and 
+        contaminants.get("pfas_ppt", 0) < 1 and 
+        contaminants.get("microplastics", "Low") == "Low"):
+        trust_badges.append("Ultra Pure")
+    
+    return trust_grade, trust_badges
+
 async def seed_water_brands():
     """Seed the database with water brand data if empty"""
     count = await db.water_brands.count_documents({})
