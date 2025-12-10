@@ -8,9 +8,9 @@ const WaterRing = ({ score = 0, size = 200 }) => {
 
   // Determine color based on score
   const getColor = () => {
-    if (score >= 80) return '#00F0FF'; // Cyan - Safe
-    if (score >= 60) return '#FFB800'; // Yellow - Warning
-    return '#FF2E2E'; // Red - Danger
+    if (score >= 80) return '#51B0E6'; // Blue - Safe
+    if (score >= 60) return '#FFA726'; // Orange - Warning
+    return '#EF5350'; // Red - Danger
   };
 
   const color = getColor();
@@ -23,7 +23,7 @@ const WaterRing = ({ score = 0, size = 200 }) => {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgba(255, 255, 255, 0.1)"
+          stroke="rgba(166, 168, 171, 0.2)"
           strokeWidth={strokeWidth}
           fill="none"
         />
