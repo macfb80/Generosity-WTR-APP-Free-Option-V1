@@ -94,16 +94,16 @@ const Scanner = ({ onClose, onScan }) => {
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col" data-testid="scanner-overlay">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-secondary/20">
+      <div className="flex items-center justify-between p-5 border-b border-secondary/20">
         <div className="flex-1"></div>
         
-        {/* Centered Logo - Optimized Size */}
+        {/* Centered Logo - 25% Smaller */}
         <img 
           src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/5hx57fqb_image.png" 
           alt="Generosity Logo" 
           className="w-full"
           data-testid="scanner-logo"
-          style={{ maxWidth: '450px', height: 'auto' }}
+          style={{ maxWidth: '340px', height: 'auto' }}
         />
         
         <div className="flex-1 flex justify-end">

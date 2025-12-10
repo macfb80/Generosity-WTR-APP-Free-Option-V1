@@ -82,14 +82,14 @@ function App() {
       
       {/* Header */}
       <header className="border-b border-secondary/20 backdrop-blur-xl bg-white/95 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-center">
-          {/* Centered Generosity Logo - Optimized Size */}
+        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-center">
+          {/* Centered Generosity Logo - 25% Smaller */}
           <img 
             src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/5hx57fqb_image.png" 
             alt="Generosity Logo" 
             className="w-full"
             data-testid="app-logo"
-            style={{ maxWidth: '550px', height: 'auto' }}
+            style={{ maxWidth: '410px', height: 'auto' }}
           />
         </div>
       </header>
