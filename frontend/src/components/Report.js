@@ -1,8 +1,16 @@
-import React from 'react';
-import { X, CheckCircle, AlertTriangle, XCircle, Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, CheckCircle, AlertTriangle, XCircle, Download, Share2, ThumbsUp, TrendingUp } from 'lucide-react';
 import WaterRing from './WaterRing';
+import { toast } from 'sonner';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const Report = ({ scanResult, onClose }) => {
+  const [userRating, setUserRating] = useState(null);
+  const [hasRated, setHasRated] = useState(false);
+  
   if (!scanResult) return null;
 
   const getScoreStatus = (score) => {
@@ -13,6 +21,55 @@ const Report = ({ scanResult, onClose }) => {
 
   const status = getScoreStatus(scanResult.quality_score);
   const StatusIcon = status.icon;
+
+  // Share functionality
+  const handleShare = async () => {
+    const shareData = {
+      title: `${scanResult.brand_name} Water Quality Report`,
+      text: `I just scanned ${scanResult.brand_name} with WTR APP! Quality Score: ${scanResult.quality_score}/100. ${scanResult.report_summary}`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        // Use native share on mobile
+        await navigator.share(shareData);
+        toast.success('Report shared successfully!');
+      } else {
+        // Fallback: Copy to clipboard on desktop
+        const shareText = `${shareData.title}\n\n${shareData.text}\n\n${shareData.url}`;
+        await navigator.clipboard.writeText(shareText);
+        toast.success('Report link copied to clipboard!');
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Share error:', error);
+        toast.error('Failed to share report');
+      }
+    }
+  };
+
+  // Rating functionality
+  const handleRating = async (rating) => {
+    try {
+      setUserRating(rating);
+      setHasRated(true);
+      
+      // Save rating to backend
+      await axios.post(`${API}/rate`, {
+        scan_id: scanResult.id,
+        barcode: scanResult.barcode,
+        brand_name: scanResult.brand_name,
+        quality_score: scanResult.quality_score,
+        user_rating: rating
+      });
+      
+      toast.success(rating === 'drink_again' ? '👍 Thanks for your feedback!' : '🔄 Looking for better options!');
+    } catch (error) {
+      console.error('Rating error:', error);
+      toast.error('Failed to save rating');
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-white overflow-auto" data-testid="report-view">
