@@ -107,9 +107,18 @@ function App() {
           Scan Water Bottle
         </button>
 
-        {/* Hero Ring */}
+        {/* Hero Ring with Trust Grade */}
         <div className="glass-card rounded-2xl p-8 text-center fade-in" data-testid="dashboard">
-          <WaterRing score={latestScan?.quality_score || 0} size={200} />
+          <div className="relative inline-block">
+            <WaterRing score={latestScan?.quality_score || 0} size={200} />
+            {latestScan && latestScan.trust_grade && (
+              <div className="absolute -top-2 -right-2 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-neon border-4 border-white">
+                <span className="font-sans text-2xl font-bold text-white">
+                  {latestScan.trust_grade}
+                </span>
+              </div>
+            )}
+          </div>
           <div className="mt-6">
             <h2 className="font-sans text-2xl font-semibold text-text-primary">
               {latestScan ? 'Latest Scan' : 'No Scans Yet'}
@@ -119,12 +128,27 @@ function App() {
                 <p className="font-body text-text-secondary mt-2">
                   {latestScan.brand_name} {latestScan.product_name}
                 </p>
+                
+                {/* Trust Badges */}
+                {latestScan.trust_badges && latestScan.trust_badges.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-2 mt-3">
+                    {latestScan.trust_badges.slice(0, 3).map((badge, idx) => (
+                      <span 
+                        key={idx}
+                        className="px-3 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-semibold"
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
                 <button
                   data-testid="view-latest-report-btn"
                   onClick={() => handleViewHistory(latestScan)}
                   className="mt-4 px-6 py-2 bg-secondary/10 hover:bg-secondary/20 text-text-primary rounded-full font-body text-sm transition-colors"
                 >
-                  View Report
+                  View Full Report
                 </button>
               </>
             )}
