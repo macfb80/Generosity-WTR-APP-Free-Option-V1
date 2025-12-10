@@ -62,6 +62,13 @@ class ScanResult(BaseModel):
 class ScanRequest(BaseModel):
     barcode: str
 
+class RatingRequest(BaseModel):
+    scan_id: str
+    barcode: str
+    brand_name: str
+    quality_score: int
+    user_rating: str  # 'drink_again' or 'upgrade'
+
 # Seed water brand database
 WATER_BRANDS_DATA = [
     {
@@ -351,6 +358,28 @@ async def get_scan_history():
             item['timestamp'] = datetime.fromisoformat(item['timestamp'])
     
     return history
+
+@api_router.post("/rate")
+async def save_rating(request: RatingRequest):
+    """Save user rating for a water scan"""
+    try:
+        rating_doc = {
+            "id": str(uuid.uuid4()),
+            "scan_id": request.scan_id,
+            "barcode": request.barcode,
+            "brand_name": request.brand_name,
+            "quality_score": request.quality_score,
+            "user_rating": request.user_rating,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.user_ratings.insert_one(rating_doc)
+        logger.info(f"Rating saved: {request.brand_name} - {request.user_rating}")
+        
+        return {"status": "success", "message": "Rating saved successfully"}
+    except Exception as e:
+        logger.error(f"Error saving rating: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to save rating")
 
 # Include the router in the main app
 app.include_router(api_router)
