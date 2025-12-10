@@ -37,10 +37,12 @@ function App() {
   const handleScan = async (barcode) => {
     setShowScanner(false);
     setIsLoading(true);
-    toast.loading('Analyzing water quality...', { id: 'scan' });
+    toast.loading('Analyzing water quality with AI...', { id: 'scan' });
 
     try {
-      const response = await axios.post(`${API}/scan`, { barcode });
+      const response = await axios.post(`${API}/scan`, { barcode }, {
+        timeout: 60000, // 60 second timeout for AI processing
+      });
       setScanResult(response.data);
       setLatestScan(response.data);
       setShowReport(true);
