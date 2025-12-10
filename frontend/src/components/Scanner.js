@@ -7,6 +7,7 @@ const Scanner = ({ onClose, onScan }) => {
   const [scanMode, setScanMode] = useState('camera'); // 'camera' or 'manual'
   const [manualBarcode, setManualBarcode] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [cameraError, setCameraError] = useState(null);
   const scannerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
 
