@@ -17,9 +17,11 @@ function App() {
   const [scanHistory, setScanHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [latestScan, setLatestScan] = useState(null);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     fetchHistory();
+    fetchStats();
   }, []);
 
   const fetchHistory = async () => {
@@ -31,6 +33,15 @@ function App() {
       }
     } catch (error) {
       console.error('Error fetching history:', error);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get(`${API}/stats`);
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
     }
   };
 
