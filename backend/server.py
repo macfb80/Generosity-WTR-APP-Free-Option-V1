@@ -156,25 +156,24 @@ async def generate_water_quality_report(brand: WaterBrand) -> dict:
         if not emergent_key:
             raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
         
-        # Create LLM chat instance
+        # Create LLM chat instance with timeout
         chat = LlmChat(
             api_key=emergent_key,
             session_id=f"water-scan-{uuid.uuid4()}",
-            system_message="""You are an expert water quality analyst with deep knowledge of:
-- EPA (Environmental Protection Agency) water quality standards
-- EWG (Environmental Working Group) water quality database
-- State-level Title 21 water quality reports and regulations
-- Bottled water industry standards
-
-Your role is to generate concise, data-driven water quality reports similar to CarFax reports for vehicles.
-Focus on factual analysis, regulatory compliance, and potential health concerns."""
+            system_message="You are a water quality analyst. Generate concise water quality reports based on EPA and EWG standards. Respond in valid JSON format only."
         )
         
         # Configure for OpenAI GPT-5.1
         chat.with_model("openai", "gpt-5.1")
         
-        # Create analysis prompt
-        prompt = f"""Analyze the following bottled water and generate a comprehensive Water Quality Report:
+        # Create shorter, more focused prompt
+        prompt = f"""Analyze this bottled water and return ONLY valid JSON (no markdown):
+
+Product: {brand.brand_name} {brand.product_name}
+Source: {brand.source_type} from {brand.source_location}
+pH: {brand.baseline_ph}, TDS: {brand.baseline_tds} ppm
+
+Return JSON with this structure:
 
 Brand: {brand.brand_name}
 Product: {brand.product_name}
