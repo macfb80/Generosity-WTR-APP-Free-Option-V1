@@ -91,7 +91,7 @@ const Report = ({ scanResult, onClose }) => {
             Regulatory Compliance
           </h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-background-subtle rounded-xl">
               <span className="font-body text-text-primary">EPA Standards</span>
               {scanResult.compliance.epa_compliant ? (
                 <CheckCircle className="w-6 h-6 text-status-safe" />
@@ -99,13 +99,13 @@ const Report = ({ scanResult, onClose }) => {
                 <XCircle className="w-6 h-6 text-status-danger" />
               )}
             </div>
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-background-subtle rounded-xl">
               <span className="font-body text-text-primary">EWG Rating</span>
               <span className="font-mono font-bold text-text-primary">
                 {scanResult.compliance.ewg_rating}
               </span>
             </div>
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-background-subtle rounded-xl">
               <span className="font-body text-text-primary">State Compliance</span>
               {scanResult.compliance.state_compliant ? (
                 <CheckCircle className="w-6 h-6 text-status-safe" />
@@ -124,7 +124,7 @@ const Report = ({ scanResult, onClose }) => {
           </h3>
           <div className="space-y-3">
             {/* TDS */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
