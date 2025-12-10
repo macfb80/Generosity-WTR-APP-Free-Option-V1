@@ -217,25 +217,20 @@ function App() {
               </div>
             </div>
             
-            {/* Top 5 Cleanest */}
+            {/* Top Rated */}
             {stats.top_5_cleanest && stats.top_5_cleanest.length > 0 && (
-              <div className="mt-4">
-                <h4 className="font-body font-semibold text-text-primary mb-3 text-sm">
-                  🏆 Top 5 Cleanest Bottles You've Found
+              <div>
+                <h4 className="font-body font-semibold text-text-primary mb-3">
+                  Top Rated Bottles
                 </h4>
                 <div className="space-y-2">
-                  {stats.top_5_cleanest.map((item, idx) => (
+                  {stats.top_5_cleanest.slice(0, 3).map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-background-subtle rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-lg font-bold text-primary">#{idx + 1}</span>
-                        <div>
-                          <p className="font-body font-semibold text-text-primary text-sm">{item.brand_name}</p>
-                          <p className="font-body text-xs text-text-muted">{item.product_name}</p>
-                        </div>
+                      <div className="flex-1">
+                        <p className="font-body font-semibold text-text-primary">{item.brand_name}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xl font-bold text-primary">{item.trust_grade}</span>
-                        <span className="font-body text-xs text-text-muted">{item.score}</span>
+                        <span className="font-mono text-lg font-bold text-primary">{item.trust_grade}</span>
                       </div>
                     </div>
                   ))}
