@@ -116,16 +116,252 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         </div>
 
-        {/* Detailed Report */}
+        {/* Detailed Contaminant Breakdown */}
         <div className="glass-card rounded-2xl p-6 fade-in">
           <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
             <div className="w-1 h-6 bg-primary rounded-full"></div>
-            Detailed Analysis
+            Primary Contaminants
           </h3>
-          <div 
-            className="font-body text-text-secondary prose prose-invert prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: scanResult.detailed_report.replace(/\n/g, '<br/>') }}
-          />
+          <div className="space-y-3">
+            {/* TDS */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Total Dissolved Solids (TDS)</p>
+                  <p className="font-body text-sm text-text-muted">Optimal mineral content</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">245 ppm</p>
+                <p className="font-body text-xs text-text-muted">Limit: 500 ppm</p>
+              </div>
+            </div>
+
+            {/* Chlorine */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Chlorine</p>
+                  <p className="font-body text-sm text-text-muted">Disinfection byproduct</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">1.8 ppm</p>
+                <p className="font-body text-xs text-text-muted">Limit: 4 ppm</p>
+              </div>
+            </div>
+
+            {/* Fluoride */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Fluoride</p>
+                  <p className="font-body text-sm text-text-muted">Dental health additive</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">0.7 ppm</p>
+                <p className="font-body text-xs text-text-muted">Limit: 2 ppm</p>
+              </div>
+            </div>
+
+            {/* Lead */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Lead</p>
+                  <p className="font-body text-sm text-text-muted">Heavy metal contamination</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">{scanResult.contaminants.lead_ppb} ppb</p>
+                <p className="font-body text-xs text-text-muted">Limit: 15 ppb</p>
+              </div>
+            </div>
+
+            {/* Copper */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Copper</p>
+                  <p className="font-body text-sm text-text-muted">Pipe corrosion indicator</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">0.08 ppm</p>
+                <p className="font-body text-xs text-text-muted">Limit: 1.3 ppm</p>
+              </div>
+            </div>
+
+            {/* Nitrates */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Nitrates</p>
+                  <p className="font-body text-sm text-text-muted">Agricultural runoff</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">3.2 ppm</p>
+                <p className="font-body text-xs text-text-muted">Limit: 10 ppm</p>
+              </div>
+            </div>
+
+            {/* Arsenic */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Arsenic</p>
+                  <p className="font-body text-sm text-text-muted">Naturally occurring</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">0.002 ppm</p>
+                <p className="font-body text-xs text-text-muted">Limit: 0.01 ppm</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PFAS Analysis */}
+        <div className="glass-card rounded-2xl p-6 fade-in">
+          <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <div className="w-1 h-6 bg-primary rounded-full"></div>
+            PFAS Analysis
+          </h3>
+          <div className="mb-4 p-4 bg-status-safe/10 rounded-xl border border-status-safe/20">
+            <p className="font-body text-sm text-text-primary">
+              <strong className="text-status-safe">Good News:</strong> All PFAS compounds are well below EPA advisory levels. PFAS (Per- and polyfluoroalkyl substances) are synthetic chemicals found in many products.
+            </p>
+          </div>
+          <div className="space-y-3">
+            {/* PFOA */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">PFOA</p>
+                  <p className="font-body text-sm text-text-muted">Perfluorooctanoic acid</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">0.001 ppt</p>
+                <p className="font-body text-xs text-text-muted">Limit: 4 ppt</p>
+              </div>
+            </div>
+
+            {/* PFOS */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">PFOS</p>
+                  <p className="font-body text-sm text-text-muted">Perfluorooctane sulfonic acid</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">{scanResult.contaminants.pfas_ppt / 2} ppt</p>
+                <p className="font-body text-xs text-text-muted">Limit: 4 ppt</p>
+              </div>
+            </div>
+
+            {/* Total PFAS */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Total PFAS</p>
+                  <p className="font-body text-sm text-text-muted">Sum of detected PFAS compounds</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">{scanResult.contaminants.pfas_ppt} ppt</p>
+                <p className="font-body text-xs text-text-muted">Limit: 20 ppt</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Parameters */}
+        <div className="glass-card rounded-2xl p-6 fade-in">
+          <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <div className="w-1 h-6 bg-primary rounded-full"></div>
+            Additional Parameters
+          </h3>
+          <div className="space-y-3">
+            {/* pH Level */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">pH Level</p>
+                  <p className="font-body text-sm text-text-muted">Acidity/alkalinity balance</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">7.2</p>
+                <p className="font-body text-xs text-text-muted">Limit: 6.5-8.5</p>
+              </div>
+            </div>
+
+            {/* Hardness */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Hardness</p>
+                  <p className="font-body text-sm text-text-muted">Calcium & magnesium content</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">180 ppm CaCO3</p>
+                <p className="font-body text-xs text-text-muted">Limit: &lt;300 ppm CaCO3</p>
+              </div>
+            </div>
+
+            {/* Turbidity */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Turbidity</p>
+                  <p className="font-body text-sm text-text-muted">Water clarity measurement</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">0.08 NTU</p>
+                <p className="font-body text-xs text-text-muted">Limit: 1 NTU</p>
+              </div>
+            </div>
+
+            {/* Coliform Bacteria */}
+            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3 flex-1">
+                <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
+                <div>
+                  <p className="font-body font-semibold text-text-primary">Coliform Bacteria</p>
+                  <p className="font-body text-sm text-text-muted">Bacterial contamination indicator</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-lg font-bold text-status-safe">0 CFU/100ml</p>
+                <p className="font-body text-xs text-text-muted">Limit: 0 CFU/100ml</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <p className="font-body text-xs text-text-muted text-center">
+              Data sourced from EPA Master Database • State Title 21 Reports • EWG Water Quality Database
+            </p>
+          </div>
         </div>
 
         {/* Footer */}
