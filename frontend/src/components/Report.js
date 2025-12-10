@@ -108,9 +108,20 @@ const Report = ({ scanResult, onClose }) => {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-        {/* Hero Section */}
+        {/* Hero Section with Trust Grade */}
         <div className="glass-card rounded-2xl p-8 text-center fade-in">
-          <WaterRing score={scanResult.quality_score} size={180} />
+          <div className="relative inline-block">
+            <WaterRing score={scanResult.quality_score} size={180} />
+            {/* Trust Grade Badge */}
+            {scanResult.trust_grade && (
+              <div className="absolute -top-3 -right-3 w-20 h-20 bg-primary rounded-full flex flex-col items-center justify-center shadow-neon border-4 border-white animate-pulse">
+                <span className="font-sans text-3xl font-bold text-white leading-none">
+                  {scanResult.trust_grade}
+                </span>
+                <span className="font-body text-xs text-white">Trust</span>
+              </div>
+            )}
+          </div>
           <div className="mt-6">
             <div className="flex items-center justify-center gap-2 mb-2">
               <StatusIcon className={`w-6 h-6 ${status.color}`} />
@@ -121,7 +132,29 @@ const Report = ({ scanResult, onClose }) => {
             <p className="font-body text-lg text-text-primary font-semibold">
               {scanResult.brand_name} {scanResult.product_name}
             </p>
-            <p className="font-body text-text-secondary mt-2">
+            
+            {/* Trust Badges */}
+            {scanResult.trust_badges && scanResult.trust_badges.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                {scanResult.trust_badges.map((badge, idx) => {
+                  const isWarning = badge.includes("Risk") || badge.includes("Recheck");
+                  return (
+                    <span 
+                      key={idx}
+                      className={`px-4 py-2 rounded-full font-body text-sm font-semibold ${
+                        isWarning 
+                          ? 'bg-status-warning/10 text-status-warning border border-status-warning/30' 
+                          : 'bg-primary/10 text-primary border border-primary/30'
+                      }`}
+                    >
+                      {badge}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+            
+            <p className="font-body text-text-secondary mt-4">
               {scanResult.report_summary}
             </p>
           </div>
