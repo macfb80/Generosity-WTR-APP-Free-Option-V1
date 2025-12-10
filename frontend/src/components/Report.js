@@ -77,13 +77,23 @@ const Report = ({ scanResult, onClose }) => {
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-secondary/20">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <h2 className="font-sans text-xl font-semibold text-text-primary">Water Quality Report</h2>
-          <button
-            data-testid="close-report-btn"
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-secondary/10 transition-colors"
-          >
-            <X className="w-6 h-6 text-text-primary" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              data-testid="share-report-btn"
+              onClick={handleShare}
+              className="p-2 rounded-full hover:bg-primary/10 transition-colors"
+              title="Share Report"
+            >
+              <Share2 className="w-6 h-6 text-primary" />
+            </button>
+            <button
+              data-testid="close-report-btn"
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-secondary/10 transition-colors"
+            >
+              <X className="w-6 h-6 text-text-primary" />
+            </button>
+          </div>
         </div>
       </div>
 
