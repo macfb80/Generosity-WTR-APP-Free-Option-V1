@@ -183,22 +183,46 @@ Return JSON with this structure:
   "compliance": {{"epa_compliant": true, "ewg_rating": "Good", "state_compliant": true}}
 }}"""
         
-        user_message = UserMessage(text=prompt)
-        response = await chat.send_message(user_message)
-        
-        # Parse JSON response
+        # Add timeout and retry logic
+        import asyncio
         import json
-        # Remove markdown code blocks if present
-        cleaned_response = response.strip()
-        if cleaned_response.startswith('```json'):
-            cleaned_response = cleaned_response[7:]
-        if cleaned_response.startswith('```'):
-            cleaned_response = cleaned_response[3:]
-        if cleaned_response.endswith('```'):
-            cleaned_response = cleaned_response[:-3]
         
-        report_data = json.loads(cleaned_response.strip())
-        return report_data
+        max_retries = 2
+        timeout_seconds = 15
+        
+        for attempt in range(max_retries):
+            try:
+                user_message = UserMessage(text=prompt)
+                
+                # Use asyncio.wait_for for timeout
+                response = await asyncio.wait_for(
+                    chat.send_message(user_message),
+                    timeout=timeout_seconds
+                )
+                
+                # Parse JSON response
+                cleaned_response = response.strip()
+                if cleaned_response.startswith('```json'):
+                    cleaned_response = cleaned_response[7:]
+                if cleaned_response.startswith('```'):
+                    cleaned_response = cleaned_response[3:]
+                if cleaned_response.endswith('```'):
+                    cleaned_response = cleaned_response[:-3]
+                
+                report_data = json.loads(cleaned_response.strip())
+                return report_data
+                
+            except asyncio.TimeoutError:
+                logger.warning(f"GPT-5.1 API timeout on attempt {attempt + 1}")
+                if attempt == max_retries - 1:
+                    raise Exception("API timeout after retries")
+                await asyncio.sleep(1)  # Brief delay before retry
+                
+            except json.JSONDecodeError as e:
+                logger.warning(f"JSON parsing error on attempt {attempt + 1}: {e}")
+                if attempt == max_retries - 1:
+                    raise Exception("Invalid JSON response after retries")
+                await asyncio.sleep(1)
         
     except Exception as e:
         logger.error(f"Error generating report: {str(e)}")
