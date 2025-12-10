@@ -200,25 +200,20 @@ function App() {
           </div>
         )}
 
-        {/* My Bottle Stats */}
+        {/* Water Tracker */}
         {stats && stats.total_scans > 0 && (
           <div className="glass-card rounded-2xl p-6 fade-in">
-            <h3 className="font-sans text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <span className="text-2xl">📊</span>
-              My Bottle Log
+            <h3 className="font-sans text-lg font-semibold text-text-primary mb-4">
+              Water Tracker
             </h3>
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="text-center">
-                <p className="font-mono text-3xl font-bold text-primary">{stats.total_scans}</p>
-                <p className="font-body text-xs text-text-muted mt-1">Bottles Scanned</p>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-sm text-text-secondary mb-1">Total Scans</p>
+                <p className="font-mono text-2xl font-bold text-primary">{stats.total_scans}</p>
               </div>
-              <div className="text-center">
-                <p className="font-mono text-3xl font-bold text-primary">{stats.average_trust_score}</p>
-                <p className="font-body text-xs text-text-muted mt-1">Avg Trust Score</p>
-              </div>
-              <div className="text-center">
-                <p className="font-body text-sm font-bold text-text-primary truncate">{stats.most_scanned_brand}</p>
-                <p className="font-body text-xs text-text-muted mt-1">Most Scanned</p>
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-sm text-text-secondary mb-1">Avg Score</p>
+                <p className="font-mono text-2xl font-bold text-primary">{stats.average_trust_score}</p>
               </div>
             </div>
             
