@@ -139,7 +139,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Chlorine */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -154,7 +154,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Fluoride */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -169,7 +169,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Lead */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -184,7 +184,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Copper */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -199,7 +199,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Nitrates */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -214,7 +214,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Arsenic */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -243,7 +243,7 @@ const Report = ({ scanResult, onClose }) => {
           </div>
           <div className="space-y-3">
             {/* PFOA */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -258,7 +258,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* PFOS */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -273,7 +273,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Total PFAS */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -297,7 +297,7 @@ const Report = ({ scanResult, onClose }) => {
           </h3>
           <div className="space-y-3">
             {/* pH Level */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -312,7 +312,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Hardness */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -327,7 +327,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Turbidity */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
@@ -342,7 +342,7 @@ const Report = ({ scanResult, onClose }) => {
             </div>
 
             {/* Coliform Bacteria */}
-            <div className="p-4 bg-white/5 rounded-xl flex items-start justify-between">
+            <div className="p-4 bg-background-subtle rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
                 <CheckCircle className="w-5 h-5 text-status-safe mt-1 flex-shrink-0" />
                 <div>
