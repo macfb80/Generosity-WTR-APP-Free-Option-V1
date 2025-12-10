@@ -256,7 +256,7 @@ Be factual and data-driven. Base analysis on known water quality issues for this
 # Routes
 @api_router.get("/")
 async def root():
-    return {"message": "AquaFax Water Quality Scanner API"}
+    return {"message": "WTR APP - Water Quality Scanner API"}
 
 @api_router.get("/brands", response_model=List[WaterBrand])
 async def get_brands():
@@ -322,7 +322,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     await seed_water_brands()
-    logger.info("AquaFax API started")
+    logger.info("WTR APP API started")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
