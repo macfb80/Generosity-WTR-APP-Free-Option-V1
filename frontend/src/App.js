@@ -69,10 +69,10 @@ function App() {
       <Toaster position="top-center" theme="dark" />
       
       {/* Header */}
-      <header className="border-b border-white/10 backdrop-blur-xl bg-background/80 sticky top-0 z-40">
+      <header className="border-b border-secondary/20 backdrop-blur-xl bg-white/95 sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary/15 rounded-full flex items-center justify-center">
               <Droplets className="w-6 h-6 text-primary" />
             </div>
             <h1 className="font-sans text-xl font-bold text-text-primary">AquaFax</h1>
@@ -97,7 +97,7 @@ function App() {
                 <button
                   data-testid="view-latest-report-btn"
                   onClick={() => handleViewHistory(latestScan)}
-                  className="mt-4 px-6 py-2 bg-white/10 hover:bg-white/20 text-text-primary rounded-full font-body text-sm transition-colors"
+                  className="mt-4 px-6 py-2 bg-secondary/10 hover:bg-secondary/20 text-text-primary rounded-full font-body text-sm transition-colors"
                 >
                   View Report
                 </button>
@@ -111,7 +111,7 @@ function App() {
           data-testid="scan-new-water-btn"
           onClick={() => setShowScanner(true)}
           disabled={isLoading}
-          className="w-full py-4 bg-primary hover:bg-primary/90 text-black rounded-2xl font-sans font-bold text-lg transition-all shadow-neon disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+          className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-2xl font-sans font-bold text-lg transition-all shadow-neon disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
         >
           <Scan className="w-6 h-6" />
           Scan Water Bottle
@@ -130,7 +130,7 @@ function App() {
                   key={scan.id}
                   data-testid={`history-item-${scan.id}`}
                   onClick={() => handleViewHistory(scan)}
-                  className="w-full p-4 bg-white/5 hover:bg-white/10 rounded-xl text-left transition-colors group"
+                  className="w-full p-4 bg-background-subtle hover:bg-secondary/10 rounded-xl text-left transition-colors group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
