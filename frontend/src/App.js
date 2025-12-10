@@ -72,10 +72,12 @@ function App() {
       <header className="border-b border-secondary/20 backdrop-blur-xl bg-white/95 sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/15 rounded-full flex items-center justify-center">
-              <Droplets className="w-6 h-6 text-primary" />
-            </div>
-            <h1 className="font-sans text-xl font-bold text-text-primary">AquaFax</h1>
+            {/* Generosity Logo - Drop in Circle */}
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="48" stroke="#51B0E6" strokeWidth="3" fill="none"/>
+              <path d="M50 25C50 25 35 40 35 52C35 60.284 41.716 67 50 67C58.284 67 65 60.284 65 52C65 40 50 25 50 25Z" fill="#51B0E6"/>
+            </svg>
+            <h1 className="font-sans text-xl font-bold text-text-primary">WTR APP</h1>
           </div>
         </div>
       </header>
