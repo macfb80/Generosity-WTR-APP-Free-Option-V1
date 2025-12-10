@@ -135,9 +135,20 @@ const Scanner = ({ onClose, onScan }) => {
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute inset-x-0 top-1/2 h-0.5 bg-primary scan-line"></div>
             </div>
-            <p className="text-center mt-4 text-text-secondary font-body">
-              Position barcode within the frame
-            </p>
+            <div className="mt-4 space-y-2">
+              <p className="text-center text-text-primary font-body font-semibold">
+                📱 Point camera at barcode
+              </p>
+              <p className="text-center text-text-secondary font-body text-sm">
+                Hold steady and align barcode within the frame.<br/>
+                Works with UPC, EAN, and CODE-128 barcodes.
+              </p>
+              {isScanning && (
+                <p className="text-center text-primary font-body text-sm animate-pulse">
+                  🔍 Scanning...
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <div className="w-full max-w-md">
