@@ -460,6 +460,85 @@ async def save_rating(request: RatingRequest):
         logger.error(f"Error saving rating: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to save rating")
 
+@api_router.post("/favorite/{scan_id}")
+async def toggle_favorite(scan_id: str):
+    """Toggle favorite status for a scan"""
+    try:
+        scan = await db.scan_history.find_one({"id": scan_id})
+        if not scan:
+            raise HTTPException(status_code=404, detail="Scan not found")
+        
+        new_status = not scan.get("is_favorite", False)
+        await db.scan_history.update_one(
+            {"id": scan_id},
+            {"$set": {"is_favorite": new_status}}
+        )
+        
+        return {"status": "success", "is_favorite": new_status}
+    except Exception as e:
+        logger.error(f"Error toggling favorite: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to toggle favorite")
+
+@api_router.get("/stats")
+async def get_user_stats():
+    """Get user scan statistics"""
+    try:
+        # Get all scans
+        scans = await db.scan_history.find({}, {"_id": 0}).to_list(1000)
+        
+        if not scans:
+            return {
+                "total_scans": 0,
+                "average_trust_score": 0,
+                "most_scanned_brand": "None",
+                "top_5_cleanest": [],
+                "brands_to_watch": [],
+                "most_frequent": []
+            }
+        
+        # Calculate stats
+        total_scans = len(scans)
+        avg_score = sum(scan.get("quality_score", 0) for scan in scans) / total_scans if total_scans > 0 else 0
+        
+        # Most scanned brand
+        brand_counts = {}
+        for scan in scans:
+            brand = scan.get("brand_name", "Unknown")
+            brand_counts[brand] = brand_counts.get(brand, 0) + 1
+        most_scanned = max(brand_counts.items(), key=lambda x: x[1])[0] if brand_counts else "None"
+        
+        # Top 5 cleanest (unique brands with highest scores)
+        brand_best_scores = {}
+        for scan in scans:
+            brand = scan.get("brand_name", "Unknown")
+            score = scan.get("quality_score", 0)
+            if brand not in brand_best_scores or score > brand_best_scores[brand]["score"]:
+                brand_best_scores[brand] = {
+                    "brand_name": brand,
+                    "product_name": scan.get("product_name", ""),
+                    "score": score,
+                    "trust_grade": scan.get("trust_grade", "C")
+                }
+        top_5 = sorted(brand_best_scores.values(), key=lambda x: x["score"], reverse=True)[:5]
+        
+        # Brands to watch (lowest scores)
+        brands_to_watch = sorted(brand_best_scores.values(), key=lambda x: x["score"])[:3]
+        
+        # Most frequent brands
+        most_frequent = [{"brand": brand, "count": count} for brand, count in sorted(brand_counts.items(), key=lambda x: x[1], reverse=True)[:5]]
+        
+        return {
+            "total_scans": total_scans,
+            "average_trust_score": round(avg_score, 1),
+            "most_scanned_brand": most_scanned,
+            "top_5_cleanest": top_5,
+            "brands_to_watch": brands_to_watch,
+            "most_frequent": most_frequent
+        }
+    except Exception as e:
+        logger.error(f"Error getting stats: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get stats")
+
 # Include the router in the main app
 app.include_router(api_router)
 
