@@ -62,9 +62,9 @@ const Scanner = ({ onClose, onScan }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col" data-testid="scanner-overlay">
+    <div className="fixed inset-0 z-50 bg-white flex flex-col" data-testid="scanner-overlay">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+      <div className="flex items-center justify-between p-4 border-b border-secondary/20">
         <h2 className="font-sans text-xl font-semibold text-text-primary">Scan Barcode</h2>
         <button
           data-testid="close-scanner-btn"
@@ -82,8 +82,8 @@ const Scanner = ({ onClose, onScan }) => {
           onClick={() => setScanMode('camera')}
           className={`flex-1 py-3 rounded-xl font-body font-medium transition-all ${
             scanMode === 'camera'
-              ? 'bg-primary text-black'
-              : 'bg-white/5 text-text-secondary hover:bg-white/10'
+              ? 'bg-primary text-white'
+              : 'bg-background-subtle text-text-secondary hover:bg-secondary/10'
           }`}
         >
           <Camera className="w-5 h-5 inline-block mr-2" />
@@ -97,8 +97,8 @@ const Scanner = ({ onClose, onScan }) => {
           }}
           className={`flex-1 py-3 rounded-xl font-body font-medium transition-all ${
             scanMode === 'manual'
-              ? 'bg-primary text-black'
-              : 'bg-white/5 text-text-secondary hover:bg-white/10'
+              ? 'bg-primary text-white'
+              : 'bg-background-subtle text-text-secondary hover:bg-secondary/10'
           }`}
         >
           <Keyboard className="w-5 h-5 inline-block mr-2" />
@@ -135,7 +135,7 @@ const Scanner = ({ onClose, onScan }) => {
                   value={manualBarcode}
                   onChange={(e) => setManualBarcode(e.target.value)}
                   placeholder="012345678901"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-text-primary font-mono text-lg focus:outline-none focus:border-primary/30 transition-colors"
+                  className="w-full px-4 py-3 bg-white border border-secondary/30 rounded-xl text-text-primary font-mono text-lg focus:outline-none focus:border-primary transition-colors"
                   autoFocus
                 />
               </div>
@@ -143,7 +143,7 @@ const Scanner = ({ onClose, onScan }) => {
                 data-testid="manual-scan-submit-btn"
                 type="submit"
                 disabled={!manualBarcode.trim()}
-                className="w-full py-3 bg-primary text-black rounded-xl font-body font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-primary text-white rounded-xl font-body font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Scan Water
               </button>
