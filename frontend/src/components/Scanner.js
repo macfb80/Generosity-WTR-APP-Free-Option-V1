@@ -47,10 +47,22 @@ const Scanner = ({ onClose, onScan }) => {
         }
       );
       
-      toast.info("Point camera at water bottle barcode");
+      toast.info("📷 Camera ready - Point at barcode");
     } catch (err) {
       console.error("Camera error:", err);
-      toast.error("Camera access denied. Please allow camera permission or use manual entry.");
+      const errorMsg = err.message || err.toString();
+      
+      if (errorMsg.includes('NotAllowedError') || errorMsg.includes('Permission denied')) {
+        setCameraError("Camera permission denied. Please allow camera access in your browser settings.");
+        toast.error("Camera permission needed");
+      } else if (errorMsg.includes('NotFoundError')) {
+        setCameraError("No camera found on this device.");
+        toast.error("No camera detected");
+      } else {
+        setCameraError("Unable to access camera. Please try manual entry.");
+        toast.error("Camera error");
+      }
+      
       setScanMode('manual');
       setIsScanning(false);
     }
