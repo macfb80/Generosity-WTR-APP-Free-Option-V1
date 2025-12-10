@@ -82,26 +82,13 @@ function App() {
       
       {/* Header */}
       <header className="border-b border-secondary/20 backdrop-blur-xl bg-white/95 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          {/* Left Logo - Generosity Water */}
+        <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-center">
+          {/* Centered Generosity Logo */}
           <img 
-            src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/3slt5v9r_image.png" 
-            alt="Generosity Water Logo" 
-            className="h-12 w-auto"
-            data-testid="app-logo-left"
-          />
-          
-          {/* Center Title */}
-          <h1 className="font-sans text-2xl font-bold" style={{ color: '#A6A8AB' }}>
-            WTR APP
-          </h1>
-          
-          {/* Right Logo - Tagline */}
-          <img 
-            src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/icbkz0h2_image.png" 
-            alt="Drink Give Live Generously" 
-            className="h-12 w-auto"
-            data-testid="app-logo-right"
+            src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/x3fjl9t4_image.png" 
+            alt="Generosity Logo" 
+            className="h-16 w-auto"
+            data-testid="app-logo"
           />
         </div>
       </header>
