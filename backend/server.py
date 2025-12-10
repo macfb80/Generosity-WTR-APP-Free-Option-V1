@@ -387,16 +387,37 @@ async def scan_water(request: ScanRequest):
     # Generate AI report
     report_data = await generate_water_quality_report(brand)
     
-    # Create scan result
+    # Calculate WTR Trust Score™ and badges
+    trust_grade, trust_badges = calculate_trust_score_and_badges(
+        quality_score=report_data["quality_score"],
+        contaminants=report_data["contaminants"],
+        compliance=report_data["compliance"],
+        source_type=brand.source_type,
+        baseline_tds=brand.baseline_tds or 0
+    )
+    
+    # Create source context
+    source_context = {
+        "source_type": brand.source_type,
+        "source_location": brand.source_location or "Unknown",
+        "baseline_ph": brand.baseline_ph,
+        "baseline_tds": brand.baseline_tds,
+        "transparency_score": "High" if report_data["compliance"].get("epa_compliant") and report_data["compliance"].get("ewg_rating") in ["Excellent", "Good"] else "Medium"
+    }
+    
+    # Create scan result with Trust Score
     scan_result = ScanResult(
         barcode=request.barcode,
         brand_name=brand.brand_name,
         product_name=brand.product_name,
         quality_score=report_data["quality_score"],
+        trust_grade=trust_grade,
+        trust_badges=trust_badges,
         report_summary=report_data["summary"],
         detailed_report=report_data["detailed_report"],
         contaminants=report_data["contaminants"],
-        compliance=report_data["compliance"]
+        compliance=report_data["compliance"],
+        source_context=source_context
     )
     
     # Save to history
