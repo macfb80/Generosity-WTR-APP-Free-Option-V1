@@ -79,6 +79,11 @@ function App() {
             data-testid="app-logo-left"
           />
           
+          {/* Center Title */}
+          <h1 className="font-sans text-2xl font-bold" style={{ color: '#A6A8AB' }}>
+            WTR APP
+          </h1>
+          
           {/* Right Logo - Tagline */}
           <img 
             src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/icbkz0h2_image.png" 
