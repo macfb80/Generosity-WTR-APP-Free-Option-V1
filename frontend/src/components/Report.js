@@ -474,6 +474,42 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         </div>
 
+        {/* Source Context */}
+        {scanResult.source_context && (
+          <div className="glass-card rounded-2xl p-6 fade-in">
+            <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              Source Context
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm mb-1">Source Type</p>
+                <p className="font-mono text-lg font-bold text-text-primary">
+                  {scanResult.source_context.source_type}
+                </p>
+              </div>
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm mb-1">Location</p>
+                <p className="font-body text-sm font-semibold text-text-primary">
+                  {scanResult.source_context.source_location}
+                </p>
+              </div>
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm mb-1">pH Level</p>
+                <p className="font-mono text-lg font-bold text-text-primary">
+                  {scanResult.source_context.baseline_ph || 'N/A'}
+                </p>
+              </div>
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm mb-1">Brand Transparency</p>
+                <p className="font-body text-sm font-semibold text-primary">
+                  {scanResult.source_context.transparency_score}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Rating & Feedback Section */}
         <div className="glass-card rounded-2xl p-6 fade-in" data-testid="rating-section">
           <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 text-center">
