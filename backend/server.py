@@ -53,11 +53,15 @@ class ScanResult(BaseModel):
     brand_name: str
     product_name: str
     quality_score: int  # 0-100
+    trust_grade: str  # A, B, C, D, F
+    trust_badges: List[str]  # Trust labels
     report_summary: str
     detailed_report: str
     contaminants: dict
     compliance: dict
+    source_context: dict  # Source type, location, transparency
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    is_favorite: bool = False
 
 class ScanRequest(BaseModel):
     barcode: str
