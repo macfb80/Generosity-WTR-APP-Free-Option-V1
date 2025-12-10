@@ -175,45 +175,13 @@ pH: {brand.baseline_ph}, TDS: {brand.baseline_tds} ppm
 
 Return JSON with this structure:
 
-Brand: {brand.brand_name}
-Product: {brand.product_name}
-Source Type: {brand.source_type}
-Source Location: {brand.source_location}
-Baseline pH: {brand.baseline_ph}
-Baseline TDS: {brand.baseline_tds} ppm
-
-Cross-reference this product against:
-1. EPA Master Database on Water Quality standards
-2. EWG Water Quality Database reports
-3. State-level Title 21 regulations for bottled water
-4. Industry best practices
-
-Provide:
-1. Overall Quality Score (0-100)
-2. Brief Summary (2-3 sentences)
-3. Key Contaminants Analysis (Lead, PFAS, Microplastics, Chlorine byproducts)
-4. Compliance Status (EPA, EWG, State regulations)
-5. Detailed Report (CarFax-style with clear sections)
-
-Format your response as JSON with this structure:
 {{
-  "quality_score": <number 0-100>,
-  "summary": "<brief 2-3 sentence summary>",
-  "detailed_report": "<comprehensive report in markdown format>",
-  "contaminants": {{
-    "lead_ppb": <number>,
-    "pfas_ppt": <number>,
-    "microplastics": "<Low/Medium/High>",
-    "disinfection_byproducts": "<Low/Medium/High>"
-  }},
-  "compliance": {{
-    "epa_compliant": <true/false>,
-    "ewg_rating": "<Excellent/Good/Fair/Poor>",
-    "state_compliant": <true/false>
-  }}
-}}
-
-Be factual and data-driven. Base analysis on known water quality issues for this source type and location."""
+  "quality_score": 75,
+  "summary": "Brief quality assessment",
+  "detailed_report": "Water quality report",
+  "contaminants": {{"lead_ppb": 0.5, "pfas_ppt": 2.0, "microplastics": "Low", "disinfection_byproducts": "Low"}},
+  "compliance": {{"epa_compliant": true, "ewg_rating": "Good", "state_compliant": true}}
+}}"""
         
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
