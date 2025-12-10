@@ -15,15 +15,15 @@ const Report = ({ scanResult, onClose }) => {
   const StatusIcon = status.icon;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background overflow-auto" data-testid="report-view">
+    <div className="fixed inset-0 z-50 bg-white overflow-auto" data-testid="report-view">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-white/10">
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-secondary/20">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <h2 className="font-sans text-xl font-semibold text-text-primary">Water Quality Report</h2>
           <button
             data-testid="close-report-btn"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors"
+            className="p-2 rounded-full hover:bg-secondary/10 transition-colors"
           >
             <X className="w-6 h-6 text-text-primary" />
           </button>
@@ -57,25 +57,25 @@ const Report = ({ scanResult, onClose }) => {
             Contaminants Analysis
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-white/5 rounded-xl">
+            <div className="p-4 bg-background-subtle rounded-xl">
               <p className="font-body text-text-secondary text-sm">Lead Level</p>
               <p className="font-mono text-2xl font-bold text-text-primary mt-1">
                 {scanResult.contaminants.lead_ppb} <span className="text-sm text-text-muted">ppb</span>
               </p>
             </div>
-            <div className="p-4 bg-white/5 rounded-xl">
+            <div className="p-4 bg-background-subtle rounded-xl">
               <p className="font-body text-text-secondary text-sm">PFAS</p>
               <p className="font-mono text-2xl font-bold text-text-primary mt-1">
                 {scanResult.contaminants.pfas_ppt} <span className="text-sm text-text-muted">ppt</span>
               </p>
             </div>
-            <div className="p-4 bg-white/5 rounded-xl">
+            <div className="p-4 bg-background-subtle rounded-xl">
               <p className="font-body text-text-secondary text-sm">Microplastics</p>
               <p className="font-mono text-2xl font-bold text-text-primary mt-1">
                 {scanResult.contaminants.microplastics}
               </p>
             </div>
-            <div className="p-4 bg-white/5 rounded-xl">
+            <div className="p-4 bg-background-subtle rounded-xl">
               <p className="font-body text-text-secondary text-sm">Disinfection Byproducts</p>
               <p className="font-mono text-2xl font-bold text-text-primary mt-1">
                 {scanResult.contaminants.disinfection_byproducts}
