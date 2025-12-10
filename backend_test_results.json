@@ -1,0 +1,59 @@
+{
+  "summary": {
+    "total_tests": 7,
+    "passed_tests": 6,
+    "success_rate": "85.7%",
+    "timestamp": "2025-12-10T18:31:57.517276"
+  },
+  "detailed_results": [
+    {
+      "test_name": "API Root Endpoint",
+      "success": true,
+      "details": "Status: 200, Message: AquaFax Water Quality Scanner API",
+      "response_data": null,
+      "timestamp": "2025-12-10T18:27:34.897014"
+    },
+    {
+      "test_name": "Get Water Brands",
+      "success": true,
+      "details": "Found 8 brands, including: Fiji, Evian, Dasani",
+      "response_data": null,
+      "timestamp": "2025-12-10T18:27:34.943192"
+    },
+    {
+      "test_name": "Scan Water - Valid Barcode",
+      "success": true,
+      "details": "Brand: Fiji, Score: 75",
+      "response_data": null,
+      "timestamp": "2025-12-10T18:28:03.116900"
+    },
+    {
+      "test_name": "Scan Water - Invalid Barcode",
+      "success": true,
+      "details": "Correctly returned 404: Water brand not found. Try scanning another bottle or enter barcode manually.",
+      "response_data": null,
+      "timestamp": "2025-12-10T18:28:03.178582"
+    },
+    {
+      "test_name": "All Sample Barcodes",
+      "success": false,
+      "details": "5/8 barcodes working",
+      "response_data": null,
+      "timestamp": "2025-12-10T18:31:36.560303"
+    },
+    {
+      "test_name": "Get Scan History",
+      "success": true,
+      "details": "Retrieved 12 scan records",
+      "response_data": null,
+      "timestamp": "2025-12-10T18:31:36.632033"
+    },
+    {
+      "test_name": "AI Report Generation",
+      "success": true,
+      "details": "Quality checks passed: Detailed report generated, Contaminants analysis complete, Compliance analysis complete",
+      "response_data": null,
+      "timestamp": "2025-12-10T18:31:57.516149"
+    }
+  ]
+}
