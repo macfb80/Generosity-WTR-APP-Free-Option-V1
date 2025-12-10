@@ -200,15 +200,64 @@ function App() {
           </div>
         )}
 
+        {/* My Bottle Stats */}
+        {stats && stats.total_scans > 0 && (
+          <div className="glass-card rounded-2xl p-6 fade-in">
+            <h3 className="font-sans text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <span className="text-2xl">📊</span>
+              My Bottle Log
+            </h3>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="text-center">
+                <p className="font-mono text-3xl font-bold text-primary">{stats.total_scans}</p>
+                <p className="font-body text-xs text-text-muted mt-1">Bottles Scanned</p>
+              </div>
+              <div className="text-center">
+                <p className="font-mono text-3xl font-bold text-primary">{stats.average_trust_score}</p>
+                <p className="font-body text-xs text-text-muted mt-1">Avg Trust Score</p>
+              </div>
+              <div className="text-center">
+                <p className="font-body text-sm font-bold text-text-primary truncate">{stats.most_scanned_brand}</p>
+                <p className="font-body text-xs text-text-muted mt-1">Most Scanned</p>
+              </div>
+            </div>
+            
+            {/* Top 5 Cleanest */}
+            {stats.top_5_cleanest && stats.top_5_cleanest.length > 0 && (
+              <div className="mt-4">
+                <h4 className="font-body font-semibold text-text-primary mb-3 text-sm">
+                  🏆 Top 5 Cleanest Bottles You've Found
+                </h4>
+                <div className="space-y-2">
+                  {stats.top_5_cleanest.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-background-subtle rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-lg font-bold text-primary">#{idx + 1}</span>
+                        <div>
+                          <p className="font-body font-semibold text-text-primary text-sm">{item.brand_name}</p>
+                          <p className="font-body text-xs text-text-muted">{item.product_name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xl font-bold text-primary">{item.trust_grade}</span>
+                        <span className="font-body text-xs text-text-muted">{item.score}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Info Card */}
         <div className="glass-card rounded-2xl p-6 fade-in">
           <h3 className="font-sans text-lg font-semibold text-text-primary mb-3">
             About WTR APP
           </h3>
           <p className="font-body text-text-secondary text-sm leading-relaxed">
-            WTR APP analyzes bottled water quality using data from EPA, EWG, and state-level
-            Title 21 reports. Get instant insights into contaminants, compliance, and overall
-            water quality - like a CarFax report for your water.
+            WTR APP analyzes bottled water quality using the <strong>Trust but Verify™ System</strong>. 
+            Get your WTR Trust Score™, badges, and insights from EPA, EWG, and state Title 21 reports.
           </p>
         </div>
       </main>
