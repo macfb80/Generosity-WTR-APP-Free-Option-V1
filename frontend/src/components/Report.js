@@ -75,16 +75,16 @@ const Report = ({ scanResult, onClose }) => {
     <div className="fixed inset-0 z-50 bg-white overflow-auto" data-testid="report-view">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-secondary/20">
-        <div className="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex-1"></div>
           
-          {/* Centered Logo - 25% Smaller */}
+          {/* Centered Logo */}
           <img 
-            src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/5hx57fqb_image.png" 
-            alt="Generosity Logo" 
+            src="https://customer-assets.emergentagent.com/job_waterfax-check/artifacts/hq3g7o5u_image.png" 
+            alt="Generosity Water Intelligence" 
             className="w-full"
             data-testid="report-logo"
-            style={{ maxWidth: '340px', height: 'auto' }}
+            style={{ maxWidth: '320px', height: 'auto' }}
           />
           
           <div className="flex-1 flex items-center justify-end gap-2">
