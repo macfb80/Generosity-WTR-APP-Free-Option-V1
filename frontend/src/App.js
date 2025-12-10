@@ -91,6 +91,17 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-md mx-auto px-4 py-8 space-y-6">
+        {/* Scan Button - First Action */}
+        <button
+          data-testid="scan-new-water-btn"
+          onClick={() => setShowScanner(true)}
+          disabled={isLoading}
+          className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-2xl font-sans font-bold text-lg transition-all shadow-neon disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+        >
+          <Scan className="w-6 h-6" />
+          Scan Water Bottle
+        </button>
+
         {/* Hero Ring */}
         <div className="glass-card rounded-2xl p-8 text-center fade-in" data-testid="dashboard">
           <WaterRing score={latestScan?.quality_score || 0} size={200} />
@@ -114,17 +125,6 @@ function App() {
             )}
           </div>
         </div>
-
-        {/* Scan Button */}
-        <button
-          data-testid="scan-new-water-btn"
-          onClick={() => setShowScanner(true)}
-          disabled={isLoading}
-          className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-2xl font-sans font-bold text-lg transition-all shadow-neon disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-        >
-          <Scan className="w-6 h-6" />
-          Scan Water Bottle
-        </button>
 
         {/* History */}
         {scanHistory.length > 0 && (
