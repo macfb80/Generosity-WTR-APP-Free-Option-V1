@@ -16,23 +16,40 @@ const Scanner = ({ onClose, onScan }) => {
       const html5QrCode = new Html5Qrcode("qr-reader");
       html5QrCodeRef.current = html5QrCode;
 
+      // Configuration for barcode scanning
+      const config = {
+        fps: 10,
+        qrbox: { width: 280, height: 150 }, // Rectangle shape better for barcodes
+        aspectRatio: 1.777778, // 16:9 aspect ratio
+        formatsToSupport: [
+          0,  // QR_CODE
+          8,  // CODE_128
+          13, // EAN_13 (most common for water bottles)
+          14, // EAN_8
+          16, // UPC_A
+          17  // UPC_E
+        ]
+      };
+
       await html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }
-        },
+        { facingMode: "environment" }, // Use back camera on mobile
+        config,
         (decodedText) => {
-          html5QrCode.stop();
-          onScan(decodedText);
+          console.log("Scanned barcode:", decodedText);
+          html5QrCode.stop().then(() => {
+            toast.success("Barcode detected!");
+            onScan(decodedText);
+          }).catch(console.error);
         },
         (error) => {
-          // Scanning errors are normal
+          // Scanning errors are normal - suppress console spam
         }
       );
+      
+      toast.info("Point camera at water bottle barcode");
     } catch (err) {
       console.error("Camera error:", err);
-      toast.error("Camera access denied. Please use manual entry.");
+      toast.error("Camera access denied. Please allow camera permission or use manual entry.");
       setScanMode('manual');
       setIsScanning(false);
     }
