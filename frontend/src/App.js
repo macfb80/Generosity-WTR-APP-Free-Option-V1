@@ -156,10 +156,10 @@ function App() {
         {/* Info Card */}
         <div className="glass-card rounded-2xl p-6 fade-in">
           <h3 className="font-sans text-lg font-semibold text-text-primary mb-3">
-            About AquaFax
+            About WTR APP
           </h3>
           <p className="font-body text-text-secondary text-sm leading-relaxed">
-            AquaFax analyzes bottled water quality using data from EPA, EWG, and state-level
+            WTR APP analyzes bottled water quality using data from EPA, EWG, and state-level
             Title 21 reports. Get instant insights into contaminants, compliance, and overall
             water quality - like a CarFax report for your water.
           </p>
