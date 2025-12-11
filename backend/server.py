@@ -93,6 +93,32 @@ class RatingRequest(BaseModel):
     quality_score: int
     user_rating: str  # 'drink_again' or 'upgrade'
 
+# User Auth Models
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    dob: Optional[str] = None
+    zip_code: Optional[str] = None
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserProfile(BaseModel):
+    user_id: str
+    email: str
+    name: str
+    dob: Optional[str] = None
+    zip_code: Optional[str] = None
+    connected_wearables: Optional[Dict[str, Any]] = {}
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    dob: Optional[str] = None
+    zip_code: Optional[str] = None
+
 # Seed water brand database
 WATER_BRANDS_DATA = [
     {
