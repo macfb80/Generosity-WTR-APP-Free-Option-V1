@@ -496,6 +496,75 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         </div>
 
+        {/* Last Test Violations */}
+        {scanResult.test_violations && scanResult.test_violations.length > 0 && (
+          <div className="glass-card rounded-2xl p-6 fade-in">
+            <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              Last Test Violations
+            </h3>
+            {scanResult.test_violations.map((violation, idx) => (
+              <div key={idx} className="mb-4 last:mb-0">
+                {violation.status === 'clean' ? (
+                  <div className="p-4 bg-primary/10 rounded-xl border border-primary/30">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-body font-semibold text-text-primary mb-1">Clean Record</p>
+                        <p className="font-body text-sm text-text-secondary">
+                          {violation.message}
+                        </p>
+                        <p className="font-body text-xs text-text-muted mt-2">
+                          Last Test: {violation.last_test_date}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`p-4 rounded-xl border ${
+                    violation.severity === 'Minor' 
+                      ? 'bg-status-warning/10 border-status-warning/30' 
+                      : 'bg-status-danger/10 border-status-danger/30'
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className={`w-6 h-6 flex-shrink-0 mt-1 ${
+                        violation.severity === 'Minor' ? 'text-status-warning' : 'text-status-danger'
+                      }`} />
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <p className="font-body font-semibold text-text-primary">{violation.type}</p>
+                            <p className="font-body text-xs text-text-muted">{violation.date}</p>
+                          </div>
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            violation.severity === 'Minor' ? 'bg-status-warning text-white' : 'bg-status-danger text-white'
+                          }`}>
+                            {violation.severity}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-body text-sm text-text-primary">
+                            <strong>Contaminant:</strong> {violation.contaminant}
+                          </p>
+                          <p className="font-body text-sm text-text-primary">
+                            <strong>Level Found:</strong> {violation.level_found}
+                          </p>
+                          <p className="font-body text-sm text-text-primary">
+                            <strong>Legal Limit:</strong> {violation.legal_limit}
+                          </p>
+                          <p className="font-body text-sm text-primary mt-2">
+                            <strong>Resolution:</strong> {violation.resolution}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Source Context */}
         {scanResult.source_context && (
           <div className="glass-card rounded-2xl p-6 fade-in">
