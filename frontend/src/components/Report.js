@@ -601,6 +601,81 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         )}
 
+        {/* Test Locations Map */}
+        <div className="glass-card rounded-2xl p-6 fade-in">
+          <button
+            onClick={() => {
+              setShowMap(!showMap);
+              if (!showMap && !userLocation) {
+                // Get user's current location
+                if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      setUserLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                      });
+                      // Save location to backend
+                      axios.post(`${API}/scan/location`, {
+                        barcode: scanResult.barcode,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        location_name: "Current Location"
+                      }).catch(console.error);
+                    },
+                    (error) => {
+                      console.error('Location error:', error);
+                      toast.error('Unable to access location');
+                    }
+                  );
+                }
+              }
+            }}
+            className="w-full flex items-center justify-between p-4 bg-background-subtle hover:bg-secondary/10 rounded-xl transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <MapPin className="w-6 h-6 text-primary" />
+              <div className="text-left">
+                <p className="font-body font-semibold text-text-primary">Test Locations</p>
+                <p className="font-body text-xs text-text-muted">Where you've tested this water</p>
+              </div>
+            </div>
+            {showMap ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
+          </button>
+          
+          {showMap && (
+            <div className="mt-4 p-4 bg-background-subtle rounded-xl">
+              {userLocation ? (
+                <div className="space-y-3">
+                  <div className="aspect-video bg-secondary/10 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    {/* Simple map placeholder - in production, use Google Maps or Mapbox */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20"></div>
+                    <div className="relative z-10 text-center">
+                      <MapPin className="w-12 h-12 text-primary mx-auto mb-2" />
+                      <p className="font-body font-semibold text-text-primary">Current Location</p>
+                      <p className="font-mono text-xs text-text-muted mt-1">
+                        {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <p className="font-body text-sm text-text-primary">
+                      📍 Location saved! You tested this water at your current location.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <MapPin className="w-12 h-12 text-secondary mx-auto mb-3" />
+                  <p className="font-body text-text-secondary">
+                    Enable location to track where you test water
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Rating & Feedback Section */}
         <div className="glass-card rounded-2xl p-6 fade-in" data-testid="rating-section">
           <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 text-center">
