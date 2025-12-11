@@ -44,6 +44,7 @@ class WaterBrand(BaseModel):
     source_location: Optional[str] = None
     baseline_ph: Optional[float] = None
     baseline_tds: Optional[int] = None  # Total Dissolved Solids
+    bottle_material: str = "Plastic"  # Plastic, Glass, Aluminum
 
 class ScanResult(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -60,8 +61,18 @@ class ScanResult(BaseModel):
     contaminants: dict
     compliance: dict
     source_context: dict  # Source type, location, transparency
+    test_violations: List[dict]  # EPA/State violations
+    bottle_material: str  # Plastic, Glass, Aluminum
+    material_impact: str  # Impact description
+    location: Optional[dict] = None  # Geolocation data
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_favorite: bool = False
+
+class ScanLocationRequest(BaseModel):
+    barcode: str
+    latitude: float
+    longitude: float
+    location_name: Optional[str] = None
 
 class ScanRequest(BaseModel):
     barcode: str
