@@ -603,80 +603,125 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         )}
 
-        {/* Test Locations Map */}
-        <div className="glass-card rounded-2xl p-6 fade-in">
+        {/* Scan Locations Map - Collapsible Drawer */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card rounded-2xl overflow-hidden fade-in"
+        >
+          {/* Collapsed State - Mini Preview */}
           <button
-            onClick={() => {
-              setShowMap(!showMap);
-              if (!showMap && !userLocation) {
-                // Get user's current location
-                if (navigator.geolocation) {
-                  navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                      setUserLocation({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                      });
-                      // Save location to backend
-                      axios.post(`${API}/scan/location`, {
-                        barcode: scanResult.barcode,
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        location_name: "Current Location"
-                      }).catch(console.error);
-                    },
-                    (error) => {
-                      console.error('Location error:', error);
-                      toast.error('Unable to access location');
-                    }
-                  );
-                }
-              }
-            }}
-            className="w-full flex items-center justify-between p-4 bg-background-subtle hover:bg-secondary/10 rounded-xl transition-colors"
+            onClick={() => setMapExpanded(!mapExpanded)}
+            className="w-full p-6 hover:bg-secondary/5 transition-all group"
           >
-            <div className="flex items-center gap-3">
-              <MapPin className="w-6 h-6 text-primary" />
-              <div className="text-left">
-                <p className="font-body font-semibold text-text-primary">Test Locations</p>
-                <p className="font-body text-xs text-text-muted">Where you've tested this water</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  animate={{ 
+                    scale: mapExpanded ? 1.1 : 1,
+                    rotate: mapExpanded ? 180 : 0
+                  }}
+                  transition={{ type: "spring", damping: 20 }}
+                  className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center"
+                >
+                  <MapPin className="w-7 h-7 text-primary" />
+                </motion.div>
+                <div className="text-left">
+                  <p className="font-sans text-lg font-bold text-text-primary group-hover:text-primary transition-colors">
+                    {scanResult.location ? 'See Where You Verified This Water' : 'Location Not Captured'}
+                  </p>
+                  <p className="font-body text-sm text-text-muted">
+                    {scanResult.location 
+                      ? 'View your hydration verification pattern'
+                      : 'Enable location for future scans'}
+                  </p>
+                </div>
               </div>
+              <motion.div
+                animate={{ rotate: mapExpanded ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChevronDown className="w-6 h-6 text-text-muted" />
+              </motion.div>
             </div>
-            {showMap ? <ChevronUp className="w-5 h-5 text-text-muted" /> : <ChevronDown className="w-5 h-5 text-text-muted" />}
           </button>
-          
-          {showMap && (
-            <div className="mt-4 p-4 bg-background-subtle rounded-xl">
-              {userLocation ? (
-                <div className="space-y-3">
-                  <div className="aspect-video bg-secondary/10 rounded-lg flex items-center justify-center relative overflow-hidden">
-                    {/* Simple map placeholder - in production, use Google Maps or Mapbox */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20"></div>
-                    <div className="relative z-10 text-center">
-                      <MapPin className="w-12 h-12 text-primary mx-auto mb-2" />
-                      <p className="font-body font-semibold text-text-primary">Current Location</p>
-                      <p className="font-mono text-xs text-text-muted mt-1">
-                        {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-                      </p>
+
+          {/* Expanded State - Map Preview */}
+          <motion.div
+            initial={false}
+            animate={{ 
+              height: mapExpanded ? 'auto' : 0,
+              opacity: mapExpanded ? 1 : 0
+            }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="overflow-hidden"
+          >
+            <div className="p-6 pt-0 space-y-4">
+              {scanResult.location ? (
+                <>
+                  {/* Mini Map Preview */}
+                  <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2, type: "spring" }}
+                        className="text-center"
+                      >
+                        <motion.div
+                          animate={{ y: [0, -10, 0] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <MapPin className="w-16 h-16 text-primary mx-auto mb-2 drop-shadow-lg" />
+                        </motion.div>
+                        <p className="font-body font-semibold text-text-primary">
+                          Location Captured
+                        </p>
+                        <p className="font-mono text-xs text-text-muted mt-1">
+                          {scanResult.location.latitude.toFixed(4)}, {scanResult.location.longitude.toFixed(4)}
+                        </p>
+                      </motion.div>
                     </div>
                   </div>
-                  <div className="p-3 bg-primary/10 rounded-lg">
+
+                  {/* View Full Map Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowMapModal(true)}
+                    className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-body font-semibold text-lg shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    <MapPin className="w-5 h-5" />
+                    View Full Interactive Map
+                  </motion.button>
+
+                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
                     <p className="font-body text-sm text-text-primary">
-                      📍 Location saved! You tested this water at your current location.
+                      <strong className="text-primary">Location Tracking Active:</strong> Your scan locations help build insights into regional water quality patterns and your hydration habits.
                     </p>
                   </div>
-                </div>
+                </>
               ) : (
-                <div className="text-center py-8">
-                  <MapPin className="w-12 h-12 text-secondary mx-auto mb-3" />
-                  <p className="font-body text-text-secondary">
-                    Enable location to track where you test water
+                <div className="text-center py-8 px-4">
+                  <MapPin className="w-12 h-12 text-secondary mx-auto mb-3 opacity-50" />
+                  <p className="font-body text-text-primary font-semibold mb-2">
+                    Location Not Available
+                  </p>
+                  <p className="font-body text-sm text-text-muted">
+                    Enable location permissions when scanning to track where you verify water quality and see your hydration pattern on the map.
                   </p>
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Full-Screen Map Modal */}
+        <ScanMap 
+          isOpen={showMapModal}
+          onClose={() => setShowMapModal(false)}
+          currentScan={scanResult}
+        />
 
         {/* Rating & Feedback Section */}
         <div className="glass-card rounded-2xl p-6 fade-in" data-testid="rating-section">
