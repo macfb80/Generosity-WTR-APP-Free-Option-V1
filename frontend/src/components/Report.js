@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, AlertTriangle, XCircle, Download, Share2, ThumbsUp, TrendingUp } from 'lucide-react';
+import { X, CheckCircle, AlertTriangle, XCircle, Download, Share2, ThumbsUp, TrendingUp, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import WaterRing from './WaterRing';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -10,6 +10,8 @@ const API = `${BACKEND_URL}/api`;
 const Report = ({ scanResult, onClose }) => {
   const [userRating, setUserRating] = useState(null);
   const [hasRated, setHasRated] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
   
   if (!scanResult) return null;
 
