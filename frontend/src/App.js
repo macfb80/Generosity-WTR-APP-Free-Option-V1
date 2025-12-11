@@ -28,6 +28,14 @@ function App() {
   useEffect(() => {
     fetchHistory();
     fetchStats();
+    
+    // Check for existing auth token
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('currentUser');
+    if (token && user) {
+      setAuthToken(token);
+      setCurrentUser(JSON.parse(user));
+    }
   }, []);
 
   const fetchHistory = async () => {
