@@ -129,6 +129,29 @@ function App() {
     setShowReport(true);
   };
 
+  const handleLogin = (user, token) => {
+    setCurrentUser(user);
+    setAuthToken(token);
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    setShowAuthModal(false);
+    toast.success(`Welcome back, ${user.name}!`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setAuthToken(null);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    toast.success('Logged out successfully');
+  };
+
+  const handleProfileUpdate = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    toast.success('Profile updated successfully');
+  };
+
   return (
     <div className="min-h-screen bg-background" data-testid="app-container">
       <Toaster position="top-center" theme="dark" />
