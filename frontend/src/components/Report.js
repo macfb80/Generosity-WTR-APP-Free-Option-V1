@@ -12,8 +12,8 @@ const API = `${BACKEND_URL}/api`;
 const Report = ({ scanResult, onClose }) => {
   const [userRating, setUserRating] = useState(null);
   const [hasRated, setHasRated] = useState(false);
-  const [showMap, setShowMap] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [mapExpanded, setMapExpanded] = useState(false);
   
   if (!scanResult) return null;
 
