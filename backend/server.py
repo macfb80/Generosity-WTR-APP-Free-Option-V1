@@ -665,7 +665,7 @@ async def get_scan_locations(scan_id: str):
 
 @api_router.get("/stats")
 async def get_user_stats():
-    """Get user scan statistics"""
+    """Get comprehensive user scan statistics with trends and insights"""
     try:
         # Get all scans
         scans = await db.scan_history.find({}, {"_id": 0}).to_list(1000)
@@ -676,24 +676,77 @@ async def get_user_stats():
                 "average_trust_score": 0,
                 "most_scanned_brand": "None",
                 "top_5_cleanest": [],
-                "brands_to_watch": [],
-                "most_frequent": []
+                "brands_to_avoid": [],
+                "most_frequent": [],
+                "this_week": 0,
+                "this_month": 0,
+                "clean_water_percentage": 0,
+                "trend": "neutral",
+                "unique_brands_scanned": 0,
+                "locations_tracked": 0,
+                "health_score": 0,
+                "safety_alerts": []
             }
         
-        # Calculate stats
-        total_scans = len(scans)
-        avg_score = sum(scan.get("quality_score", 0) for scan in scans) / total_scans if total_scans > 0 else 0
+        # Parse timestamps
+        now = datetime.now(timezone.utc)
+        week_ago = now - timedelta(days=7)
+        month_ago = now - timedelta(days=30)
+        two_weeks_ago = now - timedelta(days=14)
+        
+        scans_with_time = []
+        for scan in scans:
+            ts = scan.get("timestamp")
+            if isinstance(ts, str):
+                ts = datetime.fromisoformat(ts)
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            scan["parsed_timestamp"] = ts
+            scans_with_time.append(scan)
+        
+        # Basic stats
+        total_scans = len(scans_with_time)
+        avg_score = sum(scan.get("quality_score", 0) for scan in scans_with_time) / total_scans if total_scans > 0 else 0
+        
+        # Time-based counts
+        scans_this_week = [s for s in scans_with_time if s["parsed_timestamp"] >= week_ago]
+        scans_this_month = [s for s in scans_with_time if s["parsed_timestamp"] >= month_ago]
+        scans_prev_week = [s for s in scans_with_time if two_weeks_ago <= s["parsed_timestamp"] < week_ago]
+        
+        # Trend calculation (this week vs previous week)
+        this_week_avg = sum(s.get("quality_score", 0) for s in scans_this_week) / len(scans_this_week) if scans_this_week else 0
+        prev_week_avg = sum(s.get("quality_score", 0) for s in scans_prev_week) / len(scans_prev_week) if scans_prev_week else 0
+        
+        if this_week_avg > prev_week_avg + 5:
+            trend = "improving"
+        elif this_week_avg < prev_week_avg - 5:
+            trend = "declining"
+        else:
+            trend = "stable"
+        
+        # Clean water percentage (score >= 75)
+        clean_scans = [s for s in scans_with_time if s.get("quality_score", 0) >= 75]
+        clean_percentage = (len(clean_scans) / total_scans * 100) if total_scans > 0 else 0
+        
+        # Unique brands
+        unique_brands = len(set(s.get("brand_name", "Unknown") for s in scans_with_time))
+        
+        # Locations tracked
+        locations_count = sum(1 for s in scans_with_time if s.get("location"))
+        
+        # Health score (composite: avg score * 0.6 + clean percentage * 0.4)
+        health_score = round((avg_score * 0.6) + (clean_percentage * 0.4), 1)
         
         # Most scanned brand
         brand_counts = {}
-        for scan in scans:
+        for scan in scans_with_time:
             brand = scan.get("brand_name", "Unknown")
             brand_counts[brand] = brand_counts.get(brand, 0) + 1
         most_scanned = max(brand_counts.items(), key=lambda x: x[1])[0] if brand_counts else "None"
         
         # Top 5 cleanest (unique brands with highest scores)
         brand_best_scores = {}
-        for scan in scans:
+        for scan in scans_with_time:
             brand = scan.get("brand_name", "Unknown")
             score = scan.get("quality_score", 0)
             if brand not in brand_best_scores or score > brand_best_scores[brand]["score"]:
@@ -701,23 +754,58 @@ async def get_user_stats():
                     "brand_name": brand,
                     "product_name": scan.get("product_name", ""),
                     "score": score,
-                    "trust_grade": scan.get("trust_grade", "C")
+                    "trust_grade": scan.get("trust_grade", "C"),
+                    "bottle_material": scan.get("bottle_material", "Plastic")
                 }
         top_5 = sorted(brand_best_scores.values(), key=lambda x: x["score"], reverse=True)[:5]
         
-        # Brands to watch (lowest scores)
-        brands_to_watch = sorted(brand_best_scores.values(), key=lambda x: x["score"])[:3]
+        # Brands to AVOID (lowest scores - more actionable than "watch")
+        brands_to_avoid = sorted(brand_best_scores.values(), key=lambda x: x["score"])[:3]
         
         # Most frequent brands
         most_frequent = [{"brand": brand, "count": count} for brand, count in sorted(brand_counts.items(), key=lambda x: x[1], reverse=True)[:5]]
+        
+        # Safety alerts (critical issues)
+        safety_alerts = []
+        for scan in scans_with_time[-5:]:  # Check last 5 scans
+            score = scan.get("quality_score", 0)
+            brand = scan.get("brand_name", "Unknown")
+            
+            if score < 60:
+                safety_alerts.append({
+                    "type": "low_quality",
+                    "message": f"{brand} scored below 60. Consider upgrading.",
+                    "severity": "warning"
+                })
+            
+            # Check for plastic bottles with microplastic risk
+            if scan.get("bottle_material") == "Plastic":
+                badges = scan.get("trust_badges", [])
+                if any("Microplastics Risk" in badge for badge in badges):
+                    safety_alerts.append({
+                        "type": "microplastics",
+                        "message": f"{brand}: Microplastics detected. Consider glass bottles.",
+                        "severity": "caution"
+                    })
+        
+        # Remove duplicate alerts
+        safety_alerts = [dict(t) for t in {tuple(d.items()) for d in safety_alerts}]
         
         return {
             "total_scans": total_scans,
             "average_trust_score": round(avg_score, 1),
             "most_scanned_brand": most_scanned,
             "top_5_cleanest": top_5,
-            "brands_to_watch": brands_to_watch,
-            "most_frequent": most_frequent
+            "brands_to_avoid": brands_to_avoid,
+            "most_frequent": most_frequent,
+            "this_week": len(scans_this_week),
+            "this_month": len(scans_this_month),
+            "clean_water_percentage": round(clean_percentage, 1),
+            "trend": trend,
+            "unique_brands_scanned": unique_brands,
+            "locations_tracked": locations_count,
+            "health_score": health_score,
+            "safety_alerts": safety_alerts[:3]  # Max 3 alerts
         }
     except Exception as e:
         logger.error(f"Error getting stats: {str(e)}")
