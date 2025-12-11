@@ -542,16 +542,35 @@ async def scan_water(request: ScanRequest):
     
     return scan_result
 
-@api_router.get("/history", response_model=List[ScanResult])
+@api_router.get("/history")
 async def get_scan_history():
-    """Get scan history"""
-    history = await db.scan_history.find({}, {"_id": 0}).sort("timestamp", -1).to_list(100)
-    
-    for item in history:
-        if isinstance(item['timestamp'], str):
-            item['timestamp'] = datetime.fromisoformat(item['timestamp'])
-    
-    return history
+    """Get scan history - returns raw documents to handle schema evolution"""
+    try:
+        history = await db.scan_history.find({}, {"_id": 0}).sort("timestamp", -1).to_list(100)
+        
+        # Convert timestamp strings to datetime objects for consistency
+        for item in history:
+            if isinstance(item.get('timestamp'), str):
+                item['timestamp'] = datetime.fromisoformat(item['timestamp']).isoformat()
+            elif isinstance(item.get('timestamp'), datetime):
+                item['timestamp'] = item['timestamp'].isoformat()
+            
+            # Ensure all required fields exist with defaults for old records
+            if 'trust_badges' not in item:
+                item['trust_badges'] = []
+            if 'source_context' not in item:
+                item['source_context'] = {}
+            if 'test_violations' not in item:
+                item['test_violations'] = []
+            if 'material_impact' not in item:
+                item['material_impact'] = ""
+            if 'location' not in item:
+                item['location'] = None
+        
+        return history
+    except Exception as e:
+        logger.error(f"Error fetching history: {str(e)}")
+        return []
 
 @api_router.post("/rate")
 async def save_rating(request: RatingRequest):
