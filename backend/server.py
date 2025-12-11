@@ -413,6 +413,10 @@ async def get_brands():
 @api_router.post("/scan", response_model=ScanResult)
 async def scan_water(request: ScanRequest):
     """Scan a water bottle barcode and generate quality report"""
+    # Log incoming location data
+    if request.latitude and request.longitude:
+        logger.info(f"Scan with location: lat={request.latitude}, lon={request.longitude}")
+    
     # Look up brand by barcode
     brand_doc = await db.water_brands.find_one({"barcode": request.barcode}, {"_id": 0})
     
