@@ -503,6 +503,15 @@ async def scan_water(request: ScanRequest):
         "transparency_score": "High" if report_data["compliance"].get("epa_compliant") and report_data["compliance"].get("ewg_rating") in ["Excellent", "Good"] else "Medium"
     }
     
+    # Prepare location data if provided
+    location_data = None
+    if request.latitude is not None and request.longitude is not None:
+        location_data = {
+            "latitude": request.latitude,
+            "longitude": request.longitude,
+            "recorded_at": datetime.now(timezone.utc).isoformat()
+        }
+    
     # Create scan result with Trust Score and violations
     scan_result = ScanResult(
         barcode=request.barcode,
@@ -518,12 +527,17 @@ async def scan_water(request: ScanRequest):
         source_context=source_context,
         test_violations=test_violations,
         bottle_material=brand.bottle_material,
-        material_impact=material_impact
+        material_impact=material_impact,
+        location=location_data
     )
     
-    # Save to history
+    # Save to history with additional metadata
     doc = scan_result.model_dump()
     doc['timestamp'] = doc['timestamp'].isoformat()
+    doc['user_id'] = request.user_id or "anonymous"
+    doc['app_version'] = request.app_version or "1.0.0"
+    if request.consumption_confirmed is not None:
+        doc['consumption_confirmed'] = request.consumption_confirmed
     await db.scan_history.insert_one(doc)
     
     return scan_result
