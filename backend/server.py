@@ -160,21 +160,41 @@ WATER_BRANDS_DATA = [
     }
 ]
 
-def calculate_trust_score_and_badges(quality_score: int, contaminants: dict, compliance: dict, source_type: str, baseline_tds: int) -> tuple:
+def calculate_trust_score_and_badges(quality_score: int, contaminants: dict, compliance: dict, source_type: str, baseline_tds: int, bottle_material: str = "Plastic") -> tuple:
     """
     Calculate WTR Trust Score™ grade and badges based on water quality data.
-    Returns: (trust_grade: str, trust_badges: List[str])
+    Applies penalty for plastic/aluminum bottles.
+    Returns: (adjusted_score: int, trust_grade: str, trust_badges: List[str], material_impact: str)
     """
     trust_badges = []
+    adjusted_score = quality_score
+    material_impact = ""
     
-    # Calculate trust grade from quality score
-    if quality_score >= 90:
+    # Apply bottle material impact
+    if bottle_material == "Plastic":
+        adjusted_score -= 5  # 5-point penalty for plastic
+        trust_badges.append("Plastic Bottle Risk")
+        material_impact = "Plastic bottles may leach microplastics and chemicals (BPA, phthalates) into water, especially when exposed to heat or sunlight."
+    elif bottle_material == "Aluminum":
+        adjusted_score -= 3  # 3-point penalty for aluminum
+        trust_badges.append("Metal Container")
+        material_impact = "Aluminum containers may leach trace metals. Most have protective linings, but integrity varies by brand and storage conditions."
+    elif bottle_material == "Glass":
+        # No penalty for glass - it's the safest material
+        trust_badges.append("Glass Bottle - Best Choice")
+        material_impact = "Glass is the safest bottle material - no chemical leaching or microplastic contamination."
+    
+    # Ensure score stays in valid range
+    adjusted_score = max(0, min(100, adjusted_score))
+    
+    # Calculate trust grade from adjusted quality score
+    if adjusted_score >= 90:
         trust_grade = "A"
-    elif quality_score >= 80:
+    elif adjusted_score >= 80:
         trust_grade = "B"
-    elif quality_score >= 70:
+    elif adjusted_score >= 70:
         trust_grade = "C"
-    elif quality_score >= 60:
+    elif adjusted_score >= 60:
         trust_grade = "D"
     else:
         trust_grade = "F"
