@@ -54,9 +54,37 @@ function App() {
       // Brief delay to show scanning message
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      toast.loading('🧪 Analyzing water quality with AI...', { id: 'scan' });
+      // Capture geolocation
+      let locationData = {};
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 5000,
+              enableHighAccuracy: true
+            });
+          });
+          
+          locationData = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+          
+          toast.loading('📍 Location captured • 🧪 Analyzing water quality...', { id: 'scan' });
+        } catch (geoError) {
+          console.log('Geolocation not available:', geoError);
+          toast.loading('🧪 Analyzing water quality with AI...', { id: 'scan' });
+        }
+      } else {
+        toast.loading('🧪 Analyzing water quality with AI...', { id: 'scan' });
+      }
       
-      const response = await axios.post(`${API}/scan`, { barcode }, {
+      const response = await axios.post(`${API}/scan`, {
+        barcode,
+        ...locationData,
+        user_id: "user_001", // In production, use actual user ID
+        app_version: "1.0.0"
+      }, {
         timeout: 60000, // 60 second timeout for AI processing
       });
       
