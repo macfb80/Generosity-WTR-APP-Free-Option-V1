@@ -571,6 +571,56 @@ async def toggle_favorite(scan_id: str):
         logger.error(f"Error toggling favorite: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to toggle favorite")
 
+@api_router.post("/scan/location")
+async def add_scan_location(request: ScanLocationRequest):
+    """Add geolocation to a scan"""
+    try:
+        # Find the most recent scan with this barcode
+        scan = await db.scan_history.find_one(
+            {"barcode": request.barcode},
+            sort=[("timestamp", -1)]
+        )
+        
+        if not scan:
+            raise HTTPException(status_code=404, detail="Scan not found")
+        
+        # Update with location
+        location_data = {
+            "latitude": request.latitude,
+            "longitude": request.longitude,
+            "location_name": request.location_name or "Unknown Location",
+            "recorded_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Add to locations array (support multiple locations per bottle)
+        await db.scan_history.update_one(
+            {"id": scan["id"]},
+            {"$push": {"locations": location_data}}
+        )
+        
+        return {"status": "success", "message": "Location added"}
+    except Exception as e:
+        logger.error(f"Error adding location: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to add location")
+
+@api_router.get("/scan/{scan_id}/locations")
+async def get_scan_locations(scan_id: str):
+    """Get all locations for a specific scan"""
+    try:
+        scan = await db.scan_history.find_one({"id": scan_id}, {"_id": 0})
+        if not scan:
+            raise HTTPException(status_code=404, detail="Scan not found")
+        
+        locations = scan.get("locations", [])
+        return {
+            "brand_name": scan.get("brand_name"),
+            "product_name": scan.get("product_name"),
+            "locations": locations
+        }
+    except Exception as e:
+        logger.error(f"Error getting locations: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get locations")
+
 @api_router.get("/stats")
 async def get_user_stats():
     """Get user scan statistics"""
