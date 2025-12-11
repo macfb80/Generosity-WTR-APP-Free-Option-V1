@@ -94,7 +94,7 @@ const Scanner = ({ onClose, onScan }) => {
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col" data-testid="scanner-overlay">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-secondary/20">
+      <div className="flex items-center justify-between p-4 border-b border-secondary/20 bg-white">
         <div className="flex-1"></div>
         
         {/* Centered Logo */}
@@ -103,14 +103,14 @@ const Scanner = ({ onClose, onScan }) => {
           alt="Generosity Water Intelligence" 
           className="w-full"
           data-testid="scanner-logo"
-          style={{ maxWidth: '320px', height: 'auto' }}
+          style={{ maxWidth: '280px', height: 'auto' }}
         />
         
         <div className="flex-1 flex justify-end">
           <button
             data-testid="close-scanner-btn"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors"
+            className="p-2 rounded-full hover:bg-secondary/10 transition-colors"
           >
             <X className="w-6 h-6 text-text-primary" />
           </button>
