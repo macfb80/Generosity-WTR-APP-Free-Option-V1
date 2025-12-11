@@ -429,10 +429,191 @@ Return JSON with this structure:
             }
         }
 
+# Helper Functions
+security = HTTPBearer()
+JWT_SECRET = os.environ.get('JWT_SECRET', secrets.token_urlsafe(32))
+JWT_ALGORITHM = "HS256"
+
+def hash_password(password: str) -> str:
+    """Hash password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify password against hash"""
+    return hash_password(password) == hashed
+
+def create_jwt_token(user_id: str, email: str) -> str:
+    """Create JWT token"""
+    payload = {
+        "user_id": user_id,
+        "email": email,
+        "exp": datetime.now(timezone.utc) + timedelta(days=30)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+    """Verify JWT token"""
+    try:
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 # Routes
 @api_router.get("/")
 async def root():
     return {"message": "WTR APP - Water Quality Scanner API"}
+
+# Auth Routes
+@api_router.post("/auth/register")
+async def register(user: UserRegister):
+    """Register a new user"""
+    try:
+        # Check if user already exists
+        existing_user = await db.users.find_one({"email": user.email})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Create user
+        user_id = str(uuid.uuid4())
+        hashed_password = hash_password(user.password)
+        
+        user_doc = {
+            "user_id": user_id,
+            "email": user.email,
+            "password_hash": hashed_password,
+            "name": user.name,
+            "dob": user.dob,
+            "zip_code": user.zip_code,
+            "connected_wearables": {},
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.users.insert_one(user_doc)
+        
+        # Create JWT token
+        token = create_jwt_token(user_id, user.email)
+        
+        # Return user profile without password
+        user_profile = {
+            "user_id": user_id,
+            "email": user.email,
+            "name": user.name,
+            "dob": user.dob,
+            "zip_code": user.zip_code,
+            "connected_wearables": {}
+        }
+        
+        return {
+            "user": user_profile,
+            "token": token,
+            "message": "User registered successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Registration error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to register user")
+
+@api_router.post("/auth/login")
+async def login(credentials: UserLogin):
+    """Login user"""
+    try:
+        # Find user
+        user = await db.users.find_one({"email": credentials.email})
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Verify password
+        if not verify_password(credentials.password, user["password_hash"]):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Create JWT token
+        token = create_jwt_token(user["user_id"], user["email"])
+        
+        # Return user profile
+        user_profile = {
+            "user_id": user["user_id"],
+            "email": user["email"],
+            "name": user["name"],
+            "dob": user.get("dob"),
+            "zip_code": user.get("zip_code"),
+            "connected_wearables": user.get("connected_wearables", {})
+        }
+        
+        return {
+            "user": user_profile,
+            "token": token,
+            "message": "Login successful"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to login")
+
+@api_router.get("/auth/google")
+async def google_auth():
+    """Initiate Google OAuth flow"""
+    # Placeholder for Google OAuth integration
+    return {"message": "Google OAuth integration coming soon"}
+
+# User Profile Routes
+@api_router.get("/user/profile")
+async def get_profile(token_data: dict = Depends(verify_token)):
+    """Get user profile"""
+    try:
+        user = await db.users.find_one({"user_id": token_data["user_id"]}, {"_id": 0, "password_hash": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get profile error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get profile")
+
+@api_router.put("/user/profile")
+async def update_profile(
+    update_data: UserUpdateRequest,
+    token_data: dict = Depends(verify_token)
+):
+    """Update user profile"""
+    try:
+        # Prepare update document
+        update_doc = {"updated_at": datetime.now(timezone.utc)}
+        
+        if update_data.name is not None:
+            update_doc["name"] = update_data.name
+        if update_data.dob is not None:
+            update_doc["dob"] = update_data.dob
+        if update_data.zip_code is not None:
+            update_doc["zip_code"] = update_data.zip_code
+        
+        # Update user
+        result = await db.users.update_one(
+            {"user_id": token_data["user_id"]},
+            {"$set": update_doc}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get updated user
+        user = await db.users.find_one({"user_id": token_data["user_id"]}, {"_id": 0, "password_hash": 0})
+        
+        return {
+            "user": user,
+            "message": "Profile updated successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Update profile error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update profile")
 
 @api_router.get("/brands", response_model=List[WaterBrand])
 async def get_brands():
