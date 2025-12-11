@@ -76,6 +76,11 @@ class ScanLocationRequest(BaseModel):
 
 class ScanRequest(BaseModel):
     barcode: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    user_id: Optional[str] = None
+    app_version: Optional[str] = "1.0.0"
+    consumption_confirmed: Optional[bool] = None
 
 class RatingRequest(BaseModel):
     scan_id: str
