@@ -20,6 +20,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [latestScan, setLatestScan] = useState(null);
   const [stats, setStats] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authToken, setAuthToken] = useState(null);
 
   useEffect(() => {
     fetchHistory();
