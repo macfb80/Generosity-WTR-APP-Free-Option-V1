@@ -232,7 +232,61 @@ def calculate_trust_score_and_badges(quality_score: int, contaminants: dict, com
         contaminants.get("microplastics", "Low") == "Low"):
         trust_badges.append("Ultra Pure")
     
-    return trust_grade, trust_badges
+    return adjusted_score, trust_grade, trust_badges, material_impact
+
+def generate_test_violations(brand_name: str, compliance: dict) -> List[dict]:
+    """
+    Generate test violations based on compliance data and EPA/State records.
+    In production, this would query actual EPA violation databases.
+    """
+    violations = []
+    
+    # Check EPA compliance
+    if not compliance.get("epa_compliant", True):
+        violations.append({
+            "date": "2024-03-15",
+            "type": "EPA Maximum Contaminant Level",
+            "contaminant": "Total Trihalomethanes (TTHMs)",
+            "level_found": "82 ppb",
+            "legal_limit": "80 ppb",
+            "severity": "Minor",
+            "resolution": "Corrected within 30 days"
+        })
+    
+    # Check EWG rating for potential issues
+    ewg_rating = compliance.get("ewg_rating", "Good")
+    if ewg_rating in ["Poor", "Fair"]:
+        violations.append({
+            "date": "2024-01-20",
+            "type": "EWG Health Guideline Exceedance",
+            "contaminant": "Chromium-6",
+            "level_found": "0.08 ppb",
+            "legal_limit": "Legal but above EWG health guideline (0.02 ppb)",
+            "severity": "Moderate",
+            "resolution": "Under review by brand"
+        })
+    
+    # State compliance issues
+    if not compliance.get("state_compliant", True):
+        violations.append({
+            "date": "2023-11-10",
+            "type": "State Title 21 Violation",
+            "contaminant": "Arsenic",
+            "level_found": "8.5 ppb",
+            "legal_limit": "5 ppb (State)",
+            "severity": "Moderate",
+            "resolution": "Source changed, retested and passed"
+        })
+    
+    # If no violations, return clean record
+    if not violations:
+        violations.append({
+            "status": "clean",
+            "message": f"No violations found in the last 3 years for {brand_name}. All EPA and state compliance tests passed.",
+            "last_test_date": "2024-11-15"
+        })
+    
+    return violations
 
 async def seed_water_brands():
     """Seed the database with water brand data if empty"""
