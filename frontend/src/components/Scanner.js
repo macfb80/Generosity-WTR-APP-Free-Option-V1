@@ -149,22 +149,23 @@ const Scanner = ({ onClose, onScan }) => {
       </div>
 
       {/* Scanner Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
         {scanMode === 'camera' ? (
-          <div className="relative w-full max-w-md">
+          <div className="relative w-full max-w-lg mx-auto">
             <div
               id="qr-reader"
               data-testid="camera-view"
-              className="rounded-2xl overflow-hidden border-2 border-primary/30"
+              className="rounded-2xl overflow-hidden border-4 border-primary/30 shadow-2xl mx-auto"
+              style={{ maxWidth: '90vw', aspectRatio: '16/9' }}
             ></div>
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-x-0 top-1/2 h-0.5 bg-primary scan-line"></div>
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="w-3/4 h-0.5 bg-primary scan-line"></div>
             </div>
-            <div className="mt-4 space-y-2">
-              <p className="text-center text-text-primary font-body font-semibold">
+            <div className="mt-6 space-y-3 px-4">
+              <p className="text-center text-text-primary font-body font-semibold text-lg">
                 📱 Point camera at barcode
               </p>
-              <p className="text-center text-text-secondary font-body text-sm">
+              <p className="text-center text-text-secondary font-body text-sm max-w-md mx-auto">
                 Hold steady and align barcode within the frame.<br/>
                 Works with UPC, EAN, and CODE-128 barcodes.
               </p>
@@ -176,7 +177,7 @@ const Scanner = ({ onClose, onScan }) => {
             </div>
           </div>
         ) : (
-          <div className="w-full max-w-md">
+          <div className="w-full max-w-md mx-auto px-4">
             <form onSubmit={handleManualSubmit} className="space-y-4">
               <div>
                 <label className="block text-text-secondary font-body text-sm mb-2">
