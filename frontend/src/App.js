@@ -480,6 +480,25 @@ function App() {
           onClose={() => setShowReport(false)}
         />
       )}
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onLogin={handleLogin}
+        />
+      )}
+
+      {/* Profile Modal */}
+      {showProfileModal && currentUser && (
+        <ProfileModal
+          user={currentUser}
+          authToken={authToken}
+          onClose={() => setShowProfileModal(false)}
+          onLogout={handleLogout}
+          onUpdateProfile={handleProfileUpdate}
+        />
+      )}
     </div>
   );
 }
