@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, AlertTriangle, XCircle, Download, Share2, ThumbsUp, TrendingUp, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import WaterRing from './WaterRing';
+import ScanMap from './ScanMap';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
