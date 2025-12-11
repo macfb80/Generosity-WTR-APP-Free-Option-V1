@@ -196,6 +196,26 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         </div>
 
+        {/* Bottle Material Impact */}
+        {scanResult.material_impact && (
+          <div className={`glass-card rounded-2xl p-6 fade-in ${scanResult.bottle_material === 'Glass' ? 'border-2 border-primary' : 'border-2 border-status-warning'}`}>
+            <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              Bottle Material: {scanResult.bottle_material}
+            </h3>
+            <div className={`p-4 rounded-xl ${scanResult.bottle_material === 'Glass' ? 'bg-primary/10' : 'bg-status-warning/10'}`}>
+              <p className="font-body text-sm text-text-primary">
+                {scanResult.material_impact}
+              </p>
+              {scanResult.bottle_material !== 'Glass' && (
+                <p className="font-body text-xs text-text-muted mt-2">
+                  ⚠️ Trust Score adjusted: -{scanResult.bottle_material === 'Plastic' ? '5' : '3'} points for container material
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Compliance Status */}
         <div className="glass-card rounded-2xl p-6 fade-in">
           <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
