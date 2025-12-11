@@ -228,38 +228,156 @@ function App() {
           </div>
         )}
 
-        {/* Water Tracker */}
+        {/* Water Tracker - Enhanced */}
         {stats && stats.total_scans > 0 && (
           <div className="glass-card rounded-2xl p-6 fade-in">
-            <h3 className="font-sans text-lg font-semibold text-text-primary mb-4">
-              Water Tracker
-            </h3>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="p-4 bg-background-subtle rounded-xl">
-                <p className="font-body text-sm text-text-secondary mb-1">Total Scans</p>
-                <p className="font-mono text-2xl font-bold text-primary">{stats.total_scans}</p>
-              </div>
-              <div className="p-4 bg-background-subtle rounded-xl">
-                <p className="font-body text-sm text-text-secondary mb-1">Avg Score</p>
-                <p className="font-mono text-2xl font-bold text-primary">{stats.average_trust_score}</p>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-sans text-xl font-bold text-text-primary">
+                Water Intelligence
+              </h3>
+              <div className="px-3 py-1 bg-primary/10 rounded-full">
+                <p className="font-body text-xs font-semibold text-primary">
+                  Health Score: {stats.health_score}
+                </p>
               </div>
             </div>
+
+            {/* Safety Alerts */}
+            {stats.safety_alerts && stats.safety_alerts.length > 0 && (
+              <div className="mb-6 p-4 bg-status-warning/10 border border-status-warning/30 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-status-warning/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg">⚠️</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-body font-semibold text-text-primary text-sm mb-1">
+                      Safety Alert
+                    </p>
+                    <p className="font-body text-xs text-text-secondary">
+                      {stats.safety_alerts[0].message}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <Droplets className="w-4 h-4 text-primary" />
+                  <p className="font-body text-xs text-text-secondary">This Week</p>
+                </div>
+                <p className="font-mono text-2xl font-bold text-primary">{stats.this_week}</p>
+                <p className="font-body text-xs text-text-muted mt-1">
+                  {stats.trend === 'improving' ? '📈 Improving' : stats.trend === 'declining' ? '📉 Declining' : '➡️ Stable'}
+                </p>
+              </div>
+
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-xs text-text-secondary mb-1">This Month</p>
+                <p className="font-mono text-2xl font-bold text-text-primary">{stats.this_month}</p>
+                <p className="font-body text-xs text-text-muted mt-1">
+                  {stats.total_scans} total scans
+                </p>
+              </div>
+
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-xs text-text-secondary mb-1">Clean Water %</p>
+                <p className="font-mono text-2xl font-bold text-status-safe">{stats.clean_water_percentage}%</p>
+                <p className="font-body text-xs text-text-muted mt-1">
+                  Score ≥75
+                </p>
+              </div>
+
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-xs text-text-secondary mb-1">Avg Score</p>
+                <p className="font-mono text-2xl font-bold text-primary">{stats.average_trust_score}</p>
+                <p className="font-body text-xs text-text-muted mt-1">
+                  {stats.unique_brands_scanned} brands
+                </p>
+              </div>
+            </div>
+
+            {/* Locations Tracked */}
+            {stats.locations_tracked > 0 && (
+              <div className="mb-6 p-4 bg-primary/5 rounded-xl border border-primary/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Scan className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-body font-semibold text-text-primary text-sm">
+                        {stats.locations_tracked} Locations Tracked
+                      </p>
+                      <p className="font-body text-xs text-text-muted">
+                        Building your hydration map
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             
-            {/* Top Rated */}
+            {/* Top Rated Bottles */}
             {stats.top_5_cleanest && stats.top_5_cleanest.length > 0 && (
-              <div>
-                <h4 className="font-body font-semibold text-text-primary mb-3">
-                  Top Rated Bottles
-                </h4>
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-body font-semibold text-text-primary">
+                    ✅ Top Rated Bottles
+                  </h4>
+                  <span className="font-body text-xs text-text-muted">
+                    Best choices
+                  </span>
+                </div>
                 <div className="space-y-2">
                   {stats.top_5_cleanest.slice(0, 3).map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-background-subtle rounded-lg">
-                      <div className="flex-1">
-                        <p className="font-body font-semibold text-text-primary">{item.brand_name}</p>
+                    <div key={idx} className="flex items-center justify-between p-3 bg-background-subtle hover:bg-primary/5 rounded-lg transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                          item.trust_grade === 'A' ? 'bg-status-safe text-white' :
+                          item.trust_grade === 'B' ? 'bg-primary text-white' :
+                          'bg-secondary text-white'
+                        }`}>
+                          {item.trust_grade}
+                        </div>
+                        <div>
+                          <p className="font-body font-semibold text-text-primary text-sm">{item.brand_name}</p>
+                          <p className="font-body text-xs text-text-muted">{item.bottle_material} bottle</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-lg font-bold text-primary">{item.trust_grade}</span>
+                      <div className="font-mono text-lg font-bold text-primary">{item.score}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bottles to Avoid */}
+            {stats.brands_to_avoid && stats.brands_to_avoid.length > 0 && stats.brands_to_avoid[0].score < 70 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-body font-semibold text-text-primary">
+                    ⚠️ Bottles to Reconsider
+                  </h4>
+                  <span className="font-body text-xs text-text-muted">
+                    Lower quality
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {stats.brands_to_avoid.slice(0, 2).map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-status-warning/5 border border-status-warning/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-status-warning/20 rounded-full flex items-center justify-center font-bold text-sm text-status-warning">
+                          {item.trust_grade}
+                        </div>
+                        <div>
+                          <p className="font-body font-semibold text-text-primary text-sm">{item.brand_name}</p>
+                          <p className="font-body text-xs text-text-muted">Consider upgrading</p>
+                        </div>
                       </div>
+                      <div className="font-mono text-lg font-bold text-status-warning">{item.score}</div>
                     </div>
                   ))}
                 </div>
