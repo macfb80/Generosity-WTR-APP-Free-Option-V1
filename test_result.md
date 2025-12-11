@@ -101,3 +101,124 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Test the complete User Profile and Authentication flow for the WTR APP"
+
+frontend:
+  - task: "Sign Up Flow"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/AuthModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing sign up flow with form validation and backend integration"
+
+  - task: "Profile Modal Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ProfileModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing profile modal opening and tab navigation"
+
+  - task: "Profile Tab Functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ProfileModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing profile editing and saving functionality"
+
+  - task: "Wearables Tab Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ProfileModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing wearables tab with 5 wearable cards and connect buttons"
+
+  - task: "Sign Out Functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing sign out functionality and state reset"
+
+backend:
+  - task: "User Registration API"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing /api/auth/register endpoint"
+
+  - task: "User Login API"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing /api/auth/login endpoint"
+
+  - task: "Profile Update API"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing /api/user/profile PUT endpoint"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Sign Up Flow"
+    - "Profile Modal Display"
+    - "Profile Tab Functionality"
+    - "Wearables Tab Display"
+    - "Sign Out Functionality"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "sequential"
+
+agent_communication:
+  - agent: "testing"
+    message: "Starting comprehensive testing of authentication and profile flow. Will test sign up, profile modal, profile editing, wearables tab, and sign out functionality."
