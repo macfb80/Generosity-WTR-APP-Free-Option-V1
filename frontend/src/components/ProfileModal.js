@@ -51,8 +51,8 @@ const ProfileModal = ({ user, authToken, onClose, onLogout, onUpdateProfile }) =
 
     if (wearableType === 'oura_ring') {
       try {
-        // Redirect to Oura OAuth flow
-        window.location.href = `${API}/wearables/oura/authorize`;
+        // Redirect to Oura OAuth flow using window.location.origin for deployment compatibility
+        window.location.href = `${window.location.origin}/api/wearables/oura/authorize`;
       } catch (error) {
         console.error('Oura connection error:', error);
         toast.error('Failed to connect Oura Ring');
