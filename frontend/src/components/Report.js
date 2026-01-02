@@ -236,38 +236,40 @@ const Report = ({ scanResult, onClose }) => {
         )}
 
         {/* Contaminants Analysis */}
-        <div className="glass-card rounded-2xl p-6 fade-in">
-          <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <div className="w-1 h-6 bg-primary rounded-full"></div>
-            Contaminants Analysis
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-background-subtle rounded-xl">
-              <p className="font-body text-text-secondary text-sm">Lead Level</p>
-              <p className="font-mono text-2xl font-bold text-text-primary mt-1">
-                {scanResult.contaminants.lead_ppb} <span className="text-sm text-text-muted">ppb</span>
-              </p>
-            </div>
-            <div className="p-4 bg-background-subtle rounded-xl">
-              <p className="font-body text-text-secondary text-sm">PFAS</p>
-              <p className="font-mono text-2xl font-bold text-text-primary mt-1">
-                {scanResult.contaminants.pfas_ppt} <span className="text-sm text-text-muted">ppt</span>
-              </p>
-            </div>
-            <div className="p-4 bg-background-subtle rounded-xl">
-              <p className="font-body text-text-secondary text-sm">Microplastics</p>
-              <p className="font-mono text-2xl font-bold text-text-primary mt-1">
-                {scanResult.contaminants.microplastics}
-              </p>
-            </div>
-            <div className="p-4 bg-background-subtle rounded-xl">
-              <p className="font-body text-text-secondary text-sm">Disinfection Byproducts</p>
-              <p className="font-mono text-2xl font-bold text-text-primary mt-1">
-                {scanResult.contaminants.disinfection_byproducts}
-              </p>
+        {scanResult.contaminants && (
+          <div className="glass-card rounded-2xl p-6 fade-in">
+            <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              Contaminants Analysis
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm">Lead Level</p>
+                <p className="font-mono text-2xl font-bold text-text-primary mt-1">
+                  {scanResult.contaminants.lead_ppb || 0} <span className="text-sm text-text-muted">ppb</span>
+                </p>
+              </div>
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm">PFAS</p>
+                <p className="font-mono text-2xl font-bold text-text-primary mt-1">
+                  {scanResult.contaminants.pfas_ppt || 0} <span className="text-sm text-text-muted">ppt</span>
+                </p>
+              </div>
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm">Microplastics</p>
+                <p className="font-mono text-2xl font-bold text-text-primary mt-1">
+                  {scanResult.contaminants.microplastics || 'Not Detected'}
+                </p>
+              </div>
+              <div className="p-4 bg-background-subtle rounded-xl">
+                <p className="font-body text-text-secondary text-sm">Disinfection Byproducts</p>
+                <p className="font-mono text-2xl font-bold text-text-primary mt-1">
+                  {scanResult.contaminants.disinfection_byproducts || 'Not Detected'}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Bottle Material Impact */}
         {scanResult.material_impact && (
