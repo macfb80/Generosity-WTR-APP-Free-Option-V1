@@ -164,6 +164,77 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         </div>
 
+        {/* Scan Locations Map - Prominent Placement */}
+        {scanResult.location && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card rounded-2xl overflow-hidden fade-in border-2 border-primary/30"
+          >
+            {/* Map Preview Header */}
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 border-b border-primary/20">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center">
+                  <MapPin className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <p className="font-sans text-lg font-bold text-text-primary">
+                    📍 Scan Location
+                  </p>
+                  <p className="font-body text-sm text-text-muted">
+                    Verified at {scanResult.location.latitude.toFixed(4)}, {scanResult.location.longitude.toFixed(4)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Map Preview Content */}
+            <div className="p-6 space-y-4">
+              {/* Mini Map Preview */}
+              <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, type: "spring" }}
+                    className="text-center"
+                  >
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <MapPin className="w-16 h-16 text-primary mx-auto mb-2 drop-shadow-lg" />
+                    </motion.div>
+                    <p className="font-body font-semibold text-text-primary text-lg">
+                      Location Captured
+                    </p>
+                    <p className="font-body text-sm text-text-muted mt-2">
+                      See your full hydration verification map
+                    </p>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* View Full Map Button - Prominent */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowMapModal(true)}
+                className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-body font-semibold text-lg shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <MapPin className="w-5 h-5" />
+                View Full Interactive Map
+              </motion.button>
+
+              <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
+                <p className="font-body text-sm text-text-primary">
+                  <strong className="text-primary">🗺️ Location Tracking Active:</strong> Building your hydration pattern to show regional water quality insights.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Contaminants Analysis */}
         <div className="glass-card rounded-2xl p-6 fade-in">
           <h3 className="font-sans text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
