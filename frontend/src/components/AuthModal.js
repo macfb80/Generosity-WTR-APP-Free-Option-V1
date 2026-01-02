@@ -57,8 +57,8 @@ const AuthModal = ({ onClose, onLogin }) => {
 
   const handleGoogleAuth = async () => {
     try {
-      // Redirect to Google OAuth
-      window.location.href = `${API}/auth/google`;
+      // Redirect to Google OAuth using window.location.origin for deployment compatibility
+      window.location.href = `${window.location.origin}/api/auth/google`;
     } catch (error) {
       console.error('Google auth error:', error);
       toast.error('Failed to initialize Google sign-in');
