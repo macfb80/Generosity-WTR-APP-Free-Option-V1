@@ -431,7 +431,7 @@ Return JSON with this structure:
 
 # Helper Functions
 security = HTTPBearer()
-JWT_SECRET = os.environ.get('JWT_SECRET', secrets.token_urlsafe(32))
+JWT_SECRET = os.environ['JWT_SECRET']  # Required, no fallback
 JWT_ALGORITHM = "HS256"
 
 def hash_password(password: str) -> str:
