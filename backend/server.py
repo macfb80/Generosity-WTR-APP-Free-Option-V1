@@ -757,7 +757,22 @@ async def scan_water(request: ScanRequest):
 async def get_scan_history():
     """Get scan history - returns raw documents to handle schema evolution"""
     try:
-        history = await db.scan_history.find({}, {"_id": 0}).sort("timestamp", -1).to_list(100)
+        # Use projection to fetch only needed fields for display
+        projection = {
+            "_id": 0,
+            "id": 1,
+            "barcode": 1,
+            "brand_name": 1,
+            "product_name": 1,
+            "quality_score": 1,
+            "trust_grade": 1,
+            "trust_badges": 1,
+            "timestamp": 1,
+            "bottle_material": 1,
+            "location": 1
+        }
+        
+        history = await db.scan_history.find({}, projection).sort("timestamp", -1).limit(100).to_list(100)
         
         # Convert timestamp strings to datetime objects for consistency
         for item in history:
