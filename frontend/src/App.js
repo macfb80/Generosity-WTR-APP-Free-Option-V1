@@ -528,6 +528,15 @@ function App() {
           onUpdateProfile={handleProfileUpdate}
         />
       )}
+
+      {/* Scan Map Modal - Quick Access */}
+      {showMapModal && (
+        <ScanMap
+          isOpen={showMapModal}
+          onClose={() => setShowMapModal(false)}
+          currentScan={latestScan}
+        />
+      )}
     </div>
   );
 }
