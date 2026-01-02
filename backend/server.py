@@ -20,11 +20,36 @@ load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db_name = os.environ['DB_NAME']
+
+# Create MongoDB client with Atlas-compatible settings
+client = AsyncIOMotorClient(
+    mongo_url,
+    serverSelectionTimeoutMS=5000,  # 5 second timeout
+    connectTimeoutMS=10000,  # 10 second connection timeout
+    retryWrites=True,  # Enable retry writes for Atlas
+    w='majority'  # Write concern for Atlas
+)
+db = client[db_name]
 
 # Create the main app without a prefix
 app = FastAPI()
+
+# Startup event to verify MongoDB connection
+@app.on_event("startup")
+async def startup_db_client():
+    try:
+        # Verify connection on startup
+        await client.admin.command('ping')
+        logger.info(f"Successfully connected to MongoDB: {db_name}")
+    except Exception as e:
+        logger.error(f"Failed to connect to MongoDB: {str(e)}")
+        # Don't raise - let health check handle it
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
+    logger.info("MongoDB connection closed")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
