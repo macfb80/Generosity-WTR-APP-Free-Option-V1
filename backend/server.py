@@ -893,8 +893,21 @@ async def get_scan_locations(scan_id: str):
 async def get_user_stats():
     """Get comprehensive user scan statistics with trends and insights"""
     try:
-        # Get all scans
-        scans = await db.scan_history.find({}, {"_id": 0}).to_list(1000)
+        # Use projection to fetch only needed fields for stats calculation
+        projection = {
+            "_id": 0,
+            "quality_score": 1,
+            "brand_name": 1,
+            "product_name": 1,
+            "trust_grade": 1,
+            "bottle_material": 1,
+            "timestamp": 1,
+            "location": 1,
+            "trust_badges": 1
+        }
+        
+        # Get all scans with projection
+        scans = await db.scan_history.find({}, projection).limit(1000).to_list(1000)
         
         if not scans:
             return {
