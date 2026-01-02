@@ -215,33 +215,6 @@ function App() {
           Scan Water Bottle
         </button>
 
-        {/* Quick Access: View Scan Map */}
-        {stats && stats.locations_tracked > 0 && (
-          <button
-            onClick={() => setShowMapModal(true)}
-            className="w-full p-4 bg-gradient-to-br from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 border-2 border-primary/30 rounded-2xl transition-all group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="font-body font-bold text-text-primary group-hover:text-primary transition-colors">
-                    View Scan Map
-                  </p>
-                  <p className="font-body text-xs text-text-muted">
-                    {stats.locations_tracked} {stats.locations_tracked === 1 ? 'location' : 'locations'} tracked
-                  </p>
-                </div>
-              </div>
-              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                <span className="text-primary font-bold">→</span>
-              </div>
-            </div>
-          </button>
-        )}
-
         {/* Hero Ring with Trust Grade */}
         <div className="glass-card rounded-2xl p-8 text-center fade-in" data-testid="dashboard">
           <div className="relative inline-block">
