@@ -618,7 +618,7 @@ async def update_profile(
 @api_router.get("/brands", response_model=List[WaterBrand])
 async def get_brands():
     """Get all available water brands"""
-    brands = await db.water_brands.find({}, {"_id": 0}).to_list(1000)
+    brands = await db.water_brands.find({}, {"_id": 0}).limit(100).to_list(100)
     return brands
 
 @api_router.post("/scan", response_model=ScanResult)
