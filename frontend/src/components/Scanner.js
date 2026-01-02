@@ -17,28 +17,37 @@ const Scanner = ({ onClose, onScan }) => {
       const html5QrCode = new Html5Qrcode("qr-reader");
       html5QrCodeRef.current = html5QrCode;
 
-      // Configuration for barcode scanning
+      // Enhanced configuration for immediate and high-probability barcode scanning
       const config = {
-        fps: 10,
-        qrbox: { width: 280, height: 150 }, // Rectangle shape better for barcodes
+        fps: 30, // Increased from 10 to 30 for faster scanning
+        qrbox: { width: 320, height: 160 }, // Larger scan area for easier targeting
         aspectRatio: 1.777778, // 16:9 aspect ratio
         formatsToSupport: [
-          0,  // QR_CODE
-          8,  // CODE_128
+          8,  // CODE_128 (priority for water bottles)
           13, // EAN_13 (most common for water bottles)
           14, // EAN_8
           16, // UPC_A
-          17  // UPC_E
-        ]
+          17, // UPC_E
+          0,  // QR_CODE (lower priority but still supported)
+        ],
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true // Use native detector for faster scanning
+        }
       };
 
       await html5QrCode.start(
-        { facingMode: "environment" }, // Use back camera on mobile
+        { 
+          facingMode: "environment", // Use back camera on mobile
+          advanced: [
+            { focusMode: "continuous" }, // Continuous autofocus
+            { zoom: 1.5 } // Slight zoom for better barcode reading
+          ]
+        },
         config,
         (decodedText) => {
           console.log("Scanned barcode:", decodedText);
           html5QrCode.stop().then(() => {
-            toast.success("Barcode detected!");
+            toast.success("✅ Barcode detected!");
             onScan(decodedText);
           }).catch(console.error);
         },
@@ -47,7 +56,7 @@ const Scanner = ({ onClose, onScan }) => {
         }
       );
       
-      toast.info("📷 Camera ready - Point at barcode");
+      toast.success("📷 Camera ready - Scanning...", { duration: 2000 });
     } catch (err) {
       console.error("Camera error:", err);
       const errorMsg = err.message || err.toString();
