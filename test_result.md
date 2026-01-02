@@ -178,70 +178,36 @@ frontend:
         comment: "Testing improved camera scanner with 30 FPS, larger scan area, and enhanced barcode detection"
 
 backend:
-  - task: "User Registration API"
+  - task: "Scan History API with Location Data"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
-        comment: "Testing /api/auth/register endpoint"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: /api/auth/register endpoint working correctly. Successfully creates new user accounts with unique emails. Returns proper JWT token and user profile data. Handles duplicate email validation (returns 400 for existing emails)."
-
-  - task: "User Login API"
-    implemented: true
-    working: true
-    file: "/app/backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "testing"
-        comment: "Testing /api/auth/login endpoint"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: User login functionality works through registration flow. JWT token authentication successful. User session maintained properly across requests."
-
-  - task: "Profile Update API"
-    implemented: true
-    working: true
-    file: "/app/backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "testing"
-        comment: "Testing /api/user/profile PUT endpoint"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: Profile update functionality working correctly. Successfully saves changes to user name and zip code. Profile data persists and displays correctly after updates."
+        comment: "Testing /api/history endpoint returns scan data with location information for map display"
 
 metadata:
   created_by: "testing_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Sign Up Flow"
-    - "Profile Modal Display"
-    - "Profile Tab Functionality"
-    - "Wearables Tab Display"
-    - "Sign Out Functionality"
+    - "Map Quick Access Button"
+    - "Camera Scanner Improvements"
+    - "Report Map Section Placement"
+    - "Map Modal Toggle Controls"
+    - "Map Location Pins Display"
+    - "Report Map Interactive Button"
   stuck_tasks: []
   test_all: true
-  test_priority: "sequential"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
-    message: "Starting comprehensive testing of authentication and profile flow. Will test sign up, profile modal, profile editing, wearables tab, and sign out functionality."
-  - agent: "testing"
-    message: "✅ TESTING COMPLETED SUCCESSFULLY: All authentication and profile flow components are working correctly. Sign up flow, profile modal, profile editing, wearables tab display, and sign out functionality all passed testing. Backend APIs for registration and profile updates are functional. No critical issues found."
+    message: "Starting comprehensive testing of improved Map Geolocation and Camera Scanner features. Will test map quick access, camera scanner improvements, map placement in reports, and interactive map functionality."
