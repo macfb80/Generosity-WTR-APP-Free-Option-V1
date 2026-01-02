@@ -466,6 +466,21 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) 
 async def root():
     return {"message": "WTR APP - Water Quality Scanner API"}
 
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint for Kubernetes liveness/readiness probes"""
+    try:
+        # Test MongoDB connection
+        await db.command('ping')
+        return {
+            "status": "healthy",
+            "service": "WTR APP API",
+            "database": "connected"
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        raise HTTPException(status_code=503, detail="Service unavailable")
+
 # Auth Routes
 @api_router.post("/auth/register")
 async def register(user: UserRegister):
