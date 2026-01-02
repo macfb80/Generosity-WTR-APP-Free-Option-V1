@@ -674,118 +674,48 @@ const Report = ({ scanResult, onClose }) => {
           </div>
         )}
 
-        {/* Scan Locations Map - Collapsible Drawer */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-2xl overflow-hidden fade-in"
-        >
-          {/* Collapsed State - Mini Preview */}
-          <button
-            onClick={() => setMapExpanded(!mapExpanded)}
-            className="w-full p-6 hover:bg-secondary/5 transition-all group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <motion.div
-                  animate={{ 
-                    scale: mapExpanded ? 1.1 : 1,
-                    rotate: mapExpanded ? 180 : 0
-                  }}
-                  transition={{ type: "spring", damping: 20 }}
-                  className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center"
+        {/* Share & Feedback */}
+        <div className="glass-card rounded-2xl p-6 fade-in">
+          <h3 className="font-sans text-xl font-semibold text-text-primary mb-4">
+            Share & Feedback
+          </h3>
+          <div className="space-y-3">
+            <button className="w-full py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-body font-semibold transition-all flex items-center justify-center gap-2">
+              <Share2 className="w-5 h-5" />
+              Share Report
+            </button>
+            <button className="w-full py-3 bg-secondary/10 hover:bg-secondary/20 text-text-primary rounded-xl font-body font-semibold transition-all flex items-center justify-center gap-2">
+              <Download className="w-5 h-5" />
+              Download PDF
+            </button>
+          </div>
+
+          {!hasRated && (
+            <div className="mt-6 pt-6 border-t border-secondary/20">
+              <p className="font-body font-semibold text-text-primary mb-3">
+                Would you drink this water again?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleRate('drink_again')}
+                  className="py-3 bg-status-safe/10 hover:bg-status-safe/20 text-status-safe rounded-xl font-body font-semibold transition-all flex items-center justify-center gap-2"
                 >
-                  <MapPin className="w-7 h-7 text-primary" />
-                </motion.div>
-                <div className="text-left">
-                  <p className="font-sans text-lg font-bold text-text-primary group-hover:text-primary transition-colors">
-                    {scanResult.location ? 'See Where You Verified This Water' : 'Location Not Captured'}
-                  </p>
-                  <p className="font-body text-sm text-text-muted">
-                    {scanResult.location 
-                      ? 'View your hydration verification pattern'
-                      : 'Enable location for future scans'}
-                  </p>
-                </div>
+                  <ThumbsUp className="w-5 h-5" />
+                  Yes, I would
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleRate('upgrade')}
+                  className="py-3 bg-status-warning/10 hover:bg-status-warning/20 text-status-warning rounded-xl font-body font-semibold transition-all flex items-center justify-center gap-2"
+                >
+                  <TrendingUp className="w-5 h-5" />
+                  I'd upgrade
+                </motion.button>
               </div>
-              <motion.div
-                animate={{ rotate: mapExpanded ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ChevronDown className="w-6 h-6 text-text-muted" />
-              </motion.div>
             </div>
-          </button>
-
-          {/* Expanded State - Map Preview */}
-          <motion.div
-            initial={false}
-            animate={{ 
-              height: mapExpanded ? 'auto' : 0,
-              opacity: mapExpanded ? 1 : 0
-            }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="overflow-hidden"
-          >
-            <div className="p-6 pt-0 space-y-4">
-              {scanResult.location ? (
-                <>
-                  {/* Mini Map Preview */}
-                  <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.2, type: "spring" }}
-                        className="text-center"
-                      >
-                        <motion.div
-                          animate={{ y: [0, -10, 0] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          <MapPin className="w-16 h-16 text-primary mx-auto mb-2 drop-shadow-lg" />
-                        </motion.div>
-                        <p className="font-body font-semibold text-text-primary">
-                          Location Captured
-                        </p>
-                        <p className="font-mono text-xs text-text-muted mt-1">
-                          {scanResult.location.latitude.toFixed(4)}, {scanResult.location.longitude.toFixed(4)}
-                        </p>
-                      </motion.div>
-                    </div>
-                  </div>
-
-                  {/* View Full Map Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowMapModal(true)}
-                    className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-body font-semibold text-lg shadow-lg transition-all flex items-center justify-center gap-2"
-                  >
-                    <MapPin className="w-5 h-5" />
-                    View Full Interactive Map
-                  </motion.button>
-
-                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
-                    <p className="font-body text-sm text-text-primary">
-                      <strong className="text-primary">Location Tracking Active:</strong> Your scan locations help build insights into regional water quality patterns and your hydration habits.
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8 px-4">
-                  <MapPin className="w-12 h-12 text-secondary mx-auto mb-3 opacity-50" />
-                  <p className="font-body text-text-primary font-semibold mb-2">
-                    Location Not Available
-                  </p>
-                  <p className="font-body text-sm text-text-muted">
-                    Enable location permissions when scanning to track where you verify water quality and see your hydration pattern on the map.
-                  </p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </motion.div>
+          )}
+        </div>
 
         {/* Full-Screen Map Modal */}
         <ScanMap 
