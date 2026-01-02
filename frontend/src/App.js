@@ -420,8 +420,13 @@ function App() {
             {stats.top_5_cleanest && stats.top_5_cleanest.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-body font-semibold text-text-primary">
-                    ✅ Top Rated Bottles
+                  <h4 className="font-body font-semibold text-text-primary flex items-center gap-2">
+                    <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    Top Rated Bottles
                   </h4>
                   <span className="font-body text-xs text-text-muted">
                     Best choices
