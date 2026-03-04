@@ -329,37 +329,96 @@ function App() {
           </div>
         </div>
 
-        {/* History */}
-        {scanHistory.length > 0 && (
+        {/* Recent Tests - Combined Bottles & Home */}
+        {(scanHistory.length > 0 || homeTestHistory.length > 0) && (
           <div className="glass-card rounded-2xl p-6 fade-in">
             <h3 className="font-sans text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
               <History className="w-5 h-5 text-primary" />
-              Recent Scans
+              Recent Tests
             </h3>
-            <div className="space-y-3" data-testid="scan-history-list">
-              {scanHistory.slice(0, 5).map((scan) => (
-                <button
+
+            {/* Combined Timeline */}
+            <div className="space-y-3" data-testid="recent-tests-list">
+              {/* Recent Bottle Scans */}
+              {scanHistory.slice(0, 3).map((scan) => (
+                <div
                   key={scan.id}
                   data-testid={`history-item-${scan.id}`}
                   onClick={() => handleViewHistory(scan)}
-                  className="w-full p-4 bg-background-subtle hover:bg-secondary/10 rounded-xl text-left transition-colors group"
+                  className="flex items-center justify-between p-3 bg-background-subtle hover:bg-primary/5 rounded-xl transition-colors cursor-pointer group"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Scan className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
                       <p className="font-body font-semibold text-text-primary group-hover:text-primary transition-colors">
                         {scan.brand_name}
                       </p>
-                      <p className="font-body text-sm text-text-secondary">
-                        {new Date(scan.timestamp).toLocaleDateString()}
+                      <p className="font-body text-xs text-text-muted">
+                        Bottle Scan • Score: {scan.quality_score}
                       </p>
                     </div>
-                    <div className="font-mono text-2xl font-bold text-primary">
-                      {scan.quality_score}
+                  </div>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                    scan.trust_grade === 'A' ? 'bg-status-safe text-white' :
+                    scan.trust_grade === 'B' ? 'bg-primary text-white' :
+                    'bg-secondary text-white'
+                  }`}>
+                    {scan.trust_grade}
+                  </div>
+                </div>
+              ))}
+
+              {/* Recent Home Tests */}
+              {homeTestHistory.slice(0, 3).map((test, idx) => (
+                <div
+                  key={`home-${idx}`}
+                  onClick={() => {
+                    setLatestHomeTest(test);
+                    setShowZipCodeTest(true);
+                  }}
+                  className="flex items-center justify-between p-3 bg-background-subtle hover:bg-secondary/5 rounded-xl transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Home className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div>
+                      <p className="font-body font-semibold text-text-primary group-hover:text-secondary transition-colors">
+                        {test.utility_name || `ZIP ${test.zip_code}`}
+                      </p>
+                      <p className="font-body text-xs text-text-muted">
+                        Home Test • Score: {test.quality_score}
+                      </p>
                     </div>
                   </div>
-                </button>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                    test.grade === 'A' ? 'bg-status-safe text-white' :
+                    test.grade === 'B' ? 'bg-primary text-white' :
+                    'bg-secondary text-white'
+                  }`}>
+                    {test.grade}
+                  </div>
+                </div>
               ))}
             </div>
+
+            {/* Show More Buttons */}
+            {(scanHistory.length > 3 || homeTestHistory.length > 3) && (
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {scanHistory.length > 3 && (
+                  <button className="py-2 px-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-body text-xs font-semibold transition-colors">
+                    All Scans ({scanHistory.length})
+                  </button>
+                )}
+                {homeTestHistory.length > 3 && (
+                  <button className="py-2 px-3 bg-secondary/10 hover:bg-secondary/20 text-secondary rounded-lg font-body text-xs font-semibold transition-colors">
+                    All Tests ({homeTestHistory.length})
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
