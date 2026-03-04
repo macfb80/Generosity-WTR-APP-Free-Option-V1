@@ -574,6 +574,12 @@ function App() {
           currentScan={latestScan}
         />
       )}
+
+      {/* Zip Code Test Modal */}
+      <ZipCodeTest
+        isOpen={showZipCodeTest}
+        onClose={() => setShowZipCodeTest(false)}
+      />
     </div>
   );
 }
