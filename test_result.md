@@ -279,13 +279,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Map Quick Access Button"
-    - "Camera Scanner Improvements"
-    - "Map Modal Toggle Controls"
-    - "Map Location Pins Display"
-  stuck_tasks:
-    - "Report Map Section Placement"
-    - "Report Map Interactive Button"
+    - "ZIP Code Test Button Visibility"
+    - "ZIP Code Test Modal Opening"
+    - "ZIP Code Submission and Results"
+    - "Multiple ZIP Code Testing"
+    - "ZIP Code Water Quality API"
+  stuck_tasks: []
   test_all: true
   test_priority: "high_first"
 
