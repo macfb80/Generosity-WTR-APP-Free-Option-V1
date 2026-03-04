@@ -223,86 +223,108 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-md mx-auto px-4 py-8 space-y-6">
-        {/* Scan Button - First Action */}
-        <button
-          data-testid="scan-new-water-btn"
-          onClick={() => setShowScanner(true)}
-          disabled={isLoading}
-          className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-2xl font-sans font-bold text-lg transition-all shadow-neon disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-        >
-          <Scan className="w-6 h-6" />
-          Scan Water Bottle
-        </button>
+        {/* Action Buttons - Side by Side */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Scan Bottle Button */}
+          <button
+            data-testid="scan-new-water-btn"
+            onClick={() => setShowScanner(true)}
+            disabled={isLoading}
+            className="py-4 bg-primary hover:bg-primary/90 text-white rounded-2xl font-body font-semibold text-sm transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-2"
+          >
+            <Scan className="w-6 h-6" />
+            <span className="text-xs">Scan Bottle</span>
+          </button>
 
-        {/* Zip Code Water Test Button */}
-        <button
-          onClick={() => setShowZipCodeTest(true)}
-          className="w-full p-4 bg-gradient-to-br from-secondary/10 to-secondary/5 hover:from-secondary/20 hover:to-secondary/10 border-2 border-secondary/30 rounded-2xl transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Home className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-body font-bold text-text-primary group-hover:text-primary transition-colors">
-                  Test Your Home Water
-                </p>
-                <p className="font-body text-xs text-text-muted">
-                  Check tap water quality by ZIP code
-                </p>
-              </div>
-            </div>
-            <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-              <span className="text-primary font-bold">→</span>
-            </div>
-          </div>
-        </button>
+          {/* Test Home Water Button */}
+          <button
+            onClick={() => setShowZipCodeTest(true)}
+            className="py-4 bg-gradient-to-br from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-white rounded-2xl font-body font-semibold text-sm transition-all shadow-lg flex flex-col items-center justify-center gap-2"
+          >
+            <Home className="w-6 h-6" />
+            <span className="text-xs">Test Home</span>
+          </button>
+        </div>
 
-        {/* Hero Ring with Trust Grade */}
-        <div className="glass-card rounded-2xl p-8 text-center fade-in" data-testid="dashboard">
-          <div className="relative inline-block">
-            <WaterRing score={latestScan?.quality_score || 0} size={200} />
-            {latestScan && latestScan.trust_grade && (
-              <div className="absolute -top-2 -right-2 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-neon border-4 border-white">
-                <span className="font-sans text-2xl font-bold text-white">
+        {/* Dual Ring Dashboard - Both Scores Side by Side */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Water Bottle Quality Ring */}
+          <div className="glass-card rounded-2xl p-4 fade-in">
+            <p className="font-body text-xs text-text-secondary text-center mb-2">Bottle Quality</p>
+            <div className="relative flex items-center justify-center">
+              {latestScan ? (
+                <>
+                  <WaterRing score={latestScan.quality_score} size={100} />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="font-mono text-2xl font-bold text-primary">
+                      {latestScan.quality_score}
+                    </span>
+                    <span className="font-body text-xs text-text-muted">Score</span>
+                  </div>
+                </>
+              ) : (
+                <div className="w-[100px] h-[100px] rounded-full border-4 border-secondary/20 flex items-center justify-center">
+                  <Droplets className="w-8 h-8 text-secondary/40" />
+                </div>
+              )}
+            </div>
+            {latestScan ? (
+              <div className="mt-3 text-center">
+                <p className="font-body text-xs font-semibold text-text-primary truncate">
+                  {latestScan.brand_name}
+                </p>
+                <div className={`inline-block mt-1 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                  latestScan.trust_grade === 'A' ? 'bg-status-safe text-white' :
+                  latestScan.trust_grade === 'B' ? 'bg-primary text-white' :
+                  'bg-secondary text-white'
+                }`}>
                   {latestScan.trust_grade}
-                </span>
+                </div>
               </div>
+            ) : (
+              <p className="mt-3 text-center font-body text-xs text-text-muted">
+                No scans yet
+              </p>
             )}
           </div>
-          <div className="mt-6">
-            <h2 className="font-sans text-2xl font-semibold text-text-primary">
-              {latestScan ? 'Latest Scan' : 'No Scans Yet'}
-            </h2>
-            {latestScan && (
-              <>
-                <p className="font-body text-text-secondary mt-2">
-                  {latestScan.brand_name} {latestScan.product_name}
-                </p>
-                
-                {/* Trust Badges */}
-                {latestScan.trust_badges && latestScan.trust_badges.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2 mt-3">
-                    {latestScan.trust_badges.slice(0, 3).map((badge, idx) => (
-                      <span 
-                        key={idx}
-                        className="px-3 py-1 bg-primary/10 text-primary rounded-full font-body text-xs font-semibold"
-                      >
-                        {badge}
-                      </span>
-                    ))}
+
+          {/* Home Water Quality Ring */}
+          <div className="glass-card rounded-2xl p-4 fade-in">
+            <p className="font-body text-xs text-text-secondary text-center mb-2">Home Water</p>
+            <div className="relative flex items-center justify-center">
+              {latestHomeTest ? (
+                <>
+                  <WaterRing score={latestHomeTest.quality_score} size={100} />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="font-mono text-2xl font-bold text-primary">
+                      {latestHomeTest.quality_score}
+                    </span>
+                    <span className="font-body text-xs text-text-muted">Score</span>
                   </div>
-                )}
-                
-                <button
-                  data-testid="view-latest-report-btn"
-                  onClick={() => handleViewHistory(latestScan)}
-                  className="mt-4 px-6 py-2 bg-secondary/10 hover:bg-secondary/20 text-text-primary rounded-full font-body text-sm transition-colors"
-                >
-                  View Full Report
-                </button>
-              </>
+                </>
+              ) : (
+                <div className="w-[100px] h-[100px] rounded-full border-4 border-secondary/20 flex items-center justify-center">
+                  <Home className="w-8 h-8 text-secondary/40" />
+                </div>
+              )}
+            </div>
+            {latestHomeTest ? (
+              <div className="mt-3 text-center">
+                <p className="font-body text-xs font-semibold text-text-primary">
+                  ZIP {latestHomeTest.zip_code}
+                </p>
+                <div className={`inline-block mt-1 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                  latestHomeTest.grade === 'A' ? 'bg-status-safe text-white' :
+                  latestHomeTest.grade === 'B' ? 'bg-primary text-white' :
+                  'bg-secondary text-white'
+                }`}>
+                  {latestHomeTest.grade}
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3 text-center font-body text-xs text-text-muted">
+                No tests yet
+              </p>
             )}
           </div>
         </div>
