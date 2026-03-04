@@ -195,6 +195,54 @@ frontend:
         agent: "testing"
         comment: "✅ PASSED: Scanner opens correctly with enhanced configuration. Camera mode shows 'Camera error' (expected in automated environment). Manual entry mode works perfectly with sample barcodes (Fiji, Evian, Dasani). Enhanced scanner features implemented: 30 FPS, larger scan area (320x160), priority barcode formats, continuous autofocus. Fallback to manual mode works seamlessly."
 
+  - task: "ZIP Code Test Button Visibility"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing 'Test Your Home Water' button visibility below 'Scan Water Bottle' button with proper subtitle and home icon"
+
+  - task: "ZIP Code Test Modal Opening"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ZipCodeTest.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing modal opens with correct title, subtitle, info section, form fields, and feature cards"
+
+  - task: "ZIP Code Submission and Results"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ZipCodeTest.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing ZIP code submission (90210), loading state, and results display with quality score, utility name, contaminants, and recommendations"
+
+  - task: "Multiple ZIP Code Testing"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ZipCodeTest.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing different ZIP codes (10001, 85001) and verifying regional variations in results"
+
 backend:
   - task: "Scan History API with Location Data"
     implemented: true
