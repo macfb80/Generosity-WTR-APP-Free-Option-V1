@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the improved Map Geolocation and Camera Scanner features for the WTR APP"
+user_problem_statement: "Test the new ZIP Code Water Test feature for WTR APP"
 
 frontend:
   - task: "Map Quick Access Button"
