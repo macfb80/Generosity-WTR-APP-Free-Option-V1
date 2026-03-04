@@ -1090,6 +1090,170 @@ async def get_user_stats():
         logger.error(f"Error getting stats: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get stats")
 
+@api_router.post("/water-quality/zip")
+async def get_water_quality_by_zip(request: dict):
+    """Get water quality data by ZIP code using EPA SDWIS data"""
+    try:
+        zip_code = request.get('zip_code')
+        address = request.get('address')
+        
+        if not zip_code or len(zip_code) != 5:
+            raise HTTPException(status_code=400, detail="Valid 5-digit ZIP code required")
+        
+        # Mock data structure - In production, integrate with EPA SDWIS API
+        # https://data.epa.gov/efservice/sdwa.sdwis_water_systems/
+        
+        # Simulated EPA data based on zip code patterns
+        water_quality_data = await generate_water_quality_report(zip_code)
+        
+        return water_quality_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching water quality data: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch water quality data")
+
+async def generate_water_quality_report(zip_code: str):
+    """Generate water quality report based on ZIP code
+    
+    In production, this would:
+    1. Query EPA SDWIS API by zip-to-county mapping
+    2. Fetch contaminant data for local water utility
+    3. Check violation history
+    4. Return comprehensive report
+    """
+    
+    # Sample utilities by region
+    utilities = {
+        "10001": ("New York City Water", "NYC DEP", "New York, NY"),
+        "90210": ("Los Angeles Water", "LADWP", "Los Angeles, CA"),
+        "85001": ("Phoenix Water", "Phoenix Water Services", "Phoenix, AZ"),
+        "60601": ("Chicago Water", "Chicago Water Dept", "Chicago, IL"),
+        "33101": ("Miami-Dade Water", "Miami-Dade WASD", "Miami, FL"),
+    }
+    
+    # Default to generic utility
+    utility_name, utility_system, location = utilities.get(
+        zip_code,
+        ("Local Water Utility", "Municipal Water System", f"ZIP {zip_code}")
+    )
+    
+    # Simulate quality score (70-95 range)
+    base_score = 75 + (int(zip_code) % 20)
+    
+    # Common contaminants with realistic data
+    contaminants = [
+        {
+            "name": "Total Trihalomethanes (TTHMs)",
+            "description": "Disinfection byproducts formed when chlorine treats water with organic matter",
+            "level": "45 ppb",
+            "legal_limit": "80 ppb",
+            "severity": "low",
+            "exceeds_limit": False
+        },
+        {
+            "name": "Lead",
+            "description": "Heavy metal that can leach from pipes and plumbing fixtures",
+            "level": "8 ppb",
+            "legal_limit": "15 ppb",
+            "severity": "medium",
+            "exceeds_limit": False
+        },
+        {
+            "name": "Chlorine",
+            "description": "Disinfectant added to kill bacteria and viruses in water",
+            "level": "2.1 mg/L",
+            "legal_limit": "4 mg/L",
+            "severity": "low",
+            "exceeds_limit": False
+        },
+        {
+            "name": "Total Hardness",
+            "description": "Calcium and magnesium minerals that cause scale buildup",
+            "level": "180 mg/L",
+            "legal_limit": "No federal limit",
+            "severity": "low",
+            "exceeds_limit": False
+        }
+    ]
+    
+    # Add region-specific contaminants
+    if zip_code.startswith("8"):  # Southwest (AZ, NV, NM)
+        contaminants.append({
+            "name": "Arsenic",
+            "description": "Naturally occurring element found in Southwest groundwater",
+            "level": "8 ppb",
+            "legal_limit": "10 ppb",
+            "severity": "medium",
+            "exceeds_limit": False
+        })
+        base_score -= 5
+    
+    if zip_code.startswith("3"):  # Southeast (FL, GA, SC)
+        contaminants.append({
+            "name": "Radium-228",
+            "description": "Radioactive element found in some groundwater sources",
+            "level": "3 pCi/L",
+            "legal_limit": "5 pCi/L",
+            "severity": "low",
+            "exceeds_limit": False
+        })
+    
+    # Determine grade
+    if base_score >= 90:
+        grade = "A"
+        risk_level = "low"
+    elif base_score >= 80:
+        grade = "B"
+        risk_level = "low"
+    elif base_score >= 70:
+        grade = "C"
+        risk_level = "medium"
+    elif base_score >= 60:
+        grade = "D"
+        risk_level = "high"
+    else:
+        grade = "F"
+        risk_level = "high"
+    
+    # Sample violations
+    violations = [
+        {
+            "type": "Monitoring & Reporting Violation",
+            "date": "Q2 2023",
+            "description": "Late submission of quarterly water quality report"
+        }
+    ] if base_score < 85 else []
+    
+    # Recommendations based on quality
+    recommendations = [
+        "Consider using a certified water filter for additional protection",
+        "Flush pipes for 30 seconds before drinking after prolonged non-use",
+        "Test your tap water annually with a certified laboratory"
+    ]
+    
+    if any(c["name"] == "Lead" and float(c["level"].split()[0]) > 5 for c in contaminants):
+        recommendations.insert(0, "Consider NSF-certified lead reduction filter")
+    
+    if any(c["name"] == "Total Hardness" for c in contaminants):
+        recommendations.append("Water softener may improve taste and reduce scale buildup")
+    
+    return {
+        "zip_code": zip_code,
+        "utility_name": utility_name,
+        "utility_system": utility_system,
+        "location": location,
+        "quality_score": base_score,
+        "grade": grade,
+        "risk_level": risk_level,
+        "contaminants": contaminants,
+        "violations": violations,
+        "recommendations": recommendations,
+        "last_updated": "December 2024",
+        "data_source": "EPA SDWIS Database",
+        "note": "This is a demonstration using sample data. Production version integrates with EPA's real-time SDWIS API."
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
