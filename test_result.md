@@ -293,3 +293,5 @@ agent_communication:
     message: "Starting comprehensive testing of improved Map Geolocation and Camera Scanner features. Will test map quick access, camera scanner improvements, map placement in reports, and interactive map functionality."
   - agent: "testing"
     message: "✅ TESTING MOSTLY COMPLETED: Map Quick Access Button, Map Modal Toggle Controls, Map Location Pins Display, and Camera Scanner Improvements all working correctly. ⚠️ ISSUE FOUND: UI interaction problem prevents testing Report Map Section - scanner overlay intercepts clicks on history items, blocking access to reports. This is a minor UI issue that doesn't affect core map functionality."
+  - agent: "testing"
+    message: "🔄 NEW TESTING FOCUS: Starting comprehensive testing of ZIP Code Water Test feature. Will test button visibility, modal functionality, form submission, results display, and API integration for multiple ZIP codes (90210, 10001, 85001)."
