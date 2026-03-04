@@ -244,6 +244,18 @@ frontend:
         comment: "Testing different ZIP codes (10001, 85001) and verifying regional variations in results"
 
 backend:
+  - task: "ZIP Code Water Quality API"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing /api/water-quality/zip endpoint for ZIP code water quality data retrieval"
+
   - task: "Scan History API with Location Data"
     implemented: true
     working: true
