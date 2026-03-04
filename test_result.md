@@ -341,17 +341,15 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Side-by-Side Action Buttons Layout"
+    - "Dual Ring Dashboard Display"
+    - "Combined Recent Tests Section"
+    - "Test Home Water Flow Integration"
   stuck_tasks: []
   test_all: false
-  test_priority: "completed"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
-    message: "Starting comprehensive testing of improved Map Geolocation and Camera Scanner features. Will test map quick access, camera scanner improvements, map placement in reports, and interactive map functionality."
-  - agent: "testing"
-    message: "✅ TESTING MOSTLY COMPLETED: Map Quick Access Button, Map Modal Toggle Controls, Map Location Pins Display, and Camera Scanner Improvements all working correctly. ⚠️ ISSUE FOUND: UI interaction problem prevents testing Report Map Section - scanner overlay intercepts clicks on history items, blocking access to reports. This is a minor UI issue that doesn't affect core map functionality."
-  - agent: "testing"
-    message: "🔄 NEW TESTING FOCUS: Starting comprehensive testing of ZIP Code Water Test feature. Will test button visibility, modal functionality, form submission, results display, and API integration for multiple ZIP codes (90210, 10001, 85001)."
-  - agent: "testing"
-    message: "✅ ZIP CODE WATER TEST FEATURE TESTING COMPLETED: All components working perfectly! Button visibility ✅, modal functionality ✅, form submission ✅, results display ✅, API integration ✅, multiple ZIP codes ✅, regional variations ✅. Feature is fully functional and ready for production use. UI matches app design perfectly with comprehensive water quality data from EPA SDWIS."
+    message: "🔄 NEW TESTING FOCUS: Testing the NEW dual-ring dashboard and side-by-side buttons layout for WTR APP. Will verify: 1) Side-by-side action buttons (Scan Bottle + Test Home), 2) Dual quality rings (Bottle Quality + Home Water), 3) Combined Recent Tests section, 4) Complete Test Home Water flow with ZIP code 10001."
