@@ -677,6 +677,7 @@ function App() {
       <ZipCodeTest
         isOpen={showZipCodeTest}
         onClose={() => setShowZipCodeTest(false)}
+        onTestComplete={handleHomeTestComplete}
       />
     </div>
   );
