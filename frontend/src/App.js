@@ -158,6 +158,21 @@ function App() {
     toast.success('Profile updated successfully');
   };
 
+  const handleHomeTestComplete = (result) => {
+    setLatestHomeTest(result);
+    setHomeTestHistory(prev => [result, ...prev].slice(0, 10)); // Keep last 10
+    localStorage.setItem('latestHomeTest', JSON.stringify(result));
+    localStorage.setItem('homeTestHistory', JSON.stringify([result, ...homeTestHistory].slice(0, 10)));
+  };
+
+  useEffect(() => {
+    // Load home test data from localStorage
+    const savedHomeTest = localStorage.getItem('latestHomeTest');
+    const savedHistory = localStorage.getItem('homeTestHistory');
+    if (savedHomeTest) setLatestHomeTest(JSON.parse(savedHomeTest));
+    if (savedHistory) setHomeTestHistory(JSON.parse(savedHistory));
+  }, []);
+
   return (
     <div className="min-h-screen bg-background" data-testid="app-container">
       <Toaster position="top-center" theme="dark" />
