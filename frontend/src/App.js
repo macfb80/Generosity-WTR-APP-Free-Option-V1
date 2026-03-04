@@ -217,6 +217,31 @@ function App() {
           Scan Water Bottle
         </button>
 
+        {/* Zip Code Water Test Button */}
+        <button
+          onClick={() => setShowZipCodeTest(true)}
+          className="w-full p-4 bg-gradient-to-br from-secondary/10 to-secondary/5 hover:from-secondary/20 hover:to-secondary/10 border-2 border-secondary/30 rounded-2xl transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Home className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-left">
+                <p className="font-body font-bold text-text-primary group-hover:text-primary transition-colors">
+                  Test Your Home Water
+                </p>
+                <p className="font-body text-xs text-text-muted">
+                  Check tap water quality by ZIP code
+                </p>
+              </div>
+            </div>
+            <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+              <span className="text-primary font-bold">→</span>
+            </div>
+          </div>
+        </button>
+
         {/* Hero Ring with Trust Grade */}
         <div className="glass-card rounded-2xl p-8 text-center fade-in" data-testid="dashboard">
           <div className="relative inline-block">
