@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '@/App.css';
-import { Scan, History, Droplets, User, LogIn, Settings, MapPin } from 'lucide-react';
+import { Scan, History, Droplets, User, LogIn, Settings, MapPin, Home } from 'lucide-react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
 import WaterRing from './components/WaterRing';
@@ -9,6 +9,7 @@ import Report from './components/Report';
 import AuthModal from './components/AuthModal';
 import ProfileModal from './components/ProfileModal';
 import ScanMap from './components/ScanMap';
+import ZipCodeTest from './components/ZipCodeTest';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
