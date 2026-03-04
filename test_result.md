@@ -105,6 +105,54 @@
 user_problem_statement: "Test the NEW dual-ring dashboard and side-by-side buttons for WTR APP"
 
 frontend:
+  - task: "Side-by-Side Action Buttons Layout"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing side-by-side button layout with 'Scan Bottle' (left) and 'Test Home' (right) buttons in grid formation"
+
+  - task: "Dual Ring Dashboard Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing dual quality rings side-by-side: 'Bottle Quality' (left) and 'Home Water' (right) with scores, grades, and fallback displays"
+
+  - task: "Combined Recent Tests Section"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing 'Recent Tests' section shows both bottle scans (Scan icon) and home tests (Home icon) with proper labels and mixed timeline"
+
+  - task: "Test Home Water Flow Integration"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ZipCodeTest.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing complete flow: Test Home button → ZIP code entry (10001) → results display → Home Water ring update → Recent Tests update"
+
   - task: "Map Quick Access Button"
     implemented: true
     working: true
