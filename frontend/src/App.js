@@ -27,6 +27,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [authToken, setAuthToken] = useState(null);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [showZipCodeTest, setShowZipCodeTest] = useState(false);
 
   useEffect(() => {
     fetchHistory();
