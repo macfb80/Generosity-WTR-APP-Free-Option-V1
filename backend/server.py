@@ -1112,7 +1112,7 @@ async def get_water_quality_by_zip(request: dict):
         logger.error(f"Error fetching water quality data: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch water quality data")
 
-async def generate_water_quality_report(zip_code: str):
+async def generate_zip_water_quality_report(zip_code: str):
     """Generate water quality report based on ZIP code
     
     In production, this would:
