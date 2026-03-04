@@ -1095,7 +1095,6 @@ async def get_water_quality_by_zip(request: dict):
     """Get water quality data by ZIP code using EPA SDWIS data"""
     try:
         zip_code = request.get('zip_code')
-        address = request.get('address')
         
         if not zip_code or len(zip_code) != 5:
             raise HTTPException(status_code=400, detail="Valid 5-digit ZIP code required")
@@ -1104,7 +1103,7 @@ async def get_water_quality_by_zip(request: dict):
         # https://data.epa.gov/efservice/sdwa.sdwis_water_systems/
         
         # Simulated EPA data based on zip code patterns
-        water_quality_data = await generate_water_quality_report(zip_code)
+        water_quality_data = await generate_zip_water_quality_report(zip_code)
         
         return water_quality_data
     except HTTPException:
