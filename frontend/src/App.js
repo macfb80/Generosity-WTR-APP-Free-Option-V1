@@ -246,86 +246,120 @@ function App() {
           </button>
         </div>
 
-        {/* Dual Ring Dashboard - Both Scores Side by Side */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Dual Ring Dashboard - Premium World-Class Design */}
+        <div className="grid grid-cols-2 gap-4">
           {/* Water Bottle Quality Ring */}
-          <div className="glass-card rounded-2xl p-4 fade-in">
-            <p className="font-body text-xs text-text-secondary text-center mb-2">Bottle Quality</p>
-            <div className="relative flex items-center justify-center">
-              {latestScan ? (
-                <>
-                  <WaterRing score={latestScan.quality_score} size={100} />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="font-mono text-2xl font-bold text-primary">
-                      {latestScan.quality_score}
-                    </span>
-                    <span className="font-body text-xs text-text-muted">Score</span>
+          <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-3xl p-5 shadow-xl border border-gray-100 fade-in overflow-hidden">
+            {/* Background Decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-body text-xs font-semibold text-text-secondary uppercase tracking-wide">Bottle Quality</p>
+                <Droplets className="w-4 h-4 text-primary/40" />
+              </div>
+              
+              <div className="relative flex items-center justify-center my-4">
+                {latestScan ? (
+                  <>
+                    <WaterRing score={latestScan.quality_score} size={110} strokeWidth={10} />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="font-sans text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary/80 drop-shadow-sm">
+                        {latestScan.quality_score}
+                      </span>
+                      <span className="font-body text-[10px] font-medium text-text-muted uppercase tracking-widest">Score</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-[110px] h-[110px] rounded-full border-4 border-dashed border-secondary/20 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+                    <Droplets className="w-10 h-10 text-secondary/30" />
                   </div>
-                </>
-              ) : (
-                <div className="w-[100px] h-[100px] rounded-full border-4 border-secondary/20 flex items-center justify-center">
-                  <Droplets className="w-8 h-8 text-secondary/40" />
+                )}
+              </div>
+              
+              {latestScan ? (
+                <div className="mt-3 space-y-2">
+                  <p className="font-body text-sm font-bold text-text-primary text-center truncate px-2">
+                    {latestScan.brand_name}
+                  </p>
+                  <div className="flex items-center justify-center gap-2">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-sans text-base font-black shadow-lg ${
+                      latestScan.trust_grade === 'A' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white' :
+                      latestScan.trust_grade === 'B' ? 'bg-gradient-to-br from-primary to-blue-600 text-white' :
+                      'bg-gradient-to-br from-gray-400 to-gray-500 text-white'
+                    }`}>
+                      {latestScan.trust_grade}
+                    </div>
+                    <div className="text-left">
+                      <p className="font-body text-[10px] text-text-muted uppercase tracking-wide">Grade</p>
+                      <p className="font-mono text-xs font-bold text-text-primary">Trust Score</p>
+                    </div>
+                  </div>
                 </div>
+              ) : (
+                <p className="mt-3 text-center font-body text-xs text-text-muted">
+                  Scan your first bottle
+                </p>
               )}
             </div>
-            {latestScan ? (
-              <div className="mt-3 text-center">
-                <p className="font-body text-xs font-semibold text-text-primary truncate">
-                  {latestScan.brand_name}
-                </p>
-                <div className={`inline-block mt-1 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                  latestScan.trust_grade === 'A' ? 'bg-status-safe text-white' :
-                  latestScan.trust_grade === 'B' ? 'bg-primary text-white' :
-                  'bg-secondary text-white'
-                }`}>
-                  {latestScan.trust_grade}
-                </div>
-              </div>
-            ) : (
-              <p className="mt-3 text-center font-body text-xs text-text-muted">
-                No scans yet
-              </p>
-            )}
           </div>
 
           {/* Home Water Quality Ring */}
-          <div className="glass-card rounded-2xl p-4 fade-in">
-            <p className="font-body text-xs text-text-secondary text-center mb-2">Home Water</p>
-            <div className="relative flex items-center justify-center">
-              {latestHomeTest ? (
-                <>
-                  <WaterRing score={latestHomeTest.quality_score} size={100} />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="font-mono text-2xl font-bold text-primary">
-                      {latestHomeTest.quality_score}
-                    </span>
-                    <span className="font-body text-xs text-text-muted">Score</span>
+          <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-3xl p-5 shadow-xl border border-gray-100 fade-in overflow-hidden">
+            {/* Background Decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-secondary/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-20 h-20 bg-secondary/5 rounded-full blur-2xl"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-body text-xs font-semibold text-text-secondary uppercase tracking-wide">Home Water</p>
+                <Home className="w-4 h-4 text-secondary/40" />
+              </div>
+              
+              <div className="relative flex items-center justify-center my-4">
+                {latestHomeTest ? (
+                  <>
+                    <WaterRing score={latestHomeTest.quality_score} size={110} strokeWidth={10} />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="font-sans text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-secondary to-gray-600 drop-shadow-sm">
+                        {latestHomeTest.quality_score}
+                      </span>
+                      <span className="font-body text-[10px] font-medium text-text-muted uppercase tracking-widest">Score</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-[110px] h-[110px] rounded-full border-4 border-dashed border-secondary/20 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+                    <Home className="w-10 h-10 text-secondary/30" />
                   </div>
-                </>
-              ) : (
-                <div className="w-[100px] h-[100px] rounded-full border-4 border-secondary/20 flex items-center justify-center">
-                  <Home className="w-8 h-8 text-secondary/40" />
+                )}
+              </div>
+              
+              {latestHomeTest ? (
+                <div className="mt-3 space-y-2">
+                  <p className="font-body text-sm font-bold text-text-primary text-center">
+                    ZIP {latestHomeTest.zip_code}
+                  </p>
+                  <div className="flex items-center justify-center gap-2">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-sans text-base font-black shadow-lg ${
+                      latestHomeTest.grade === 'A' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white' :
+                      latestHomeTest.grade === 'B' ? 'bg-gradient-to-br from-primary to-blue-600 text-white' :
+                      'bg-gradient-to-br from-gray-400 to-gray-500 text-white'
+                    }`}>
+                      {latestHomeTest.grade}
+                    </div>
+                    <div className="text-left">
+                      <p className="font-body text-[10px] text-text-muted uppercase tracking-wide">Grade</p>
+                      <p className="font-mono text-xs font-bold text-text-primary">EPA Data</p>
+                    </div>
+                  </div>
                 </div>
+              ) : (
+                <p className="mt-3 text-center font-body text-xs text-text-muted">
+                  Test your tap water
+                </p>
               )}
             </div>
-            {latestHomeTest ? (
-              <div className="mt-3 text-center">
-                <p className="font-body text-xs font-semibold text-text-primary">
-                  ZIP {latestHomeTest.zip_code}
-                </p>
-                <div className={`inline-block mt-1 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                  latestHomeTest.grade === 'A' ? 'bg-status-safe text-white' :
-                  latestHomeTest.grade === 'B' ? 'bg-primary text-white' :
-                  'bg-secondary text-white'
-                }`}>
-                  {latestHomeTest.grade}
-                </div>
-              </div>
-            ) : (
-              <p className="mt-3 text-center font-body text-xs text-text-muted">
-                No tests yet
-              </p>
-            )}
           </div>
         </div>
 
