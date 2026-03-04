@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const ZipCodeTest = ({ isOpen, onClose }) => {
+const ZipCodeTest = ({ isOpen, onClose, onTestComplete }) => {
   const [zipCode, setZipCode] = useState('');
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,6 +31,12 @@ const ZipCodeTest = ({ isOpen, onClose }) => {
       });
 
       setResults(response.data);
+      
+      // Call parent handler with results
+      if (onTestComplete) {
+        onTestComplete(response.data);
+      }
+      
       toast.success('Water quality report ready!', { id: 'zip-test' });
     } catch (error) {
       console.error('Zip code test error:', error);
