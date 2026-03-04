@@ -293,15 +293,10 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "ZIP Code Test Button Visibility"
-    - "ZIP Code Test Modal Opening"
-    - "ZIP Code Submission and Results"
-    - "Multiple ZIP Code Testing"
-    - "ZIP Code Water Quality API"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
-  test_priority: "high_first"
+  test_all: false
+  test_priority: "completed"
 
 agent_communication:
   - agent: "testing"
