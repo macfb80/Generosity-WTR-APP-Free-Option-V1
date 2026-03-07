@@ -207,7 +207,9 @@ function WTRHubAnimation({contaminants,active}){
     <div style={{padding:"8px 0"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:0,marginBottom:10}}>
         <div style={{textAlign:"center",minWidth:40}}>
-          <div style={{width:34,height:34,borderRadius:"50%",margin:"0 auto 3px",background:"linear-gradient(135deg,#4A2C0A,#7B4A1E)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🚰</div>
+          <div style={{width:34,height:34,borderRadius:"50%",margin:"0 auto 3px",background:"#F0F1F3",border:"2px solid #A6A8AB",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <Icon name="tap" size={18} color="#A6A8AB"/>
+          </div>
           <div style={{fontSize:7,color:"#A6A8AB"}}>TAP</div>
         </div>
         <div style={{color:"#C8E2F4",fontSize:12,margin:"0 2px",paddingBottom:14}}>→</div>
@@ -230,7 +232,9 @@ function WTRHubAnimation({contaminants,active}){
         ))}
         <div style={{color:"#C8E2F4",fontSize:12,margin:"0 2px",paddingBottom:14}}>→</div>
         <div style={{textAlign:"center",minWidth:40}}>
-          <div style={{width:34,height:34,borderRadius:"50%",margin:"0 auto 3px",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,animation:"pulse 2s ease-in-out infinite"}}>✨</div>
+          <div style={{width:34,height:34,borderRadius:"50%",margin:"0 auto 3px",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",animation:"pulse 2s ease-in-out infinite"}}>
+            <Icon name="sparkle" size={18} color="#FFFFFF" active/>
+          </div>
           <div style={{fontSize:7,color:"#51B0E6",fontWeight:800}}>PURE</div>
         </div>
       </div>
@@ -294,7 +298,9 @@ function BottleScanView({onBridge}){
   // INTRO VIEW
   if(mode==="intro") return(
     <div style={{padding:"24px 20px",textAlign:"center"}} data-testid="bottle-scan-intro">
-      <div style={{fontSize:44,marginBottom:10}}>🔍</div>
+      <div style={{width:60,height:60,borderRadius:"50%",background:"#F0F1F3",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
+        <Icon name="search" size={28} color="#51B0E6"/>
+      </div>
       <h3 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:8}}>Scan Your Bottle</h3>
       <p style={{fontSize:12,color:"#A6A8AB",lineHeight:1.6,marginBottom:20,maxWidth:300,margin:"0 auto 20px"}}>
         Point your camera at any plastic water bottle barcode — or search by brand.
@@ -303,16 +309,16 @@ function BottleScanView({onBridge}){
         <button 
           onClick={simulateScan} 
           data-testid="scan-camera-btn"
-          style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"13px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer"}}
+          style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"13px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
         >
-          📸 Scan Barcode with Camera
+          <Icon name="camera" size={16} color="#FFFFFF"/> Scan Barcode with Camera
         </button>
         <button 
           onClick={()=>setMode("manual")} 
           data-testid="search-brand-btn"
-          style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #C8E2F4",padding:"11px 20px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer"}}
+          style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #C8E2F4",padding:"11px 20px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
         >
-          🔤 Search by Brand Name
+          <Icon name="text" size={16} color="#51B0E6"/> Search by Brand Name
         </button>
       </div>
       <div style={{fontSize:10,color:"#A6A8AB",marginBottom:10}}>QUICK SELECT</div>
@@ -417,14 +423,20 @@ function BottleScanView({onBridge}){
         </div>
         
         {/* Key Concern Block */}
-        <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderLeft:"3px solid #D93025",borderRadius:9,padding:"12px",marginBottom:12}} data-testid="key-concern-block">
-          <div style={{fontSize:10,fontWeight:800,color:"#D93025",marginBottom:4}}>⚠ KEY CONCERN</div>
-          <div style={{fontSize:11,color:"#742A2A",lineHeight:1.6}}>{brand.concern}</div>
+        <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderLeft:"3px solid #D93025",borderRadius:9,padding:"12px",marginBottom:12,display:"flex",alignItems:"flex-start",gap:10}} data-testid="key-concern-block">
+          <Icon name="alert" size={18} color="#D93025"/>
+          <div>
+            <div style={{fontSize:10,fontWeight:800,color:"#D93025",marginBottom:4}}>KEY CONCERN</div>
+            <div style={{fontSize:11,color:"#742A2A",lineHeight:1.6}}>{brand.concern}</div>
+          </div>
         </div>
         
         {/* Bridge to Home Water Test - Light gray */}
         <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:12,padding:"14px"}}>
-          <div style={{fontSize:11,fontWeight:800,color:"#0A1A2E",marginBottom:6}}>💡 The real solution isn't a better bottle — it's filtered tap water.</div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+            <Icon name="info" size={16} color="#51B0E6"/>
+            <div style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>The real solution isn't a better bottle — it's filtered tap water.</div>
+          </div>
           <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.6,marginBottom:10}}>The Home WTR Hub removes 99%+ of contaminants at your tap — cleaner than any bottled water at $0.003/gallon vs $1.00+/bottle.</div>
           <button 
             onClick={()=>onBridge&&onBridge()} 
@@ -581,6 +593,195 @@ function NavIcon({id,active}){
   return null;
 }
 
+// ─── UNIFIED ICON COMPONENT LIBRARY ──────────────────────────────────────────
+// All icons use consistent stroke-based style matching the navigation
+function Icon({name, size=20, color="#A6A8AB", active=false}) {
+  const ic = active ? "#51B0E6" : color;
+  const s = size;
+  
+  const icons = {
+    // Location & Address
+    home: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 3L2 11H4.5V20H9.5V14H14.5V20H19.5V11H22L12 3Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <path d="M12 9C12 9 10 11.5 10 12.5C10 13.6 10.9 14.5 12 14.5C13.1 14.5 14 13.6 14 12.5C14 11.5 12 9 12 9Z" fill={active?ic:"none"} stroke={ic} strokeWidth="1.2"/>
+      </svg>
+    ),
+    pin: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <circle cx="12" cy="9" r="2.5" stroke={ic} strokeWidth="1.5" fill={active?ic:"none"}/>
+      </svg>
+    ),
+    city: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M3 21H21" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M5 21V7L10 4V21" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <path d="M10 21V10H15V21" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <path d="M15 21V6H19V21" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <line x1="7" y1="9" x2="8" y2="9" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+        <line x1="7" y1="12" x2="8" y2="12" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+        <line x1="7" y1="15" x2="8" y2="15" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+        <line x1="12" y1="13" x2="13" y2="13" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+        <line x1="12" y1="16" x2="13" y2="16" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+        <line x1="17" y1="9" x2="17" y2="9" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <line x1="17" y1="12" x2="17" y2="12" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    lock: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <rect x="5" y="10" width="14" height="11" rx="2" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <path d="M8 10V7C8 4.79 9.79 3 12 3C14.21 3 16 4.79 16 7V10" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="12" cy="15" r="1.5" fill={ic}/>
+        <line x1="12" y1="16.5" x2="12" y2="18" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    // Scanning & Search
+    scan: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M3 7V5C3 3.9 3.9 3 5 3H7" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M17 3H19C20.1 3 21 3.9 21 5V7" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M21 17V19C21 20.1 20.1 21 19 21H17" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M7 21H5C3.9 21 3 20.1 3 19V17" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="12" cy="12" r="4" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <circle cx="12" cy="12" r="1.5" fill={ic}/>
+      </svg>
+    ),
+    search: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <line x1="16" y1="16" x2="21" y2="21" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    camera: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M3 8C3 6.9 3.9 6 5 6H7L9 4H15L17 6H19C20.1 6 21 6.9 21 8V18C21 19.1 20.1 20 19 20H5C3.9 20 3 19.1 3 18V8Z" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <circle cx="12" cy="13" r="4" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <circle cx="12" cy="13" r="1.5" fill={ic}/>
+      </svg>
+    ),
+    text: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M4 7V5H20V7" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <line x1="12" y1="5" x2="12" y2="19" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M8 19H16" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    // Water & Drops
+    drop: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 3C12 3 6 10 6 14C6 17.31 8.69 20 12 20C15.31 20 18 17.31 18 14C18 10 12 3 12 3Z" stroke={ic} strokeWidth="1.5" fill={active?`${ic}20`:"none"}/>
+        <path d="M9 14C9 14 10 12 12 12" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+      </svg>
+    ),
+    droplet: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C12 2 5 10 5 14.5C5 18.64 8.13 22 12 22C15.87 22 19 18.64 19 14.5C19 10 12 2 12 2Z" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <path d="M12 19C14.21 19 16 17.21 16 15" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+      </svg>
+    ),
+    tap: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2V6" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <rect x="8" y="6" width="8" height="4" rx="1" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <path d="M10 10V12C10 12 10 14 12 14C14 14 14 12 14 12V10" stroke={ic} strokeWidth="1.5"/>
+        <path d="M12 14V16" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M12 18C12 18 9 19 9 21H15C15 19 12 18 12 18Z" stroke={ic} strokeWidth="1.5" fill="none"/>
+      </svg>
+    ),
+    sparkle: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill={active?`${ic}30`:"none"}/>
+        <circle cx="19" cy="5" r="1.5" stroke={ic} strokeWidth="1" fill="none"/>
+        <circle cx="5" cy="18" r="1" stroke={ic} strokeWidth="1" fill="none"/>
+      </svg>
+    ),
+    // Hazard & Warning  
+    hazard: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L22 20H2L12 2Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <line x1="12" y1="9" x2="12" y2="14" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="12" cy="17" r="1" fill={ic}/>
+      </svg>
+    ),
+    alert: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <line x1="12" y1="8" x2="12" y2="13" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="12" cy="16" r="1" fill={ic}/>
+      </svg>
+    ),
+    shield: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6V11C4 16.5 7.5 21.25 12 22.5C16.5 21.25 20 16.5 20 11V6L12 2Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <path d="M9 12L11 14L15 10" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    // Science & Lab
+    flask: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M9 3V10L4 18C3.5 19 4 20 5 20H19C20 20 20.5 19 20 18L15 10V3" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <line x1="8" y1="3" x2="16" y2="3" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M7 15H17" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/>
+      </svg>
+    ),
+    atom: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="2" fill={ic}/>
+        <ellipse cx="12" cy="12" rx="9" ry="4" stroke={ic} strokeWidth="1.3" fill="none"/>
+        <ellipse cx="12" cy="12" rx="9" ry="4" stroke={ic} strokeWidth="1.3" fill="none" transform="rotate(60 12 12)"/>
+        <ellipse cx="12" cy="12" rx="9" ry="4" stroke={ic} strokeWidth="1.3" fill="none" transform="rotate(120 12 12)"/>
+      </svg>
+    ),
+    // Status & Check
+    check: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <path d="M8 12L11 15L16 9" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    checkCircle: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="#1E8A4C" strokeWidth="1.5" fill="#F0FAF4"/>
+        <path d="M8 12L11 15L16 9" stroke="#1E8A4C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    // Misc
+    bell: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M18 8C18 6.4 17.4 4.9 16.2 3.8C15.1 2.6 13.6 2 12 2C10.4 2 8.9 2.6 7.8 3.8C6.6 4.9 6 6.4 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <path d="M13.7 21C13.5 21.4 13 21.6 12.5 21.7C12 21.8 11.4 21.7 11 21.5C10.5 21.2 10.2 20.8 10 20.3" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    email: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="5" width="18" height="14" rx="2" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <path d="M3 7L12 13L21 7" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    filter: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M4 4H20L14 12V18L10 20V12L4 4Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+      </svg>
+    ),
+    info: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <line x1="12" y1="11" x2="12" y2="16" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="12" cy="8" r="1" fill={ic}/>
+      </svg>
+    ),
+    book: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <path d="M4 4C4 4 5 3 8 3C11 3 12 4.5 12 4.5C12 4.5 13 3 16 3C19 3 20 4 20 4V19C20 19 19 18 16 18C13 18 12 19.5 12 19.5C12 19.5 11 18 8 18C5 18 4 19 4 19V4Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+        <line x1="12" y1="5" x2="12" y2="19" stroke={ic} strokeWidth="1.5"/>
+      </svg>
+    ),
+  };
+  
+  return icons[name] || null;
+}
+
 // ─── MAIN APP COMPONENT ──────────────────────────────────────────────────────
 export default function TrustButVerify(){
   const [tab,setTab]=useState("home");
@@ -659,6 +860,7 @@ export default function TrustButVerify(){
         @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes ripple{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(2.2);opacity:0}}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .tbv-card{animation:slideUp 0.4s ease forwards}
         input:focus{outline:none;border-color:#51B0E6!important;box-shadow:0 0 0 3px #51B0E622!important}
         button:active{opacity:0.85;transform:scale(0.98)}
@@ -697,9 +899,9 @@ export default function TrustButVerify(){
               {/* Input Mode Toggle */}
               <div style={{display:"flex",background:"#F0F1F3",borderRadius:10,padding:3,maxWidth:320,margin:"0 auto 10px",gap:2}} data-testid="input-mode-toggle">
                 {[
-                  {id:"address",icon:"🏠",label:"My Address"},
-                  {id:"zip",icon:"📍",label:"ZIP Code"},
-                  {id:"city",icon:"🏙️",label:"City"}
+                  {id:"address",iconName:"home",label:"My Address"},
+                  {id:"zip",iconName:"pin",label:"ZIP Code"},
+                  {id:"city",iconName:"city",label:"City"}
                 ].map(m=>(
                   <button 
                     key={m.id} 
@@ -715,10 +917,10 @@ export default function TrustButVerify(){
                       cursor:"pointer",
                       boxShadow:inputMode===m.id?"0 1px 4px rgba(81,176,230,0.12)":"none",
                       transition:"all 0.2s",
-                      display:"flex",alignItems:"center",justifyContent:"center",gap:3
+                      display:"flex",alignItems:"center",justifyContent:"center",gap:4
                     }}
                   >
-                    <span>{m.icon}</span>{m.label}
+                    <Icon name={m.iconName} size={14} color={inputMode===m.id?"#51B0E6":"#A6A8AB"}/>{m.label}
                   </button>
                 ))}
               </div>
@@ -726,7 +928,7 @@ export default function TrustButVerify(){
               {/* Privacy Notice */}
               {inputMode==="address"&&(
                 <div style={{display:"flex",alignItems:"center",gap:6,background:"#F0FAF4",border:"1px solid #1E8A4C33",borderRadius:8,padding:"6px 12px",maxWidth:320,margin:"0 auto 9px",fontSize:10,color:"#276749"}}>
-                  🔒 Your address is never stored. Used only to match your water utility.
+                  <Icon name="lock" size={14} color="#1E8A4C"/> Your address is never stored. Used only to match your water utility.
                 </div>
               )}
               
@@ -748,9 +950,9 @@ export default function TrustButVerify(){
                 <button 
                   onClick={startScan}
                   data-testid="scan-btn"
-                  style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"13px 16px",fontSize:11,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}
+                  style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"13px 16px",fontSize:11,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5}}
                 >
-                  {inputMode==="address"?"SCAN 🏠":inputMode==="zip"?"SCAN 📍":"TEST →"}
+                  SCAN <Icon name="scan" size={14} color="#FFFFFF"/>
                 </button>
               </div>
               <div style={{fontSize:9,color:"#C5C6C8",marginTop:7}}>Address · ZIP · City · EPA SDWIS + EWG Database</div>
@@ -797,12 +999,15 @@ export default function TrustButVerify(){
             {/* Animated Water Drop */}
             <div style={{position:"relative",width:80,height:80,margin:"0 auto 22px"}}>
               <div style={{position:"absolute",inset:0,borderRadius:"50%",background:"#51B0E620",border:"2px solid #51B0E644",animation:"ripple 1.4s ease-out infinite"}}/>
-              <div style={{width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,position:"relative",zIndex:1}}>💧</div>
+              <div style={{width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",zIndex:1}}>
+                <Icon name="droplet" size={36} color="#FFFFFF"/>
+              </div>
             </div>
             
-            <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:18}}>
-              {inputMode==="address"?"🏠 Scanning your address...":
-               inputMode==="zip"?"📍 Scanning ZIP code...":
+            <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:18,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              <Icon name={inputMode==="address"?"home":inputMode==="zip"?"pin":"city"} size={20} color="#51B0E6"/>
+              {inputMode==="address"?"Scanning your address...":
+               inputMode==="zip"?"Scanning ZIP code...":
                `Analyzing ${input}`}
             </h2>
             
@@ -823,7 +1028,9 @@ export default function TrustButVerify(){
                     transition:"all 0.3s"
                   }}
                 >
-                  <span>{i<scanStep?"✓":i===scanStep?"◌":"○"}</span>
+                  {i<scanStep?<Icon name="check" size={16} color="#1E8A4C"/>:
+                   i===scanStep?<span style={{width:16,height:16,borderRadius:"50%",border:"2px solid #51B0E6",borderTopColor:"transparent",animation:"spin 1s linear infinite",display:"inline-block"}}/>:
+                   <span style={{width:16,height:16,borderRadius:"50%",border:"2px solid #C5C6C8",display:"inline-block"}}/>}
                   {msg}
                 </div>
               ))}
@@ -876,15 +1083,18 @@ export default function TrustButVerify(){
             
             {/* High Risk Alert */}
             {highRisk.length>0&&(
-              <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderLeft:"4px solid #D93025",borderRadius:10,padding:"11px 14px",marginBottom:10,animation:"slideUp 0.4s 0.1s ease forwards",opacity:0}} data-testid="high-risk-alert">
-                <div style={{fontSize:10,fontWeight:800,color:"#D93025",marginBottom:3}}>⚠ {highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length>1?"S":""} FOUND</div>
-                <div style={{fontSize:10,color:"#742A2A"}}>{highRisk.map(c=>c.name).join(" · ")} — levels exceed health guidelines</div>
+              <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderLeft:"4px solid #D93025",borderRadius:10,padding:"11px 14px",marginBottom:10,animation:"slideUp 0.4s 0.1s ease forwards",opacity:0,display:"flex",alignItems:"flex-start",gap:10}} data-testid="high-risk-alert">
+                <Icon name="hazard" size={18} color="#D93025"/>
+                <div>
+                  <div style={{fontSize:10,fontWeight:800,color:"#D93025",marginBottom:3}}>{highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length>1?"S":""} FOUND</div>
+                  <div style={{fontSize:10,color:"#742A2A"}}>{highRisk.map(c=>c.name).join(" · ")} — levels exceed health guidelines</div>
+                </div>
               </div>
             )}
             
             {/* Weekly Alerts */}
             <div style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 14px",display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
-              <div style={{fontSize:20}}>🔔</div>
+              <Icon name="bell" size={22} color="#51B0E6"/>
               <div style={{flex:1}}>
                 <div style={{fontSize:11,fontWeight:800,color:"#FFFFFF",marginBottom:1}}>Weekly Water Report — {data.city?.split(",")[0]}</div>
                 <div style={{fontSize:9,color:"#94A3B8"}}>Enable push alerts when contamination levels change</div>
@@ -1057,16 +1267,18 @@ export default function TrustButVerify(){
             
             {/* Learn Cards */}
             {[
-              {icon:"☣️",title:"PFAS: Forever Chemicals",desc:"Found in 45% of US tap water. Linked to cancer, immune disruption, and reproductive harm. EPA set new limits at 4 ppt in 2024 — 1,000x stricter than before.",tag:"HIGH RISK",tc:"#D93025"},
-              {icon:"🔴",title:"Lead: No Safe Level",desc:"Irreversible neurological damage in children under 6. From aging pipes in pre-1986 homes. Chicago has 400,000+ lead service lines.",tag:"HIGH RISK",tc:"#D93025"},
-              {icon:"🟠",title:"Chromium-6 (Erin Brockovich)",desc:"Found in 75% of US tap water. CA health goal is 0.02 ppb — most cities test 10–25x this level.",tag:"HIGH RISK",tc:"#D93025"},
-              {icon:"🟡",title:"Microplastics",desc:"Found in 94% of US tap water, human blood, lungs, placentas and breast milk. Average American ingests 5 grams per week.",tag:"EMERGING",tc:"#F29423"},
-              {icon:"💧",title:"Why Bottled Water Isn't the Answer",desc:"70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.",tag:"MYTH",tc:"#51B0E6"},
-              {icon:"✅",title:"How Reverse Osmosis Works",desc:"Filters to 0.0001 microns — smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.",tag:"SOLUTION",tc:"#1E8A4C"}
+              {iconName:"hazard",title:"PFAS: Forever Chemicals",desc:"Found in 45% of US tap water. Linked to cancer, immune disruption, and reproductive harm. EPA set new limits at 4 ppt in 2024 — 1,000x stricter than before.",tag:"HIGH RISK",tc:"#D93025"},
+              {iconName:"alert",title:"Lead: No Safe Level",desc:"Irreversible neurological damage in children under 6. From aging pipes in pre-1986 homes. Chicago has 400,000+ lead service lines.",tag:"HIGH RISK",tc:"#D93025"},
+              {iconName:"atom",title:"Chromium-6 (Erin Brockovich)",desc:"Found in 75% of US tap water. CA health goal is 0.02 ppb — most cities test 10–25x this level.",tag:"HIGH RISK",tc:"#D93025"},
+              {iconName:"flask",title:"Microplastics",desc:"Found in 94% of US tap water, human blood, lungs, placentas and breast milk. Average American ingests 5 grams per week.",tag:"EMERGING",tc:"#F29423"},
+              {iconName:"droplet",title:"Why Bottled Water Isn't the Answer",desc:"70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.",tag:"MYTH",tc:"#51B0E6"},
+              {iconName:"filter",title:"How Reverse Osmosis Works",desc:"Filters to 0.0001 microns — smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.",tag:"SOLUTION",tc:"#1E8A4C"}
             ].map((item,i)=>(
               <div key={i} style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:12,padding:"14px",marginBottom:8}} data-testid={`learn-card-${i}`}>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <div style={{fontSize:22,flexShrink:0}}>{item.icon}</div>
+                  <div style={{width:36,height:36,borderRadius:8,background:"#FFFFFF",border:`1px solid ${item.tc}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <Icon name={item.iconName} size={20} color={item.tc}/>
+                  </div>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5,flexWrap:"wrap"}}>
                       <div style={{fontSize:12,fontWeight:800,color:"#0A1A2E"}}>{item.title}</div>
@@ -1080,7 +1292,7 @@ export default function TrustButVerify(){
             
             {/* Bottom CTA */}
             <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:14,padding:"18px",textAlign:"center",color:"#FFFFFF",marginTop:6}}>
-              <div style={{fontSize:18,marginBottom:6}}>💧</div>
+              <div style={{marginBottom:6}}><Icon name="droplet" size={28} color="#51B0E6"/></div>
               <div style={{fontSize:14,fontWeight:800,marginBottom:5}}>Knowledge is only useful if you act on it.</div>
               <div style={{fontSize:11,color:"#94A3B8",marginBottom:12}}>The Home WTR Hub removes everything in this library — 1,000+ contaminants.</div>
               <button style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px 22px",borderRadius:10,fontSize:11,fontWeight:800,cursor:"pointer"}}>
