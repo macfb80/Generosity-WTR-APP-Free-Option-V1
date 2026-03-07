@@ -230,8 +230,8 @@ function WTRHubAnimation({contaminants,active}){
         </div>
       )}
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,marginTop:8}}>
-        {[["1,000+","Contaminants"],["99%+","PFAS"],["99%+","Heavy Metals"],["9+ pH","Alkaline"]].map(([v,l])=>(
-          <div key={v} style={{background:"#EDF6FC",borderRadius:6,padding:"7px 3px",textAlign:"center"}}>
+        {[["1,000+","Contaminants"],["99%+","PFAS"],["99%+","Heavy Metals"],["9+ pH","Alkaline"]].map(([v,l],i)=>(
+          <div key={`stat-${i}`} style={{background:"#EDF6FC",borderRadius:6,padding:"7px 3px",textAlign:"center"}}>
             <div style={{fontSize:11,fontWeight:900,color:"#51B0E6",lineHeight:1}}>{v}</div>
             <div style={{fontSize:7,color:"#A6A8AB",marginTop:1}}>{l}</div>
           </div>
