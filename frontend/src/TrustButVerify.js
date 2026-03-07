@@ -686,12 +686,6 @@ export default function TrustButVerify(){
         {tab==="home"&&phase==="landing"&&(
           <div style={{padding:"28px 20px 20px"}} data-testid="home-landing">
             <div style={{textAlign:"center",marginBottom:24}}>
-              {/* Badge */}
-              <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"#EDF6FC",border:"1px solid #C8E2F4",borderRadius:20,padding:"5px 12px",marginBottom:14,fontSize:10,fontWeight:700,color:"#2A8FCA",letterSpacing:"0.8px"}}>
-                <span style={{width:5,height:5,borderRadius:"50%",background:"#1E8A4C",display:"inline-block"}}/>
-                FREE · NO SIGNUP · EPA + EWG DATA
-              </div>
-              
               {/* Headline */}
               <h1 style={{fontSize:28,fontWeight:900,color:"#0A1A2E",lineHeight:1.1,marginBottom:10,letterSpacing:"-1px"}}>
                 What's <span style={{color:"#51B0E6"}}>actually</span> in<br/>your water?
@@ -774,25 +768,6 @@ export default function TrustButVerify(){
                   <div style={{fontSize:9,color:"#A6A8AB",marginTop:4,lineHeight:1.3}}>{t}</div>
                 </div>
               ))}
-            </div>
-            
-            {/* Who Is This For - White card with light gray items */}
-            <div style={{background:"#FFFFFF",borderRadius:14,padding:"14px",border:"1px solid #C8E2F4",marginBottom:18}}>
-              <div style={{fontSize:9,fontWeight:800,color:"#51B0E6",letterSpacing:"1.5px",marginBottom:10}}>WHO IS THIS FOR?</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                {[
-                  {icon:"👩‍👧",label:"Moms & Families",desc:"Know what your kids drink every day"},
-                  {icon:"🏡",label:"Homeowners",desc:"Understand your home water quality"},
-                  {icon:"🧬",label:"Biohackers",desc:"Optimize every input — including water"},
-                  {icon:"💪",label:"Wellness",desc:"Contaminants undermine every health goal"}
-                ].map(item=>(
-                  <div key={item.label} style={{textAlign:"center",padding:"11px 7px",borderRadius:10,background:"#F0F1F3",border:"1px solid #E4F1FA"}}>
-                    <div style={{fontSize:20,marginBottom:3}}>{item.icon}</div>
-                    <div style={{fontSize:10,fontWeight:800,color:"#0A1A2E"}}>{item.label}</div>
-                    <div style={{fontSize:9,color:"#A6A8AB",marginTop:2}}>{item.desc}</div>
-                  </div>
-                ))}
-              </div>
             </div>
             
             {/* Popular Cities */}
