@@ -536,7 +536,7 @@ function HealthCalc({city,riskScore}){
 
 // ─── NAVIGATION ICON COMPONENT ───────────────────────────────────────────────
 function NavIcon({id,active}){
-  const ic=active?"#51B0E6":"#FFFFFF";
+  const ic=active?"#51B0E6":"#A6A8AB";
   const glow=active?"#51B0E620":"transparent";
   
   if(id==="home") return(
@@ -664,8 +664,8 @@ export default function TrustButVerify(){
         button:active{opacity:0.85;transform:scale(0.98)}
       `}</style>
 
-      {/* HEADER - Generosity Gray */}
-      <div style={{background:"#A6A8AB",borderBottom:"none",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(166,168,171,0.25)"}} data-testid="app-header">
+      {/* HEADER - White */}
+      <div style={{background:"#FFFFFF",borderBottom:"1px solid #E4F1FA",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 8px rgba(166,168,171,0.12)"}} data-testid="app-header">
         <img 
           src="https://customer-assets.emergentagent.com/job_c7b8994c-67d7-46b0-8aea-fc2d9b86ff07/artifacts/yl6dfcfp_Emergent%20App%20Logos%201200%20x%20300%20-%203.PNG" 
           alt="Generosity Water Intelligence" 
@@ -1093,9 +1093,9 @@ export default function TrustButVerify(){
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* BOTTOM NAVIGATION BAR - Generosity Gray */}
+      {/* BOTTOM NAVIGATION BAR - White */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"#A6A8AB",borderTop:"1px solid rgba(255,255,255,0.2)",display:"flex",zIndex:200,boxShadow:"0 -4px 24px rgba(166,168,171,0.35)"}} data-testid="bottom-nav">
+      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"#FFFFFF",borderTop:"1px solid #E4F1FA",display:"flex",zIndex:200,boxShadow:"0 -4px 12px rgba(166,168,171,0.15)"}} data-testid="bottom-nav">
         {navTabs.map(t=>{
           const active=tab===t.id;
           return(
@@ -1123,13 +1123,13 @@ export default function TrustButVerify(){
                   color:"#fff",fontSize:7,
                   display:"flex",alignItems:"center",justifyContent:"center",
                   fontWeight:900,padding:"0 3px",
-                  border:"1.5px solid #A6A8AB"
+                  border:"1.5px solid #FFFFFF"
                 }}>
                   {t.badge}
                 </div>
               )}
               <NavIcon id={t.id} active={active}/>
-              <div style={{fontSize:9,fontWeight:active?800:500,color:active?"#51B0E6":"#FFFFFF",letterSpacing:"0.3px",lineHeight:1}}>{t.label}</div>
+              <div style={{fontSize:9,fontWeight:active?800:500,color:active?"#51B0E6":"#A6A8AB",letterSpacing:"0.3px",lineHeight:1}}>{t.label}</div>
               {active&&<div style={{position:"absolute",bottom:3,width:4,height:4,borderRadius:"50%",background:"#51B0E6",boxShadow:"0 0 6px #51B0E6"}}/>}
             </button>
           );
