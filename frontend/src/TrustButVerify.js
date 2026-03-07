@@ -650,14 +650,12 @@ export default function TrustButVerify(){
       `}</style>
 
       {/* HEADER */}
-      <div style={{background:"#FFFFFF",borderBottom:"1px solid #C8E2F4",padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(81,176,230,0.07)"}} data-testid="app-header">
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:32,height:32,borderRadius:"50%",border:"2px solid #51B0E6",display:"flex",alignItems:"center",justifyContent:"center",color:"#51B0E6",fontSize:14}}>◉</div>
-          <div>
-            <div style={{fontSize:14,fontWeight:900,color:"#0A1A2E",letterSpacing:"-0.3px"}}>Generosity™</div>
-            <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700}}>TRUST BUT VERIFY™</div>
-          </div>
-        </div>
+      <div style={{background:"#0A1A2E",borderBottom:"1px solid #C8E2F4",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(81,176,230,0.15)"}} data-testid="app-header">
+        <img 
+          src="https://customer-assets.emergentagent.com/job_c7b8994c-67d7-46b0-8aea-fc2d9b86ff07/artifacts/yl6dfcfp_Emergent%20App%20Logos%201200%20x%20300%20-%203.PNG" 
+          alt="Generosity Water Intelligence" 
+          style={{height:36,width:"auto"}}
+        />
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {data&&<div style={{background:riskScore>66?"#FFF3F2":riskScore>33?"#FFF8EE":"#F0FAF4",border:`1px solid ${riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C"}33`,color:riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C",padding:"4px 10px",borderRadius:20,fontSize:10,fontWeight:800}} data-testid="header-risk-score">Score: {riskScore}</div>}
           <div style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",padding:"5px 12px",borderRadius:20,fontSize:10,fontWeight:800}}>FREE</div>
