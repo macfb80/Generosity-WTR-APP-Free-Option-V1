@@ -1,21 +1,36 @@
 import { useState, useEffect, useRef } from "react";
 
-// ─── GENEROSITY™ OFFICIAL BRAND PALETTE ─────────────────────────────────────
+// ─── GENEROSITY™ OFFICIAL BRAND PALETTE (Updated) ────────────────────────────
+// White background (#FFFFFF) - clean, professional look
+// Primary Blue (#51B0E6, Pantone 2915 U) - key highlights
+// Secondary Gray (#A6A8AB, Pantone Cool Gray 6) - secondary text
+// Light gray (#F0F1F3) - card backgrounds
 const B = { 
-  blue:"#51B0E6", 
-  blueDark:"#2A8FCA", 
-  blueLight:"#EDF6FC", 
-  blueMid:"#DCEEF9", 
-  gray:"#A6A8AB", 
-  grayDark:"#6E7073", 
-  grayMid:"#C5C6C8", 
-  lightGray:"#F0F1F3", 
-  white:"#FFFFFF", 
-  offWhite:"#F7F9FB", 
+  // Primary Colors
+  blue:"#51B0E6",        // Pantone 2915 U - Primary highlight
+  blueDark:"#2A8FCA",    // Darker blue for gradients
+  blueLight:"#EDF6FC",   // Light blue tint
+  blueMid:"#DCEEF9",     // Mid blue for backgrounds
+  
+  // Grays (Generosity Colorway)
+  gray:"#A6A8AB",        // Pantone Cool Gray 6 - Secondary text
+  grayDark:"#6E7073",    // Dark gray for emphasis
+  grayMid:"#C5C6C8",     // Mid gray
+  lightGray:"#F0F1F3",   // Card backgrounds
+  
+  // Whites
+  white:"#FFFFFF",       // Primary background
+  offWhite:"#F7F9FB",    // Subtle off-white
+  
+  // Legacy Navy (used sparingly for contrast)
   navy:"#0A1A2E", 
   navyMid:"#0D2244", 
+  
+  // Borders
   border:"#C8E2F4", 
   borderLight:"#E4F1FA", 
+  
+  // Status Colors
   danger:"#D93025", 
   warning:"#F29423", 
   ok:"#1E8A4C", 
@@ -407,8 +422,8 @@ function BottleScanView({onBridge}){
           <div style={{fontSize:11,color:"#742A2A",lineHeight:1.6}}>{brand.concern}</div>
         </div>
         
-        {/* Bridge to Home Water Test */}
-        <div style={{background:"#EDF6FC",border:"1px solid #C8E2F4",borderRadius:12,padding:"14px"}}>
+        {/* Bridge to Home Water Test - Light gray */}
+        <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:12,padding:"14px"}}>
           <div style={{fontSize:11,fontWeight:800,color:"#0A1A2E",marginBottom:6}}>💡 The real solution isn't a better bottle — it's filtered tap water.</div>
           <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.6,marginBottom:10}}>The Home WTR Hub removes 99%+ of contaminants at your tap — cleaner than any bottled water at $0.003/gallon vs $1.00+/bottle.</div>
           <button 
@@ -450,7 +465,7 @@ function HealthCalc({city,riskScore}){
     <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,padding:"16px",marginBottom:14}} data-testid="health-calculator">
       <div style={{fontSize:10,fontWeight:800,color:"#A6A8AB",letterSpacing:"1.5px",marginBottom:12}}>LIFETIME EXPOSURE CALCULATOR</div>
       
-      {/* Persona Selection */}
+      {/* Persona Selection - Light gray unselected buttons */}
       <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}} data-testid="persona-selector">
         {personas.map(p=>(
           <button 
@@ -458,8 +473,8 @@ function HealthCalc({city,riskScore}){
             onClick={()=>setPersona(p.id)} 
             data-testid={`persona-${p.id}`}
             style={{
-              background:persona===p.id?"#EDF6FC":"#F7F9FB",
-              border:`1px solid ${persona===p.id?"#51B0E6":"#C8E2F4"}`,
+              background:persona===p.id?"#EDF6FC":"#F0F1F3",
+              border:`1px solid ${persona===p.id?"#51B0E6":"#E4F1FA"}`,
               borderRadius:20,padding:"5px 10px",fontSize:10,cursor:"pointer",
               color:persona===p.id?"#51B0E6":"#A6A8AB",
               fontWeight:persona===p.id?800:400,
@@ -635,7 +650,7 @@ export default function TrustButVerify(){
   ];
   
   return(
-    <div style={{minHeight:"100vh",background:"#F7F9FB",fontFamily:"'Nunito','Helvetica Neue',sans-serif",maxWidth:480,margin:"0 auto",position:"relative",display:"flex",flexDirection:"column"}} data-testid="trust-but-verify-app">
+    <div style={{minHeight:"100vh",background:"#FFFFFF",fontFamily:"'Nunito','Helvetica Neue',sans-serif",maxWidth:480,margin:"0 auto",position:"relative",display:"flex",flexDirection:"column"}} data-testid="trust-but-verify-app">
       
       {/* GLOBAL STYLES */}
       <style>{`
@@ -649,8 +664,8 @@ export default function TrustButVerify(){
         button:active{opacity:0.85;transform:scale(0.98)}
       `}</style>
 
-      {/* HEADER */}
-      <div style={{background:"#0A1A2E",borderBottom:"1px solid #C8E2F4",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(81,176,230,0.15)"}} data-testid="app-header">
+      {/* HEADER - Dark navy with logo */}
+      <div style={{background:"#0A1A2E",borderBottom:"none",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 12px rgba(10,26,46,0.15)"}} data-testid="app-header">
         <img 
           src="https://customer-assets.emergentagent.com/job_c7b8994c-67d7-46b0-8aea-fc2d9b86ff07/artifacts/yl6dfcfp_Emergent%20App%20Logos%201200%20x%20300%20-%203.PNG" 
           alt="Generosity Water Intelligence" 
@@ -747,21 +762,21 @@ export default function TrustButVerify(){
               <div style={{fontSize:9,color:"#C5C6C8",marginTop:7}}>Address · ZIP · City · EPA SDWIS + EWG Database</div>
             </div>
             
-            {/* Stats Row */}
+            {/* Stats Row - Light gray cards */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:18}}>
               {[
                 ["200M+","Americans exposed to PFAS"],
                 ["94%","tap water has microplastics"],
                 ["$0","to get your report"]
               ].map(([n,t])=>(
-                <div key={n} style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:10,padding:"13px 8px",textAlign:"center",boxShadow:"0 2px 8px rgba(81,176,230,0.06)"}}>
+                <div key={n} style={{background:"#F0F1F3",border:"1px solid #C8E2F4",borderRadius:10,padding:"13px 8px",textAlign:"center",boxShadow:"0 2px 8px rgba(166,168,171,0.08)"}}>
                   <div style={{fontSize:19,fontWeight:900,color:"#51B0E6",lineHeight:1}}>{n}</div>
                   <div style={{fontSize:9,color:"#A6A8AB",marginTop:4,lineHeight:1.3}}>{t}</div>
                 </div>
               ))}
             </div>
             
-            {/* Who Is This For */}
+            {/* Who Is This For - White card with light gray items */}
             <div style={{background:"#FFFFFF",borderRadius:14,padding:"14px",border:"1px solid #C8E2F4",marginBottom:18}}>
               <div style={{fontSize:9,fontWeight:800,color:"#51B0E6",letterSpacing:"1.5px",marginBottom:10}}>WHO IS THIS FOR?</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -771,7 +786,7 @@ export default function TrustButVerify(){
                   {icon:"🧬",label:"Biohackers",desc:"Optimize every input — including water"},
                   {icon:"💪",label:"Wellness",desc:"Contaminants undermine every health goal"}
                 ].map(item=>(
-                  <div key={item.label} style={{textAlign:"center",padding:"11px 7px",borderRadius:10,background:"#F7F9FB",border:"1px solid #C8E2F4"}}>
+                  <div key={item.label} style={{textAlign:"center",padding:"11px 7px",borderRadius:10,background:"#F0F1F3",border:"1px solid #E4F1FA"}}>
                     <div style={{fontSize:20,marginBottom:3}}>{item.icon}</div>
                     <div style={{fontSize:10,fontWeight:800,color:"#0A1A2E"}}>{item.label}</div>
                     <div style={{fontSize:9,color:"#A6A8AB",marginTop:2}}>{item.desc}</div>
@@ -951,7 +966,7 @@ export default function TrustButVerify(){
                 <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"1px"}}>{data.city?.split(",")[0].toUpperCase()}</div>
               </div>
               {data.contaminants.map((c,i)=>(
-                <div key={c.name} style={{display:"grid",gridTemplateColumns:"1fr auto auto",padding:"9px 14px",gap:8,alignItems:"center",borderBottom:"1px solid #C8E2F4",background:i%2===0?"#FFFFFF":"#F7F9FB"}}>
+                <div key={c.name} style={{display:"grid",gridTemplateColumns:"1fr auto auto",padding:"9px 14px",gap:8,alignItems:"center",borderBottom:"1px solid #E4F1FA",background:i%2===0?"#FFFFFF":"#F0F1F3"}}>
                   <div>
                     <span style={{fontSize:10,fontWeight:700,color:"#0A1A2E"}}>{c.name}</span>
                     <span style={{fontSize:8,color:"#A6A8AB",marginLeft:5}}>{c.category}</span>
@@ -976,8 +991,8 @@ export default function TrustButVerify(){
               </div>
             )}
             
-            {/* Email Capture */}
-            <div style={{background:"linear-gradient(135deg,#51B0E611,#DCEEF9)",border:"1px solid #C8E2F4",borderRadius:14,padding:"16px",marginBottom:12}} data-testid="email-capture">
+            {/* Email Capture - Light gray background */}
+            <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:14,padding:"16px",marginBottom:12}} data-testid="email-capture">
               <div style={{fontSize:12,fontWeight:900,color:"#0A1A2E",marginBottom:4}}>Get your full report + $100 off</div>
               <div style={{fontSize:10,color:"#A6A8AB",marginBottom:12,lineHeight:1.5}}>Receive the complete {data.city?.split(",")[0]} analysis and an exclusive offer.</div>
               {!submitted?(
@@ -1027,8 +1042,8 @@ export default function TrustButVerify(){
               </div>
             </div>
             
-            {/* Dealer/Partner CTA */}
-            <div style={{background:"#EDF6FC",border:"1px solid #C8E2F4",borderRadius:10,padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+            {/* Dealer/Partner CTA - Light gray background */}
+            <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:10,padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
               <div>
                 <div style={{fontSize:10,fontWeight:800,color:"#0A1A2E"}}>Are you a Dealer or Distributor?</div>
                 <div style={{fontSize:9,color:"#A6A8AB",marginTop:1}}>Use Trust But Verify™ as your sales tool.</div>
@@ -1074,7 +1089,7 @@ export default function TrustButVerify(){
               {icon:"💧",title:"Why Bottled Water Isn't the Answer",desc:"70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.",tag:"MYTH",tc:"#51B0E6"},
               {icon:"✅",title:"How Reverse Osmosis Works",desc:"Filters to 0.0001 microns — smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.",tag:"SOLUTION",tc:"#1E8A4C"}
             ].map((item,i)=>(
-              <div key={i} style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:12,padding:"14px",marginBottom:8}} data-testid={`learn-card-${i}`}>
+              <div key={i} style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:12,padding:"14px",marginBottom:8}} data-testid={`learn-card-${i}`}>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <div style={{fontSize:22,flexShrink:0}}>{item.icon}</div>
                   <div style={{flex:1}}>
