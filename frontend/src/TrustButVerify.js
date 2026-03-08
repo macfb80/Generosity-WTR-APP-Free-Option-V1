@@ -1136,13 +1136,13 @@ export default function TrustButVerify(){
             {/* CTA Section */}
             <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:16,padding:"22px 18px",textAlign:"center",color:"#FFFFFF",marginBottom:10}}>
               <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:7}}>THE SOLUTION</div>
-              <h3 style={{fontSize:19,fontWeight:900,marginBottom:7,letterSpacing:"-0.5px"}}>Trust AND Verify Your Water.</h3>
+              <h3 style={{fontSize:19,fontWeight:900,marginBottom:7,letterSpacing:"-0.5px"}}>Trust but Verify™ your Water.</h3>
               <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
                 The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
               </p>
-              <button style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10}}>
+              <a href="https://generositywtr.myshopify.com/products/home-hydration-hub" target="_blank" rel="noopener noreferrer" style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
                 GET THE HOME WTR HUB →
-              </button>
+              </a>
               <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
                 {["30-Day Guarantee","30-Min Install","Financing Available"].map(t=>(
                   <div key={t} style={{fontSize:9,color:"#64748B",display:"flex",alignItems:"center",gap:3}}>
@@ -1158,9 +1158,9 @@ export default function TrustButVerify(){
                 <div style={{fontSize:10,fontWeight:800,color:"#0A1A2E"}}>Are you a Dealer or Distributor?</div>
                 <div style={{fontSize:9,color:"#A6A8AB",marginTop:1}}>Use Trust But Verify™ as your sales tool.</div>
               </div>
-              <button style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #51B0E6",padding:"7px 12px",borderRadius:8,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>
+              <a href="https://generositywater.com/generosity-partners-paywall" target="_blank" rel="noopener noreferrer" style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #51B0E6",padding:"7px 12px",borderRadius:8,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",textDecoration:"none"}}>
                 PARTNER PORTAL →
-              </button>
+              </a>
             </div>
           </div>
         )}
