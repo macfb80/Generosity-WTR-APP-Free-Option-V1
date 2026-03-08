@@ -26,27 +26,32 @@ Build an investor demo web application called "Trust But Verify™" (formerly WT
 ```
 /app/frontend/
 ├── src/
-│   ├── App.js          # Entry point (imports TrustButVerify)
-│   ├── TrustButVerify.js   # Main component (1150+ lines)
-│   └── components/ui/  # Shadcn UI components (unused for this build)
+│   ├── App.js                    # Entry point (imports TrustButVerify)
+│   ├── TrustButVerify.js         # Main component (~1280 lines)
+│   └── components/
+│       ├── BottleScanView.js     # NEW: Complete water quality report system (~850 lines)
+│       └── ui/                   # Shadcn UI components
 ```
 
 ## Data Model (Hardcoded)
 ### CITY_DATA (7 cities)
-- Austin, TX
-- Chicago, IL
-- Los Angeles, CA
-- New York, NY
-- Denver, CO
-- Houston, TX
-- Phoenix, AZ
+- Austin, TX | Chicago, IL | Los Angeles, CA | New York, NY | Denver, CO | Houston, TX | Phoenix, AZ
 
 Each contains: utility, source, TDS, pH, hardness, contaminants[]
 
-### BOTTLE_BRANDS (7 brands)
-- Evian, Dasani, Aquafina, Poland Spring, Fiji Water, Smart Water, Voss
+### BOTTLE_BRANDS (16 brands - Clinical Water Quality Reports)
+**NATIONAL:** Dasani, Aquafina, smartwater, Topo Chico, Poland Spring, Pure Life, Crystal Geyser, Kirkland Signature
+**PREMIUM:** FIJI Water, evian, VOSS, Icelandic Glacial, Liquid Death, Proud Source  
+**WELLNESS:** Essentia
 
-Each contains: origin, TDS, pH, fluoride, microplastics, pfas_risk, score, concern
+Each brand contains comprehensive data:
+- Parent company, sourceType, sourceName, treatment process
+- pH, TDS (ppm), hardness, minerals (if applicable), additives
+- reportYear, reportSource, reportUrl
+- Detailed contaminants[] with: name, detected, level, fda_limit, risk, category, health impact
+- recalls[], lawsuits[], violations[]
+- ewg_grade, transparency rating, risk_score, key_concern
+- wtr_hub_statement (comparison marketing)
 
 ### ZIP_MAP
 Maps ZIP codes to cities for address resolution
@@ -76,9 +81,17 @@ Maps ZIP codes to cities for address resolution
 10. ✅ Bottom nav dark bar with SVG icons + active glow state
 
 ## Testing Status
-- **Test Date:** 2025-03-07
-- **Success Rate:** 100% (11/11 features)
-- **Test Report:** /app/test_reports/iteration_2.json
+- **Test Date:** 2025-03-08
+- **Success Rate:** 100% (10/10 features for Bottle Scan)
+- **Test Report:** /app/test_reports/iteration_3.json
+
+## Investor Demo Flow - Bottle Scan Feature
+1. ✅ Topo Chico → Score 76, PFAS 9.76 ppt HIGH (2,440x EPA limit)
+2. ✅ FIJI Water → Score 98, FDA RECALL card (1.9M bottles, manganese + bacteria)
+3. ✅ Crystal Geyser → Score 98, CRIMINAL CONVICTION violation (arsenic discharge 2021)
+4. ✅ Dasani → Score 76, VERY HIGH microplastics (~325/L per Orb Media)
+5. ✅ Icelandic Glacial → Score 15, EWG grade A, all green (contrast demo)
+6. ✅ Proud Source → Score 10, aluminum bottle = NONE microplastics (cleanest)
 
 ## Known Limitations
 - All data is hardcoded (works offline)
@@ -115,6 +128,23 @@ Maps ZIP codes to cities for address resolution
 ---
 
 ## Changelog
+
+### 2025-03-08 - Complete Bottle Scan Rebuild (Clinical Water Quality Reports)
+- **NEW:** Rebuilt BottleScanView.js component with 16 comprehensive brand profiles
+- **NEW:** Full water quality report UI with 9 sections:
+  1. Report Header (dark navy gradient, risk score, EWG grade)
+  2. Water Profile Grid (pH, TDS, Hardness, Treatment)
+  3. Minerals Card (when available)
+  4. Contaminant Analysis Table (expandable rows with health info)
+  5. Regulatory History Card (recalls, lawsuits, violations)
+  6. Key Concern (red danger card)
+  7. Transparency Rating (EWG grade + link to report)
+  8. WTR Hub Bridge (comparison + CTA to Home tab)
+  9. Data Footer (source citations)
+- **NEW:** Brand categories: NATIONAL (8), PREMIUM (6), WELLNESS (1)
+- **NEW:** Search functionality with real-time filtering
+- **DATA:** Sourced from FDA quality reports, Consumer Reports, EWG database
+- Passed all 10 frontend tests (iteration_3.json)
 
 ### 2025-03-07 - Investor Demo Complete
 - Built complete Trust But Verify™ app from user-provided source code
