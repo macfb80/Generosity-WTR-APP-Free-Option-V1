@@ -777,6 +777,12 @@ function Icon({name, size=20, color="#A6A8AB", active=false}) {
         <line x1="12" y1="5" x2="12" y2="19" stroke={ic} strokeWidth="1.5"/>
       </svg>
     ),
+    user: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <path d="M4 20C4 16.69 7.58 14 12 14C16.42 14 20 16.69 20 20" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
   };
   
   return icons[name] || null;
@@ -875,7 +881,12 @@ export default function TrustButVerify(){
         />
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {data&&<div style={{background:riskScore>66?"#FFF3F2":riskScore>33?"#FFF8EE":"#F0FAF4",border:`1px solid ${riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C"}33`,color:riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C",padding:"4px 10px",borderRadius:20,fontSize:10,fontWeight:800}} data-testid="header-risk-score">Score: {riskScore}</div>}
-          <div style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",padding:"5px 12px",borderRadius:20,fontSize:10,fontWeight:800}}>FREE</div>
+          <button 
+            style={{width:36,height:36,borderRadius:"50%",background:"#F0F1F3",border:"1px solid #E4F1FA",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}
+            data-testid="profile-btn"
+          >
+            <Icon name="user" size={20} color="#A6A8AB"/>
+          </button>
         </div>
       </div>
 
