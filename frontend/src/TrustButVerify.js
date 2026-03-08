@@ -500,100 +500,186 @@ function BottleScanView({onBridge}){
     };
   }, []);
   
-  // INTRO VIEW
+  // INTRO VIEW - Production Ready for Investor Demo
   if(mode==="intro") return(
-    <div style={{padding:"24px 20px",textAlign:"center"}} data-testid="bottle-scan-intro">
-      <div style={{width:60,height:60,borderRadius:"50%",background:"#F0F1F3",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
-        <Icon name="scan" size={28} color="#51B0E6"/>
-      </div>
-      <h3 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:8}}>Scan Your Bottle</h3>
-      <p style={{fontSize:12,color:"#A6A8AB",lineHeight:1.6,marginBottom:20,maxWidth:300,margin:"0 auto 20px"}}>
-        Point your camera at any water bottle barcode. We'll analyze it using EPA, EWG, and Title 21 compliance data.
-      </p>
-      <div style={{display:"flex",flexDirection:"column",gap:9,maxWidth:300,margin:"0 auto 20px"}}>
+    <div style={{padding:"20px"}} data-testid="bottle-scan-intro">
+      {/* Main Camera Button - Large and Prominent */}
+      <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:20,padding:"28px 20px",marginBottom:16,textAlign:"center"}}>
+        <div style={{width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",boxShadow:"0 8px 32px rgba(81,176,230,0.4)"}}>
+          <Icon name="camera" size={36} color="#FFFFFF"/>
+        </div>
+        <h3 style={{fontSize:20,fontWeight:900,color:"#FFFFFF",marginBottom:6}}>Scan Any Water Bottle</h3>
+        <p style={{fontSize:12,color:"#94A3B8",lineHeight:1.5,marginBottom:20,maxWidth:280,margin:"0 auto 20px"}}>
+          Point your camera at the barcode to instantly analyze water quality
+        </p>
+        
         <button 
           onClick={startCameraScan} 
           data-testid="scan-camera-btn"
-          style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"14px 20px",borderRadius:10,fontSize:13,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
+          style={{
+            background:"#FFFFFF",
+            color:"#0A1A2E",
+            border:"none",
+            padding:"16px 40px",
+            borderRadius:12,
+            fontSize:15,
+            fontWeight:900,
+            cursor:"pointer",
+            display:"inline-flex",
+            alignItems:"center",
+            gap:10,
+            boxShadow:"0 4px 20px rgba(255,255,255,0.3)",
+            transition:"transform 0.2s"
+          }}
         >
-          <Icon name="camera" size={18} color="#FFFFFF"/> Scan Barcode
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#51B0E6" strokeWidth="2" fill="#EDF6FC"/>
+            <circle cx="12" cy="12" r="4" fill="#51B0E6"/>
+          </svg>
+          ENABLE CAMERA
         </button>
-        <button 
-          onClick={()=>setMode("manual")} 
-          data-testid="search-brand-btn"
-          style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #C8E2F4",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
-        >
-          <Icon name="search" size={16} color="#51B0E6"/> Search by Brand
-        </button>
+        
+        <div style={{marginTop:16,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+          <Icon name="lock" size={12} color="#1E8A4C"/>
+          <span style={{fontSize:10,color:"#64748B"}}>Camera access required · No data stored</span>
+        </div>
       </div>
       
-      {/* Data sources badge */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginBottom:16}}>
-        <div style={{background:"#F0FAF4",border:"1px solid #1E8A4C33",borderRadius:6,padding:"4px 8px",fontSize:9,color:"#1E8A4C",fontWeight:600}}>EPA SDWIS</div>
-        <div style={{background:"#F0FAF4",border:"1px solid #1E8A4C33",borderRadius:6,padding:"4px 8px",fontSize:9,color:"#1E8A4C",fontWeight:600}}>EWG Database</div>
-        <div style={{background:"#F0FAF4",border:"1px solid #1E8A4C33",borderRadius:6,padding:"4px 8px",fontSize:9,color:"#1E8A4C",fontWeight:600}}>Title 21</div>
+      {/* Data Sources */}
+      <div style={{background:"#F0F1F3",borderRadius:12,padding:"12px 16px",marginBottom:16}}>
+        <div style={{fontSize:9,color:"#A6A8AB",marginBottom:8,fontWeight:700,letterSpacing:"1px"}}>DATA SOURCES</div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+          <div style={{flex:1,background:"#FFFFFF",borderRadius:8,padding:"10px 8px",textAlign:"center",border:"1px solid #E4F1FA"}}>
+            <div style={{fontSize:11,fontWeight:800,color:"#1E8A4C"}}>EPA SDWIS</div>
+            <div style={{fontSize:8,color:"#A6A8AB"}}>Federal Database</div>
+          </div>
+          <div style={{flex:1,background:"#FFFFFF",borderRadius:8,padding:"10px 8px",textAlign:"center",border:"1px solid #E4F1FA"}}>
+            <div style={{fontSize:11,fontWeight:800,color:"#1E8A4C"}}>EWG</div>
+            <div style={{fontSize:8,color:"#A6A8AB"}}>Tap Water DB</div>
+          </div>
+          <div style={{flex:1,background:"#FFFFFF",borderRadius:8,padding:"10px 8px",textAlign:"center",border:"1px solid #E4F1FA"}}>
+            <div style={{fontSize:11,fontWeight:800,color:"#1E8A4C"}}>Title 21</div>
+            <div style={{fontSize:8,color:"#A6A8AB"}}>FDA Compliance</div>
+          </div>
+        </div>
       </div>
       
-      <div style={{fontSize:10,color:"#A6A8AB",marginBottom:10}}>QUICK SELECT FOR DEMO</div>
-      <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center",maxHeight:120,overflowY:"auto"}} data-testid="brand-quick-select">
-        {Object.keys(BOTTLE_BRANDS).slice(0, 12).map(b=>(
-          <button 
-            key={b} 
-            onClick={()=>selectBrand(b)} 
-            data-testid={`brand-pill-${b.toLowerCase().replace(/\s+/g,'-')}`}
-            style={{background:"#F0F1F3",border:"1px solid #E4F1FA",color:"#0A1A2E",padding:"5px 10px",borderRadius:16,fontSize:10,cursor:"pointer",fontWeight:600}}
-          >
-            {b}
-          </button>
-        ))}
+      {/* Alternative: Manual Search */}
+      <button 
+        onClick={()=>setMode("manual")} 
+        data-testid="search-brand-btn"
+        style={{width:"100%",background:"#FFFFFF",color:"#51B0E6",border:"1px solid #C8E2F4",padding:"14px 20px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:16}}
+      >
+        <Icon name="search" size={18} color="#51B0E6"/> Or Search by Brand Name
+      </button>
+      
+      {/* Quick Demo Section */}
+      <div style={{borderTop:"1px solid #E4F1FA",paddingTop:16}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <span style={{fontSize:10,color:"#A6A8AB",fontWeight:700,letterSpacing:"1px"}}>QUICK DEMO</span>
+          <span style={{fontSize:9,color:"#51B0E6",fontWeight:600}}>{Object.keys(BOTTLE_BRANDS).length} brands</span>
+        </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6}} data-testid="brand-quick-select">
+          {["Dasani", "Aquafina", "Fiji Water", "Evian", "Smart Water", "Poland Spring", "Voss", "Essentia"].map(b=>(
+            <button 
+              key={b} 
+              onClick={()=>selectBrand(b)} 
+              data-testid={`brand-pill-${b.toLowerCase().replace(/\s+/g,'-')}`}
+              style={{background:"#FFFFFF",border:"1px solid #E4F1FA",color:"#0A1A2E",padding:"8px 14px",borderRadius:20,fontSize:11,cursor:"pointer",fontWeight:600,transition:"all 0.2s"}}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
   
-  // CAMERA VIEW
+  // CAMERA VIEW - Production Ready
   if(mode==="camera") return(
     <div style={{padding:"16px 20px"}} data-testid="bottle-camera-view">
-      <button 
-        onClick={()=>{stopCameraScan();setMode("intro");}} 
-        style={{background:"none",border:"none",color:"#A6A8AB",fontSize:12,cursor:"pointer",marginBottom:12,display:"flex",alignItems:"center",gap:4}}
-      >
-        ← Cancel Scan
-      </button>
-      
-      <div style={{textAlign:"center",marginBottom:12}}>
-        <h3 style={{fontSize:16,fontWeight:800,color:"#0A1A2E",marginBottom:4}}>Point at Barcode</h3>
-        <p style={{fontSize:11,color:"#A6A8AB"}}>Align the barcode within the frame</p>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+        <button 
+          onClick={()=>{stopCameraScan();setMode("intro");}} 
+          style={{background:"#F0F1F3",border:"none",color:"#6E7073",fontSize:12,cursor:"pointer",padding:"8px 12px",borderRadius:8,display:"flex",alignItems:"center",gap:4,fontWeight:600}}
+        >
+          ← Cancel
+        </button>
+        <div style={{background:"#F0FAF4",borderRadius:20,padding:"4px 12px",display:"flex",alignItems:"center",gap:6}}>
+          <span style={{width:8,height:8,borderRadius:"50%",background:"#1E8A4C",animation:"pulse 1.5s ease-in-out infinite"}}/>
+          <span style={{fontSize:10,color:"#1E8A4C",fontWeight:700}}>CAMERA ACTIVE</span>
+        </div>
       </div>
       
       {/* Camera viewport */}
-      <div style={{position:"relative",borderRadius:16,overflow:"hidden",background:"#000",marginBottom:12}}>
-        <div id="barcode-scanner" ref={scannerRef} style={{width:"100%",minHeight:280}}></div>
+      <div style={{position:"relative",borderRadius:20,overflow:"hidden",background:"#000",marginBottom:16,boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
+        <div id="barcode-scanner" ref={scannerRef} style={{width:"100%",minHeight:300}}></div>
         
-        {/* Scanning overlay */}
-        <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:260,height:90,border:"2px solid #51B0E6",borderRadius:8,pointerEvents:"none"}}>
+        {/* Scanning overlay frame */}
+        <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:280,height:100,pointerEvents:"none"}}>
+          {/* Corner brackets */}
           {[["top","left"],["top","right"],["bottom","left"],["bottom","right"]].map(([v,h])=>(
-            <div key={v+h} style={{position:"absolute",[v]:-3,[h]:-3,width:20,height:20,[`border${v[0].toUpperCase()+v.slice(1)}`]:"3px solid #51B0E6",[`border${h[0].toUpperCase()+h.slice(1)}`]:"3px solid #51B0E6",borderRadius:2}}/>
+            <div key={v+h} style={{
+              position:"absolute",
+              [v]:-4,[h]:-4,
+              width:28,height:28,
+              [`border${v[0].toUpperCase()+v.slice(1)}`]:"4px solid #51B0E6",
+              [`border${h[0].toUpperCase()+h.slice(1)}`]:"4px solid #51B0E6",
+              borderRadius:4
+            }}/>
           ))}
-          <div style={{position:"absolute",top:"50%",left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,#51B0E6,transparent)",animation:"pulse 1.5s ease-in-out infinite"}}/>
+          {/* Scanning line animation */}
+          <div style={{
+            position:"absolute",
+            top:0,left:0,right:0,bottom:0,
+            overflow:"hidden"
+          }}>
+            <div style={{
+              position:"absolute",
+              left:0,right:0,
+              height:3,
+              background:"linear-gradient(90deg,transparent 0%,#51B0E6 20%,#51B0E6 80%,transparent 100%)",
+              boxShadow:"0 0 20px #51B0E6",
+              animation:"scanLine 2s ease-in-out infinite"
+            }}/>
+          </div>
+        </div>
+        
+        {/* Bottom instruction */}
+        <div style={{position:"absolute",bottom:12,left:0,right:0,textAlign:"center"}}>
+          <div style={{background:"rgba(0,0,0,0.7)",display:"inline-block",padding:"8px 16px",borderRadius:20}}>
+            <span style={{fontSize:11,color:"#FFFFFF",fontWeight:600}}>Align barcode within frame</span>
+          </div>
         </div>
       </div>
       
       {scanError && (
-        <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderRadius:8,padding:"12px",marginBottom:12,display:"flex",alignItems:"center",gap:8}}>
-          <Icon name="alert" size={16} color="#D93025"/>
-          <div style={{fontSize:11,color:"#742A2A"}}>{scanError}</div>
+        <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderRadius:12,padding:"14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
+          <Icon name="alert" size={20} color="#D93025"/>
+          <div>
+            <div style={{fontSize:12,fontWeight:700,color:"#D93025",marginBottom:2}}>Camera Error</div>
+            <div style={{fontSize:11,color:"#742A2A"}}>{scanError}</div>
+          </div>
         </div>
       )}
       
-      <div style={{textAlign:"center"}}>
-        <div style={{fontSize:10,color:"#A6A8AB",marginBottom:8}}>Supports UPC, EAN, Code 128, and other formats</div>
-        <button 
-          onClick={()=>{stopCameraScan();setMode("manual");}} 
-          style={{background:"#F0F1F3",border:"1px solid #E4F1FA",color:"#51B0E6",padding:"10px 16px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer"}}
-        >
-          Enter Brand Manually Instead
-        </button>
+      <div style={{background:"#F0F1F3",borderRadius:12,padding:"14px",marginBottom:12}}>
+        <div style={{fontSize:10,color:"#6E7073",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+          <Icon name="check" size={14} color="#1E8A4C"/>
+          Supports UPC-A, UPC-E, EAN-13, Code 128, Code 39
+        </div>
+        <div style={{fontSize:10,color:"#6E7073",display:"flex",alignItems:"center",gap:6}}>
+          <Icon name="check" size={14} color="#1E8A4C"/>
+          Auto-detect any plastic water bottle barcode
+        </div>
       </div>
+      
+      <button 
+        onClick={()=>{stopCameraScan();setMode("manual");}} 
+        style={{width:"100%",background:"#FFFFFF",border:"1px solid #E4F1FA",color:"#51B0E6",padding:"12px 16px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}
+      >
+        <Icon name="text" size={16} color="#51B0E6"/> Enter Brand Manually
+      </button>
     </div>
   );
   
@@ -1229,13 +1315,15 @@ export default function TrustButVerify(){
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+        @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.8}}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes ripple{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(2.2);opacity:0}}
         @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        @keyframes scanLine{0%{top:0}50%{top:calc(100% - 3px)}100%{top:0}}
         .tbv-card{animation:slideUp 0.4s ease forwards}
         input:focus{outline:none;border-color:#51B0E6!important;box-shadow:0 0 0 3px #51B0E622!important}
         button:active{opacity:0.85;transform:scale(0.98)}
+        button:hover{opacity:0.95}
       `}</style>
 
       {/* HEADER - White */}
