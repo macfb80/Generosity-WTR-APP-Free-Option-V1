@@ -411,12 +411,14 @@ function BottleScanView({onBridge}){
   }
   
   // Request camera permission immediately and start scanning
-  async function requestCameraAndScan() {
+  // forceRetry = true bypasses the permission state check (used after user enables in settings)
+  async function requestCameraAndScan(forceRetry = false) {
     setScanError(null);
     
-    // Check if permission was previously denied
-    if (permissionState === 'denied') {
-      console.log("Permission already denied, showing settings instructions");
+    // Only check cached permission state if NOT a forced retry
+    // This allows "Try Again" to work after user enables permission in settings
+    if (!forceRetry && permissionState === 'denied') {
+      console.log("Permission cached as denied, showing settings instructions");
       setMode("permission_denied");
       return;
     }
@@ -426,7 +428,7 @@ function BottleScanView({onBridge}){
     try {
       // Request camera permission by accessing getUserMedia
       // This WILL trigger the browser's permission prompt if not yet decided
-      console.log("Requesting camera access...");
+      console.log("Requesting camera access... (forceRetry:", forceRetry, ")");
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: "environment" } 
       });
@@ -756,7 +758,7 @@ function BottleScanView({onBridge}){
         </button>
         
         <button 
-          onClick={requestCameraAndScan}
+          onClick={() => requestCameraAndScan(true)}
           style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"14px",borderRadius:10,fontSize:13,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
         >
           <Icon name="camera" size={18} color="#FFFFFF"/> Try Again
