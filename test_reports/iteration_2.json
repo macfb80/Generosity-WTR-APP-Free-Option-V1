@@ -57,7 +57,7 @@
   "should_main_agent_self_test": false,
   "context_for_next_testing_agent": "App is fully functional investor demo. All 4 tabs (Home, Scan, Report, Learn) work correctly. Chicago returns score of 98 with Lead/Chromium-6/PFAS as high concerns. Dasani returns score 78. Bottom nav has dark navy background with custom SVG icons.",
   "test_environment": {
-    "url": "https://trust-verify-51.preview.emergentagent.com",
+    "url": "https://quality-verify-app.preview.emergentagent.com",
     "viewport_tested": ["Desktop 1920x1080", "Mobile 390x844"]
   }
 }

@@ -361,6 +361,7 @@ function BottleScanView({onBridge}){
   const [manual,setManual]=useState("");
   const [scanError,setScanError]=useState(null);
   const [scannedCode,setScannedCode]=useState(null);
+  const [permissionState,setPermissionState]=useState("prompt"); // "prompt", "granted", "denied"
   const scannerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
   
@@ -373,38 +374,117 @@ function BottleScanView({onBridge}){
     "Analyzing water quality profile..."
   ];
   
-  // Start real camera scanning
-  async function startCameraScan() {
-    setMode("camera");
+  // Check camera permission on mount
+  useEffect(() => {
+    checkCameraPermission();
+  }, []);
+  
+  // Check if camera permission is already granted or denied
+  async function checkCameraPermission() {
+    try {
+      // Check if permissions API is available (not supported on all browsers, esp iOS Safari)
+      if (navigator.permissions && navigator.permissions.query) {
+        const result = await navigator.permissions.query({ name: 'camera' });
+        console.log("Camera permission state:", result.state);
+        setPermissionState(result.state);
+        
+        // If already denied, show the permission denied view immediately
+        if (result.state === 'denied') {
+          console.log("Camera permission was previously denied");
+          // Don't auto-show denied view - let user click button first
+        }
+        
+        // Listen for permission changes
+        result.onchange = () => {
+          console.log("Camera permission changed to:", result.state);
+          setPermissionState(result.state);
+          // If permission granted while on denied screen, switch to camera
+          if (result.state === 'granted' && mode === 'permission_denied') {
+            requestCameraAndScan();
+          }
+        };
+      }
+    } catch (e) {
+      // Permissions API not supported (common on iOS Safari), will check when camera is accessed
+      console.log("Permissions API not available:", e.message);
+    }
+  }
+  
+  // Request camera permission immediately and start scanning
+  async function requestCameraAndScan() {
     setScanError(null);
     
-    // Small delay to let the DOM render the scanner container
-    setTimeout(async () => {
-      try {
-        const html5QrCode = new Html5Qrcode("barcode-scanner");
-        html5QrCodeRef.current = html5QrCode;
-        
-        await html5QrCode.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 100 },
-            aspectRatio: 1.0,
-            formatsToSupport: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] // All barcode formats
-          },
-          (decodedText) => {
-            // Barcode detected!
-            handleBarcodeDetected(decodedText);
-          },
-          (errorMessage) => {
-            // Ignore scan errors (continuous scanning)
-          }
-        );
-      } catch (err) {
-        console.error("Camera error:", err);
-        setScanError("Unable to access camera. Please ensure camera permissions are granted.");
+    // Check if permission was previously denied
+    if (permissionState === 'denied') {
+      console.log("Permission already denied, showing settings instructions");
+      setMode("permission_denied");
+      return;
+    }
+    
+    setMode("requesting");
+    
+    try {
+      // Request camera permission by accessing getUserMedia
+      // This WILL trigger the browser's permission prompt if not yet decided
+      console.log("Requesting camera access...");
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" } 
+      });
+      
+      // Permission granted! Stop the stream (we'll use html5-qrcode instead)
+      console.log("Camera access granted!");
+      stream.getTracks().forEach(track => track.stop());
+      
+      setPermissionState("granted");
+      
+      // Now start the actual barcode scanner
+      setMode("camera");
+      
+      // Small delay to let the DOM render
+      setTimeout(async () => {
+        try {
+          const html5QrCode = new Html5Qrcode("barcode-scanner");
+          html5QrCodeRef.current = html5QrCode;
+          
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 100 },
+              aspectRatio: 1.0,
+              formatsToSupport: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            },
+            (decodedText) => {
+              handleBarcodeDetected(decodedText);
+            },
+            (errorMessage) => {
+              // Ignore continuous scan errors
+            }
+          );
+          console.log("Barcode scanner started successfully");
+        } catch (err) {
+          console.error("Scanner error:", err);
+          setScanError("Scanner initialization failed. Please try again.");
+        }
+      }, 200);
+      
+    } catch (err) {
+      console.error("Camera permission error:", err.name, err.message);
+      
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setPermissionState("denied");
+        setMode("permission_denied");
+      } else if (err.name === "NotFoundError") {
+        setScanError("No camera found on this device. Try using manual brand search instead.");
+        setMode("intro");
+      } else if (err.name === "NotReadableError" || err.name === "AbortError") {
+        setScanError("Camera is busy or unavailable. Please close other apps using the camera and try again.");
+        setMode("intro");
+      } else {
+        setScanError("Unable to access camera: " + err.message);
+        setMode("intro");
       }
-    }, 100);
+    }
   }
   
   // Stop camera scanning
@@ -514,7 +594,7 @@ function BottleScanView({onBridge}){
         </p>
         
         <button 
-          onClick={startCameraScan} 
+          onClick={requestCameraAndScan} 
           data-testid="scan-camera-btn"
           style={{
             background:"#FFFFFF",
@@ -541,7 +621,7 @@ function BottleScanView({onBridge}){
         
         <div style={{marginTop:16,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
           <Icon name="lock" size={12} color="#1E8A4C"/>
-          <span style={{fontSize:10,color:"#64748B"}}>Camera access required · No data stored</span>
+          <span style={{fontSize:10,color:"#64748B"}}>Tap to allow camera access</span>
         </div>
       </div>
       
@@ -591,6 +671,108 @@ function BottleScanView({onBridge}){
             </button>
           ))}
         </div>
+      </div>
+    </div>
+  );
+  
+  // REQUESTING PERMISSION VIEW
+  if(mode==="requesting") return(
+    <div style={{padding:"40px 20px",textAlign:"center"}} data-testid="bottle-requesting-permission">
+      <div style={{position:"relative",width:80,height:80,margin:"0 auto 24px"}}>
+        <div style={{position:"absolute",inset:0,borderRadius:"50%",border:"3px solid #51B0E6",borderTopColor:"transparent",animation:"spin 1s linear infinite"}}/>
+        <div style={{width:80,height:80,borderRadius:"50%",background:"#EDF6FC",display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <Icon name="camera" size={32} color="#51B0E6"/>
+        </div>
+      </div>
+      <h3 style={{fontSize:18,fontWeight:800,color:"#0A1A2E",marginBottom:8}}>Requesting Camera Access</h3>
+      <p style={{fontSize:12,color:"#A6A8AB",lineHeight:1.6,maxWidth:280,margin:"0 auto 20px"}}>
+        Please tap <strong style={{color:"#51B0E6"}}>"Allow"</strong> when prompted to enable barcode scanning
+      </p>
+      <div style={{background:"#F0F1F3",borderRadius:12,padding:"16px",maxWidth:300,margin:"0 auto"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+          <div style={{width:36,height:36,borderRadius:8,background:"#51B0E6",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <Icon name="camera" size={20} color="#FFFFFF"/>
+          </div>
+          <div style={{flex:1,textAlign:"left"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#0A1A2E"}}>Camera Permission</div>
+            <div style={{fontSize:10,color:"#A6A8AB"}}>Required for barcode scanning</div>
+          </div>
+        </div>
+        <div style={{fontSize:10,color:"#6E7073",lineHeight:1.5}}>
+          Your camera is only used to read barcodes. No images are stored or transmitted.
+        </div>
+      </div>
+    </div>
+  );
+  
+  // PERMISSION DENIED VIEW
+  if(mode==="permission_denied") return(
+    <div style={{padding:"40px 20px",textAlign:"center"}} data-testid="bottle-permission-denied">
+      <div style={{width:70,height:70,borderRadius:"50%",background:"#FFF3F2",border:"2px solid #D9302533",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}>
+        <Icon name="camera" size={30} color="#D93025"/>
+      </div>
+      <h3 style={{fontSize:18,fontWeight:800,color:"#0A1A2E",marginBottom:8}}>Camera Access Required</h3>
+      <p style={{fontSize:12,color:"#A6A8AB",lineHeight:1.6,maxWidth:300,margin:"0 auto 20px"}}>
+        Camera permission was blocked. Please enable it in your browser or device settings to scan barcodes.
+      </p>
+      
+      <div style={{background:"#F0F1F3",borderRadius:12,padding:"16px",maxWidth:320,margin:"0 auto 20px",textAlign:"left"}}>
+        <div style={{fontSize:11,fontWeight:700,color:"#0A1A2E",marginBottom:10}}>📱 How to enable camera:</div>
+        <div style={{fontSize:11,color:"#6E7073",lineHeight:2}}>
+          <div style={{marginBottom:8}}>
+            <strong style={{color:"#0A1A2E"}}>iPhone/iPad Safari:</strong><br/>
+            Settings → Safari → Camera → Allow
+          </div>
+          <div style={{marginBottom:8}}>
+            <strong style={{color:"#0A1A2E"}}>Chrome (Mobile/Desktop):</strong><br/>
+            Tap 🔒 icon in address bar → Site Settings → Camera → Allow
+          </div>
+          <div>
+            <strong style={{color:"#0A1A2E"}}>Android Browser:</strong><br/>
+            Settings → Apps → [Browser Name] → Permissions → Camera → Allow
+          </div>
+        </div>
+      </div>
+      
+      <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:280,margin:"0 auto"}}>
+        {/* Open device/browser settings button */}
+        <button 
+          onClick={() => {
+            // Try to open app settings on mobile (works on some browsers)
+            if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+              // iOS - can't directly open settings, but show instruction
+              alert("To enable camera:\n\n1. Open Settings app\n2. Scroll down to Safari (or your browser)\n3. Tap Camera\n4. Select 'Allow'\n\nThen return here and tap 'Try Again'");
+            } else if (navigator.userAgent.match(/Android/i)) {
+              // Android - try app-info intent (works on some devices)
+              alert("To enable camera:\n\n1. Open your device Settings\n2. Go to Apps\n3. Find and tap your browser\n4. Tap Permissions\n5. Enable Camera\n\nThen return here and tap 'Try Again'");
+            } else {
+              // Desktop - refresh usually re-prompts
+              alert("To enable camera:\n\nClick the 🔒 or ⓘ icon in your browser's address bar, then set Camera to 'Allow'.\n\nAfter enabling, click 'Try Again'.");
+            }
+          }}
+          style={{background:"#0A1A2E",color:"#fff",border:"none",padding:"14px",borderRadius:10,fontSize:13,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
+        >
+          <Icon name="settings" size={18} color="#FFFFFF"/> Open Settings Instructions
+        </button>
+        
+        <button 
+          onClick={requestCameraAndScan}
+          style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"14px",borderRadius:10,fontSize:13,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
+        >
+          <Icon name="camera" size={18} color="#FFFFFF"/> Try Again
+        </button>
+        <button 
+          onClick={()=>setMode("manual")}
+          style={{background:"#FFFFFF",border:"1px solid #E4F1FA",color:"#51B0E6",padding:"12px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer"}}
+        >
+          Search by Brand Name Instead
+        </button>
+        <button 
+          onClick={()=>setMode("intro")}
+          style={{background:"none",border:"none",color:"#A6A8AB",padding:"8px",fontSize:11,cursor:"pointer"}}
+        >
+          ← Back
+        </button>
       </div>
     </div>
   );
@@ -1233,6 +1415,12 @@ function Icon({name, size=20, color="#A6A8AB", active=false}) {
       <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="8" r="4" stroke={ic} strokeWidth="1.5" fill="none"/>
         <path d="M4 20C4 16.69 7.58 14 12 14C16.42 14 20 16.69 20 20" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    settings: (
+      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="3" stroke={ic} strokeWidth="1.5" fill="none"/>
+        <path d="M12 1V4M12 20V23M4.22 4.22L6.34 6.34M17.66 17.66L19.78 19.78M1 12H4M20 12H23M4.22 19.78L6.34 17.66M17.66 6.34L19.78 4.22" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
     ),
   };
