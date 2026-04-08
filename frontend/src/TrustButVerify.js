@@ -942,7 +942,8 @@ export default function TrustButVerify(){
         <img 
           src="/generosity-logo.png" 
           alt="Generosity Water Intelligence" 
-          style={{height:36,width:"auto"}}
+          style={{height:36,width:"auto",cursor:"pointer"}}
+          onClick={()=>{setPhase("landing");setTab("tbv");setData(null);setSubmitted(false);setEngagementPhase("idle");setInput("");setInputError("");window.scrollTo(0,0);}}
         />
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {data&&<div style={{background:riskScore>66?"#FFF3F2":riskScore>33?"#FFF8EE":"#F0FAF4",border:`1px solid ${riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C"}33`,color:riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C",padding:"4px 10px",borderRadius:20,fontSize:10,fontWeight:800}} data-testid="header-risk-score">Score: {riskScore}</div>}
