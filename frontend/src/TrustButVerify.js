@@ -705,6 +705,26 @@ function Icon({name, size=20, color="#A6A8AB", active=false}) {
   return icons[name] || null;
 }
 
+// ─── ANALYTICS HELPER ────────────────────────────────────────────────────────
+function generateSessionId() {
+  const id = 'wtr_' + Math.random().toString(36).slice(2, 11) + '_' + Date.now().toString(36);
+  try { sessionStorage.setItem('wtr_session_id', id); } catch(e) {}
+  return id;
+}
+
+function getSessionId() {
+  try { return sessionStorage.getItem('wtr_session_id') || generateSessionId(); } catch(e) { return generateSessionId(); }
+}
+
+function trackEvent(eventName, properties = {}) {
+  const base = {
+    session_id: getSessionId(),
+    app_version: '2.0',
+    timestamp: new Date().toISOString()
+  };
+  try { window.posthog?.capture(eventName, { ...base, ...properties }); } catch(e) {}
+}
+
 // ─── MAIN APP COMPONENT ──────────────────────────────────────────────────────
 export default function TrustButVerify(){
   const [tab,setTab]=useState("tbv");
@@ -769,6 +789,9 @@ export default function TrustButVerify(){
     // Sanitize input (basic — strip HTML tags)
     const cleanInput = scanInput.replace(/<[^>]*>/g, '').trim().slice(0, 100);
 
+    // Track scan started
+    trackEvent('scan_started', { input_mode: inputMode, input_length: cleanInput.length });
+
     setPhase("scanning");
     setScanStep(0);
     let step=0;
@@ -780,7 +803,7 @@ export default function TrustButVerify(){
         setTimeout(()=>{
           const city=resolveCity(cleanInput);
           if(!city){
-            // Track miss — no fabricated data
+            trackEvent('scan_location_not_found', { input: cleanInput.slice(0,20) });
             setPhase("not_found");
             setIsScanning(false);
             return;
@@ -789,6 +812,7 @@ export default function TrustButVerify(){
           setData({...raw,city:city});
           setPhase("results");
           setTab("wtr-intel");
+          trackEvent('scan_completed', { city, risk_score: getRiskScore(raw.contaminants), contaminant_count: raw.contaminants?.length });
           setTimeout(()=>{setShowHub(true);setGaugeOn(true);},300);
           setTimeout(()=>setAnimating(true),700);
           setIsScanning(false);
@@ -1254,7 +1278,7 @@ export default function TrustButVerify(){
                         style={{padding:"11px 13px",borderRadius:8,border:"1px solid #C8E2F4",fontSize:12,fontFamily:"inherit",background:"#FFFFFF",color:"#0A1A2E"}}
                       />
                       <button 
-                        onClick={()=>{if(email)setSubmitted(true);}}
+                        onClick={()=>{if(email){trackEvent('email_captured',{city:data?.city,risk_score:riskScore});setSubmitted(true);}}}
                         data-testid="submit-email-btn"
                         style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer"}}
                       >
@@ -1278,7 +1302,7 @@ export default function TrustButVerify(){
                   <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
                     The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
                   </p>
-                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}`} target="_blank" rel="noopener noreferrer" style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
+                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}`} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('shopify_cta_clicked',{city:data?.city,risk_score:riskScore,discount_code:'WELCOME100'})} style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
                     GET THE HOME WTR HUB →
                   </a>
                   <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
