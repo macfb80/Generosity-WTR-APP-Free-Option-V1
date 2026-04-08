@@ -912,7 +912,7 @@ export default function TrustButVerify(){
       {tab!=="wtr-btl"&&tab!=="wtr-hub"&&(
       <div style={{background:"#FFFFFF",borderBottom:"1px solid #E4F1FA",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 8px rgba(166,168,171,0.12)"}} data-testid="app-header">
         <img 
-          src="https://customer-assets.emergentagent.com/job_c7b8994c-67d7-46b0-8aea-fc2d9b86ff07/artifacts/yl6dfcfp_Emergent%20App%20Logos%201200%20x%20300%20-%203.PNG" 
+          src="/generosity-logo.png" 
           alt="Generosity Water Intelligence" 
           style={{height:36,width:"auto"}}
         />
