@@ -910,8 +910,9 @@ export default function TrustButVerify(){
   const navTabs=[
     {id:"tbv",label:"Trust but Verify\u2122"},
     {id:"wtr-intel",label:"WTR INTEL",badge:data?riskScore:null},
-    {id:"wtr-btl",label:"WTR BTL"},
-    {id:"wtr-hub",label:"WTR HUB"}
+    // Hidden until connected devices launch:
+    // {id:"wtr-btl",label:"WTR BTL"},
+    // {id:"wtr-hub",label:"WTR HUB"}
   ];
   
   return(
