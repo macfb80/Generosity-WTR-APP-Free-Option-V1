@@ -807,21 +807,49 @@ export default function TrustButVerify(){
       setScanStep(step);
       if(step>=SCAN_STEPS.length){
         clearInterval(t);
-        setTimeout(()=>{
+        setTimeout(async()=>{
           const city=resolveCity(cleanInput);
-          if(!city){
-            trackEvent('scan_location_not_found', { input: cleanInput.slice(0,20) });
-            setPhase("not_found");
+          if(city){
+            // Local city data hit
+            const raw=CITY_DATA[city];
+            setData({...raw,city:city});
+            setPhase("results");
+            setTab("wtr-intel");
+            trackEvent('scan_completed', { city, risk_score: getRiskScore(raw.contaminants), contaminant_count: raw.contaminants?.length, source:'local' });
+            setTimeout(()=>{setShowHub(true);setGaugeOn(true);},300);
+            setTimeout(()=>setAnimating(true),700);
             setIsScanning(false);
             return;
           }
-          const raw=CITY_DATA[city];
-          setData({...raw,city:city});
-          setPhase("results");
-          setTab("wtr-intel");
-          trackEvent('scan_completed', { city, risk_score: getRiskScore(raw.contaminants), contaminant_count: raw.contaminants?.length });
-          setTimeout(()=>{setShowHub(true);setGaugeOn(true);},300);
-          setTimeout(()=>setAnimating(true),700);
+          
+          // No local data — try WTR-ORACLE live EPA lookup
+          const zipMatch = cleanInput.match(/\d{5}/);
+          if(zipMatch){
+            try {
+              const oracleRes = await fetch(`https://generosity-dashboard.vercel.app/api/wtr/report?zip=${zipMatch[0]}`);
+              if(oracleRes.ok){
+                const report = await oracleRes.json();
+                if(report && report.utility && report.status !== 'not_found'){
+                  // Build city label from report data
+                  const cityLabel = `${report.utility} · ${zipMatch[0]}`;
+                  setData({...report, city: cityLabel, zip: zipMatch[0]});
+                  setPhase("results");
+                  setTab("wtr-intel");
+                  trackEvent('scan_completed', { city: cityLabel, zip: zipMatch[0], risk_score: getRiskScore(report.contaminants), contaminant_count: report.contaminants?.length, source:'wtr-oracle' });
+                  setTimeout(()=>{setShowHub(true);setGaugeOn(true);},300);
+                  setTimeout(()=>setAnimating(true),700);
+                  setIsScanning(false);
+                  return;
+                }
+              }
+            } catch(e){
+              console.warn('[WTR-ORACLE] Lookup failed:', e.message);
+            }
+          }
+          
+          // Neither local nor WTR-ORACLE had data
+          trackEvent('scan_location_not_found', { input: cleanInput.slice(0,20) });
+          setPhase("not_found");
           setIsScanning(false);
         },300);
       }
