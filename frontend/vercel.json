@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx craco build",
+  "buildCommand": "source ~/.nvm/nvm.sh && nvm install 18 && nvm use 18 && npx craco build",
   "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "build",
   "framework": null,
