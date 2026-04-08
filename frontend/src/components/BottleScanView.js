@@ -453,46 +453,83 @@ const BOTTLE_BRANDS = {
   },
 };
 
-// ─── UPC BARCODE DATABASE ────────────────────────────────────────────────────
-const UPC_DATABASE = {
+// ─── UPC TO BRAND LOOKUP TABLE ────────────────────────────────────────────────
+// Comprehensive UPC database with prefix matching support
+const UPC_TO_BRAND = {
   // Dasani
-  "049000006346": "Dasani", "049000028904": "Dasani", "049000028911": "Dasani",
-  "049000006360": "Dasani", "049000042726": "Dasani", "049000072112": "Dasani",
+  "049000042566":"Dasani","049000028690":"Dasani","049000042573":"Dasani","049000006424":"Dasani","04900004":"Dasani",
+  "049000006346":"Dasani","049000028904":"Dasani","049000028911":"Dasani","049000006360":"Dasani","049000042726":"Dasani","049000072112":"Dasani",
   // Aquafina
-  "012000001307": "Aquafina", "012000001314": "Aquafina", "012000001321": "Aquafina",
-  "012000161148": "Aquafina", "012000001291": "Aquafina", "012000204173": "Aquafina",
+  "012000161155":"Aquafina","012000010423":"Aquafina","012000200894":"Aquafina","01200016":"Aquafina",
+  "012000001307":"Aquafina","012000001314":"Aquafina","012000001321":"Aquafina","012000161148":"Aquafina","012000001291":"Aquafina","012000204173":"Aquafina",
   // FIJI Water
-  "632565000012": "FIJI Water", "632565000029": "FIJI Water", "632565000036": "FIJI Water",
-  "632565000227": "FIJI Water", "632565000234": "FIJI Water", "632565000043": "FIJI Water",
+  "632008000448":"FIJI Water","632008001001":"FIJI Water","632008002008":"FIJI Water","632008004002":"FIJI Water","63200800":"FIJI Water",
+  "632565000012":"FIJI Water","632565000029":"FIJI Water","632565000036":"FIJI Water","632565000227":"FIJI Water","632565000234":"FIJI Water","632565000043":"FIJI Water",
   // Poland Spring
-  "075720004010": "Poland Spring", "075720004034": "Poland Spring", "075720004058": "Poland Spring",
-  "075720400010": "Poland Spring", "075720400034": "Poland Spring", "075720202034": "Poland Spring",
-  // Essentia
-  "851167000019": "Essentia", "851167000026": "Essentia", "851167000033": "Essentia",
-  "851167000101": "Essentia", "851167000118": "Essentia", "851167000125": "Essentia",
-  // evian
-  "061314000011": "evian", "061314000028": "evian", "061314000035": "evian",
-  "079298612417": "evian", "061314000073": "evian", "079298612004": "evian",
-  // smartwater
-  "786162002501": "smartwater", "786162002518": "smartwater", "786162002525": "smartwater",
-  "786162002594": "smartwater", "786162375100": "smartwater", "786162002600": "smartwater",
-  // Topo Chico
-  "021136000108": "Topo Chico", "021136000115": "Topo Chico", "021136000122": "Topo Chico",
-  // Icelandic Glacial
-  "893147000014": "Icelandic Glacial", "893147000021": "Icelandic Glacial", "893147000038": "Icelandic Glacial",
-  // VOSS
-  "896716001005": "VOSS", "896716001012": "VOSS", "896716001029": "VOSS",
+  "021136100030":"Poland Spring","021136100023":"Poland Spring","021136110449":"Poland Spring","021136500014":"Poland Spring","02113610":"Poland Spring","02113650":"Poland Spring",
+  "075720004010":"Poland Spring","075720004034":"Poland Spring","075720004058":"Poland Spring","075720400010":"Poland Spring","075720400034":"Poland Spring","075720202034":"Poland Spring",
+  // Deer Park (BlueTriton)
+  "021136110456":"Deer Park","021136110463":"Deer Park","021136510013":"Deer Park",
+  // Arrowhead (BlueTriton)
+  "021136011009":"Arrowhead","021136011016":"Arrowhead","021136110012":"Arrowhead",
   // Pure Life
-  "068274540011": "Pure Life", "068274540028": "Pure Life", "068274540103": "Pure Life",
-  // Liquid Death
-  "850742006001": "Liquid Death", "850742006018": "Liquid Death", "850742006025": "Liquid Death",
+  "070847008097":"Pure Life","070847810102":"Pure Life","070847008073":"Pure Life","07084700":"Pure Life",
+  "068274540011":"Pure Life","068274540028":"Pure Life","068274540103":"Pure Life",
+  // Essentia
+  "851060002010":"Essentia","851060002027":"Essentia","851060002034":"Essentia","85106000":"Essentia",
+  "851167000019":"Essentia","851167000026":"Essentia","851167000033":"Essentia","851167000101":"Essentia","851167000118":"Essentia","851167000125":"Essentia",
+  // evian
+  "069000019832":"evian","069000019849":"evian","069000030011":"evian","06900001":"evian",
+  "061314000011":"evian","061314000028":"evian","061314000035":"evian","079298612417":"evian","061314000073":"evian","079298612004":"evian",
+  // smartwater
+  "786162009022":"smartwater","786162009015":"smartwater","786162009039":"smartwater","78616200":"smartwater",
+  "786162002501":"smartwater","786162002518":"smartwater","786162002525":"smartwater","786162002594":"smartwater","786162375100":"smartwater","786162002600":"smartwater",
+  // Topo Chico
+  "078000113474":"Topo Chico","078000113481":"Topo Chico","078000113498":"Topo Chico","07800011":"Topo Chico",
+  "021136000108":"Topo Chico","021136000115":"Topo Chico","021136000122":"Topo Chico",
+  // Icelandic Glacial
+  "898999001003":"Icelandic Glacial","898999001010":"Icelandic Glacial","898999002000":"Icelandic Glacial","89899900":"Icelandic Glacial",
+  "893147000014":"Icelandic Glacial","893147000021":"Icelandic Glacial","893147000038":"Icelandic Glacial",
+  // VOSS
+  "737437000006":"VOSS","737437000013":"VOSS","737437000020":"VOSS","73743700":"VOSS",
+  "896716001005":"VOSS","896716001012":"VOSS","896716001029":"VOSS",
   // Crystal Geyser
-  "654871100019": "Crystal Geyser", "654871100026": "Crystal Geyser", "654871100033": "Crystal Geyser",
+  "043000012604":"Crystal Geyser","043000012611":"Crystal Geyser","04300001":"Crystal Geyser",
+  "654871100019":"Crystal Geyser","654871100026":"Crystal Geyser","654871100033":"Crystal Geyser",
+  // Liquid Death
+  "852855005001":"Liquid Death","852855005018":"Liquid Death","85285500":"Liquid Death",
+  "850742006001":"Liquid Death","850742006018":"Liquid Death","850742006025":"Liquid Death",
   // Kirkland Signature
-  "096619157402": "Kirkland Signature", "096619157419": "Kirkland Signature",
+  "096619107193":"Kirkland Signature","09661910":"Kirkland Signature",
+  "096619157402":"Kirkland Signature","096619157419":"Kirkland Signature",
+  // Great Value (Walmart)
+  "078742284873":"Great Value","07874228":"Great Value",
+  // LIFEWTR
+  "012000810146":"LIFEWTR","01200081":"LIFEWTR",
   // Proud Source
-  "859001004000": "Proud Source", "859001004017": "Proud Source",
+  "857284006001":"Proud Source","85728400":"Proud Source",
+  "859001004000":"Proud Source","859001004017":"Proud Source",
+  // Perrier
+  "074780720126":"Perrier","07478072":"Perrier",
+  // San Pellegrino
+  "041508920015":"San Pellegrino","04150892":"San Pellegrino",
 };
+
+// ─── UPC LOOKUP FUNCTION ──────────────────────────────────────────────────────
+// Handles various barcode formats, leading zeros, and prefix matching
+function lookupBrandFromScan(scannedCode) {
+  const clean = scannedCode.replace(/\D/g, "");
+  // Direct match
+  if (UPC_TO_BRAND[clean]) return UPC_TO_BRAND[clean];
+  // Try without leading zero
+  if (clean.startsWith("0") && UPC_TO_BRAND[clean.slice(1)]) return UPC_TO_BRAND[clean.slice(1)];
+  // Try with leading zero
+  if (UPC_TO_BRAND["0" + clean]) return UPC_TO_BRAND["0" + clean];
+  // Prefix match (8-digit prefixes)
+  const prefixMatch = Object.keys(UPC_TO_BRAND).find(k => k.length === 8 && clean.startsWith(k));
+  if (prefixMatch) return UPC_TO_BRAND[prefixMatch];
+  return null;
+}
 
 // ─── BRAND CATEGORIES ─────────────────────────────────────────────────────────
 const BRAND_CATEGORIES = {
@@ -1081,11 +1118,13 @@ export default function BottleScanView({ onBridge }) {
   const [scanStep, setScanStep] = useState(0);
   const [brand, setBrand] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notFoundSearch, setNotFoundSearch] = useState("");
   const [scanError, setScanError] = useState(null);
   const [scannedCode, setScannedCode] = useState(null);
   const [permissionState, setPermissionState] = useState("prompt");
   const scannerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
+  const notFoundInputRef = useRef(null);
 
   const SCAN_STEPS = [
     "Reading barcode...",
@@ -1096,11 +1135,22 @@ export default function BottleScanView({ onBridge }) {
     "Generating water quality report..."
   ];
 
+  // Quick select brands for not found screen
+  const QUICK_SELECT_BRANDS = ["Dasani", "Aquafina", "FIJI Water", "Poland Spring", "Topo Chico", "Essentia", "smartwater", "Crystal Geyser", "Icelandic Glacial", "VOSS"];
+
   // Filter brands by search
   const filteredBrands = Object.keys(BOTTLE_BRANDS).filter(name =>
     name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     BOTTLE_BRANDS[name].parent?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Filter brands for not found search
+  const notFoundFilteredBrands = notFoundSearch.length > 0 
+    ? Object.keys(BOTTLE_BRANDS).filter(name =>
+        name.toLowerCase().includes(notFoundSearch.toLowerCase()) ||
+        BOTTLE_BRANDS[name].parent?.toLowerCase().includes(notFoundSearch.toLowerCase())
+      )
+    : [];
 
   // Camera permission handling
   useEffect(() => {
@@ -1185,7 +1235,8 @@ export default function BottleScanView({ onBridge }) {
       setScanStep(step);
       if (step >= SCAN_STEPS.length) {
         clearInterval(interval);
-        const brandName = UPC_DATABASE[code];
+        // Use new lookup function with prefix matching
+        const brandName = lookupBrandFromScan(code);
         setTimeout(() => {
           if (brandName && BOTTLE_BRANDS[brandName]) {
             setBrand({ name: brandName, ...BOTTLE_BRANDS[brandName] });
@@ -1225,7 +1276,7 @@ export default function BottleScanView({ onBridge }) {
     <div style={{ padding: "16px", fontFamily: "'Nunito', sans-serif" }} data-testid="bottle-scan-intro">
       {/* Camera Scan CTA */}
       <div style={{
-        background: `linear-gradient(135deg, ${B.navy}, ${B.navyMid})`,
+        background: B.blue,
         borderRadius: 16,
         padding: "24px 16px",
         marginBottom: 16,
@@ -1245,7 +1296,7 @@ export default function BottleScanView({ onBridge }) {
           <Icon name="camera" size={28} color={B.white} />
         </div>
         <h3 style={{ fontSize: 18, fontWeight: 900, color: B.white, marginBottom: 4 }}>Scan Any Water Bottle</h3>
-        <p style={{ fontSize: 11, color: B.gray, marginBottom: 16 }}>Point camera at barcode for instant quality analysis</p>
+        <p style={{ fontSize: 11, color: "#1A2B3C", marginBottom: 16 }}>Point camera at barcode for instant quality analysis</p>
         <button
           onClick={() => requestCameraAndScan()}
           data-testid="scan-camera-btn"
@@ -1266,7 +1317,6 @@ export default function BottleScanView({ onBridge }) {
 
       {/* Search */}
       <div style={{ position: "relative", marginBottom: 16 }}>
-        <Icon name="search" size={18} color={B.gray} />
         <input
           type="text"
           value={searchQuery}
@@ -1528,36 +1578,138 @@ export default function BottleScanView({ onBridge }) {
   );
 
   // ─── NOT FOUND VIEW ─────────────────────────────────────────────────────────
+  // ─── NOT FOUND VIEW ─────────────────────────────────────────────────────────
   if (mode === "not_found") return (
-    <div style={{ padding: "40px 20px", textAlign: "center", fontFamily: "'Nunito', sans-serif" }}>
+    <div style={{ padding: "24px 16px", fontFamily: "'Nunito', sans-serif" }} data-testid="not-found-view">
       <div style={{
-        width: 60,
-        height: 60,
+        width: 56,
+        height: 56,
         borderRadius: "50%",
         background: B.warningBg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        margin: "0 auto 16px"
+        margin: "0 auto 14px"
       }}>
-        <Icon name="alert" size={28} color={B.warning} />
+        <Icon name="alert" size={26} color={B.warning} />
       </div>
-      <h3 style={{ fontSize: 16, fontWeight: 800, color: B.navy, marginBottom: 8 }}>Brand Not Found</h3>
-      <p style={{ fontSize: 12, color: B.gray, marginBottom: 16 }}>Code: {scannedCode}</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 260, margin: "0 auto" }}>
-        <button
-          onClick={() => setMode("camera")}
-          style={{ background: `linear-gradient(135deg, ${B.blue}, ${B.blueDark})`, color: B.white, border: "none", padding: "12px", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}
-        >
-          Try Again
-        </button>
-        <button
-          onClick={() => setMode("intro")}
-          style={{ background: B.lightGray, color: B.gray, border: "none", padding: "10px", borderRadius: 10, fontWeight: 600, cursor: "pointer" }}
-        >
-          Search Manually
-        </button>
+      <h3 style={{ fontSize: 17, fontWeight: 800, color: B.navy, marginBottom: 6, textAlign: "center" }}>Brand Not Found</h3>
+      <p style={{ fontSize: 11, color: B.gray, marginBottom: 16, textAlign: "center" }}>
+        Scanned code: <strong style={{ color: B.navy }}>{scannedCode}</strong>
+      </p>
+      
+      {/* Search Input */}
+      <div style={{ position: "relative", marginBottom: 14 }}>
+        <input
+          ref={notFoundInputRef}
+          type="text"
+          value={notFoundSearch}
+          onChange={(e) => setNotFoundSearch(e.target.value)}
+          placeholder="Type brand name..."
+          autoFocus
+          data-testid="not-found-search-input"
+          style={{
+            width: "100%",
+            padding: "12px 12px 12px 40px",
+            border: `2px solid ${B.border}`,
+            borderRadius: 10,
+            fontSize: 13,
+            fontFamily: "'Nunito', sans-serif",
+            boxSizing: "border-box"
+          }}
+        />
+        <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}>
+          <Icon name="search" size={18} color={B.gray} />
+        </div>
       </div>
+      
+      {/* Search Results */}
+      {notFoundSearch.length > 0 && notFoundFilteredBrands.length > 0 && (
+        <div style={{ 
+          background: B.white, 
+          border: `1px solid ${B.border}`, 
+          borderRadius: 10, 
+          marginBottom: 14,
+          maxHeight: 180,
+          overflowY: "auto"
+        }}>
+          {notFoundFilteredBrands.slice(0, 6).map(name => (
+            <button
+              key={name}
+              onClick={() => { setNotFoundSearch(""); selectBrand(name); }}
+              data-testid={`not-found-result-${name.toLowerCase().replace(/\s+/g, '-')}`}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                background: "transparent",
+                border: "none",
+                borderBottom: `1px solid ${B.lightGray}`,
+                textAlign: "left",
+                fontSize: 12,
+                fontWeight: 600,
+                color: B.navy,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8
+              }}
+            >
+              <Icon name="check" size={14} color={B.blue} />
+              {name}
+              <span style={{ fontSize: 10, color: B.gray, marginLeft: "auto" }}>{BOTTLE_BRANDS[name]?.sourceType}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      
+      {/* Quick Select Pills */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: B.gray, letterSpacing: "1px", marginBottom: 8 }}>QUICK SELECT</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {QUICK_SELECT_BRANDS.map(name => (
+            <button
+              key={name}
+              onClick={() => selectBrand(name)}
+              data-testid={`quick-select-${name.toLowerCase().replace(/\s+/g, '-')}`}
+              style={{
+                background: B.white,
+                border: `1px solid ${B.border}`,
+                color: B.navy,
+                padding: "6px 10px",
+                borderRadius: 16,
+                fontSize: 10,
+                fontWeight: 600,
+                cursor: "pointer"
+              }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Try Again Button */}
+      <button
+        onClick={() => { setNotFoundSearch(""); requestCameraAndScan(true); }}
+        data-testid="try-again-btn"
+        style={{ 
+          width: "100%",
+          background: `linear-gradient(135deg, ${B.blue}, ${B.blueDark})`, 
+          color: B.white, 
+          border: "none", 
+          padding: "13px", 
+          borderRadius: 10, 
+          fontWeight: 700, 
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8
+        }}
+      >
+        <Icon name="camera" size={18} color={B.white} />
+        Try Again
+      </button>
     </div>
   );
 

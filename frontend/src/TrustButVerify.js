@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import BottleScanView from "./components/BottleScanView";
+import WTRBottleScreen from "./components/WTRBottleScreen";
+import WTRHubScreen from "./components/WTRHubScreen";
+import ProfileScreen from "./components/ProfileScreen";
 
 // ─── GENEROSITY™ OFFICIAL BRAND PALETTE (Updated) ────────────────────────────
 // White background (#FFFFFF) - clean, professional look
@@ -364,10 +367,10 @@ function HealthCalc({city,riskScore}){
   const [persona,setPersona]=useState("adult");
   
   const personas=[
-    {id:"adult",label:"Adult",icon:"🧑",mult:1.0},
-    {id:"child",label:"Child under 12",icon:"👧",mult:2.4},
-    {id:"pregnant",label:"Pregnant",icon:"🤰",mult:3.1},
-    {id:"infant",label:"Infant",icon:"👶",mult:4.2}
+    {id:"adult",label:"Adult",iconName:"user",mult:1.0},
+    {id:"child",label:"Child under 12",iconName:"user",mult:2.4},
+    {id:"pregnant",label:"Pregnant",iconName:"user",mult:3.1},
+    {id:"infant",label:"Infant",iconName:"user",mult:4.2}
   ];
   
   const sel=personas.find(p=>p.id===persona);
@@ -397,7 +400,7 @@ function HealthCalc({city,riskScore}){
               display:"flex",alignItems:"center",gap:4
             }}
           >
-            {p.icon} {p.label}
+            <Icon name={p.iconName} size={12} color={persona===p.id?"#51B0E6":"#A6A8AB"}/> {p.label}
           </button>
         ))}
       </div>
@@ -455,42 +458,46 @@ function NavIcon({id,active}){
   const ic=active?"#51B0E6":"#A6A8AB";
   const glow=active?"#51B0E620":"transparent";
   
-  if(id==="home") return(
+  if(id==="tbv") return(
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
       <circle cx="14" cy="14" r="11" fill={glow}/>
-      <path d="M14 4.5L4 13H6.5V23H11.5V17H16.5V23H21.5V13H24L14 4.5Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
-      <path d="M14 11.5C14 11.5 11.5 14.5 11.5 16C11.5 17.38 12.62 18.5 14 18.5C15.38 18.5 16.5 17.38 16.5 16C16.5 14.5 14 11.5 14 11.5Z" fill={active?"#51B0E6":"none"} stroke={ic} strokeWidth="1.2" strokeLinejoin="round"/>
+      <path d="M7 9V6.5C7 6.22 7.22 6 7.5 6H10" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18 6H20.5C20.78 6 21 6.22 21 6.5V9" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M21 19V21.5C21 21.78 20.78 22 20.5 22H18" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M10 22H7.5C7.22 22 7 21.78 7 21.5V19" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="9" y1="14" x2="19" y2="14" stroke={active?"#51B0E6":ic} strokeWidth="1.6" strokeLinecap="round"/>
+      <line x1="14" y1="10" x2="14" y2="18" stroke={active?"#51B0E6":ic} strokeWidth="1.4" strokeLinecap="round" opacity="0.5"/>
     </svg>
   );
-  
-  if(id==="bottle") return(
+
+  if(id==="wtr-intel") return(
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
       <circle cx="14" cy="14" r="11" fill={glow}/>
-      <path d="M11 4H17V6.5C17 6.5 20 8 20 12V22C20 22.55 19.55 23 19 23H9C8.45 23 8 22.55 8 22V12C8 8 11 6.5 11 6.5V4Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
-      <line x1="11" y1="4" x2="17" y2="4" stroke={ic} strokeWidth="2" strokeLinecap="round"/>
-      <line x1="10.5" y1="14" x2="17.5" y2="14" stroke={ic} strokeWidth="1.3" strokeLinecap="round"/>
-      <line x1="10.5" y1="16.5" x2="17.5" y2="16.5" stroke={ic} strokeWidth="0.8" strokeLinecap="round"/>
-      <line x1="10.5" y1="18.5" x2="17.5" y2="18.5" stroke={ic} strokeWidth="1.3" strokeLinecap="round"/>
+      <circle cx="13" cy="12" r="5.5" stroke={ic} strokeWidth="1.5" fill="none"/>
+      <line x1="17" y1="16" x2="21" y2="20" stroke={ic} strokeWidth="2" strokeLinecap="round"/>
+      <line x1="11" y1="14.5" x2="11" y2="12" stroke={active?"#51B0E6":ic} strokeWidth="1.3" strokeLinecap="round"/>
+      <line x1="13" y1="14.5" x2="13" y2="10" stroke={active?"#51B0E6":ic} strokeWidth="1.3" strokeLinecap="round"/>
+      <line x1="15" y1="14.5" x2="15" y2="11.5" stroke={active?"#51B0E6":ic} strokeWidth="1.3" strokeLinecap="round"/>
     </svg>
   );
-  
-  if(id==="report") return(
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <circle cx="14" cy="14" r="11" fill={glow}/>
-      <path d="M5.5 20A9.5 9.5 0 0 1 22.5 20" stroke="#3A4A5C" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-      <path d="M5.5 20A9.5 9.5 0 0 1 17.5 9.8" stroke={ic} strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-      <line x1="14" y1="20" x2="18.2" y2="12.5" stroke={ic} strokeWidth="1.6" strokeLinecap="round"/>
-      <circle cx="14" cy="20" r="2" fill={ic}/>
-    </svg>
-  );
-  
-  if(id==="learn") return(
+
+  if(id==="wtr-btl") return(
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
       <circle cx="14" cy="14" r="11" fill={glow}/>
       <path d="M11 5V13L6.5 20.5C6.5 20.5 6 23 9 23H19C22 23 21.5 20.5 21.5 20.5L17 13V5" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
       <line x1="10" y1="5" x2="18" y2="5" stroke={ic} strokeWidth="1.8" strokeLinecap="round"/>
       <path d="M9 19.5C9 19.5 11 17.5 14 18.5C17 19.5 19 18 19 18" stroke={active?"#51B0E6":ic} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
       <circle cx="12" cy="21" r="1.2" fill={active?"#51B0E6":ic}/>
+    </svg>
+  );
+
+  if(id==="wtr-hub") return(
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <circle cx="14" cy="14" r="11" fill={glow}/>
+      <path d="M5 14L14 6L23 14" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <path d="M8 12V22C8 22.55 8.45 23 9 23H19C19.55 23 20 22.55 20 22V12" stroke={ic} strokeWidth="1.4" strokeLinejoin="round" fill="none"/>
+      <path d="M14 13L11.5 17C11.5 18.38 12.62 19.5 14 19.5C15.38 19.5 16.5 18.38 16.5 17L14 13Z" fill={active?"#51B0E6":ic} opacity="0.7"/>
+      <line x1="14" y1="19.5" x2="14" y2="21.5" stroke={active?"#51B0E6":ic} strokeWidth="1.2" strokeLinecap="round"/>
     </svg>
   );
   
@@ -700,7 +707,7 @@ function Icon({name, size=20, color="#A6A8AB", active=false}) {
 
 // ─── MAIN APP COMPONENT ──────────────────────────────────────────────────────
 export default function TrustButVerify(){
-  const [tab,setTab]=useState("home");
+  const [tab,setTab]=useState("tbv");
   const [phase,setPhase]=useState("landing");
   const [inputMode,setInputMode]=useState("address");
   const [input,setInput]=useState("");
@@ -711,6 +718,9 @@ export default function TrustButVerify(){
   const [showHub,setShowHub]=useState(false);
   const [animating,setAnimating]=useState(false);
   const [gaugeOn,setGaugeOn]=useState(false);
+  const [insightView,setInsightView]=useState("report");
+  const [tbvView,setTbvView]=useState("home");
+  const [showProfile,setShowProfile]=useState(false);
   const inputRef=useRef(null);
   
   const SCAN_STEPS=[
@@ -733,8 +743,9 @@ export default function TrustButVerify(){
     })||null;
   }
   
-  function startScan(){
-    if(!input.trim())return;
+  function startScan(directInput){
+    const scanInput = (typeof directInput === 'string') ? directInput : input;
+    if(!scanInput || !scanInput.trim())return;
     setPhase("scanning");
     setScanStep(0);
     let step=0;
@@ -744,11 +755,11 @@ export default function TrustButVerify(){
       if(step>=SCAN_STEPS.length){
         clearInterval(t);
         setTimeout(()=>{
-          const city=resolveCity(input);
-          const raw=city?CITY_DATA[city]:GENERIC_DATA(input);
-          setData({...raw,city:city||input});
+          const city=resolveCity(scanInput);
+          const raw=city?CITY_DATA[city]:GENERIC_DATA(scanInput);
+          setData({...raw,city:city||scanInput});
           setPhase("results");
-          setTab("report");
+          setTab("wtr-intel");
           setTimeout(()=>{setShowHub(true);setGaugeOn(true);},300);
           setTimeout(()=>setAnimating(true),700);
         },300);
@@ -760,10 +771,10 @@ export default function TrustButVerify(){
   const highRisk=data?.contaminants.filter(c=>c.risk==="high")||[];
   
   const navTabs=[
-    {id:"home",label:"Home"},
-    {id:"bottle",label:"Scan"},
-    {id:"report",label:"Report",badge:data?riskScore:null},
-    {id:"learn",label:"Learn"}
+    {id:"tbv",label:"Trust but Verify\u2122"},
+    {id:"wtr-intel",label:"WTR INTEL",badge:data?riskScore:null},
+    {id:"wtr-btl",label:"WTR BTL"},
+    {id:"wtr-hub",label:"WTR HUB"}
   ];
   
   return(
@@ -787,6 +798,7 @@ export default function TrustButVerify(){
       `}</style>
 
       {/* HEADER - White */}
+      {tab!=="wtr-btl"&&tab!=="wtr-hub"&&(
       <div style={{background:"#FFFFFF",borderBottom:"1px solid #E4F1FA",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 8px rgba(166,168,171,0.12)"}} data-testid="app-header">
         <img 
           src="https://customer-assets.emergentagent.com/job_c7b8994c-67d7-46b0-8aea-fc2d9b86ff07/artifacts/yl6dfcfp_Emergent%20App%20Logos%201200%20x%20300%20-%203.PNG" 
@@ -798,25 +810,43 @@ export default function TrustButVerify(){
           <button 
             style={{width:36,height:36,borderRadius:"50%",background:"#F0F1F3",border:"1px solid #E4F1FA",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}
             data-testid="profile-btn"
+            onClick={()=>setShowProfile(true)}
           >
             <Icon name="user" size={20} color="#A6A8AB"/>
           </button>
         </div>
       </div>
+      )}
 
       {/* CONTENT AREA */}
       <div style={{flex:1,overflowY:"auto",paddingBottom:80}}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* HOME TAB - LANDING STATE */}
+        {/* TBV TAB — Home + Scan combined */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {tab==="home"&&phase==="landing"&&(
-          <div style={{padding:"28px 20px 20px"}} data-testid="home-landing">
-            <div style={{textAlign:"center",marginBottom:24}}>
-              {/* Headline */}
-              <h1 style={{fontSize:28,fontWeight:900,color:"#0A1A2E",lineHeight:1.1,marginBottom:10,letterSpacing:"-1px"}}>
-                What's <span style={{color:"#51B0E6"}}>actually</span> in<br/>your water?
-              </h1>
+        {tab==="tbv"&&(
+          <div data-testid="tbv-tab">
+            {/* Segmented toggle */}
+            <div style={{padding:"14px 16px 0",position:"sticky",top:0,zIndex:50,background:"#FFFFFF"}}>
+              <div data-testid="tbv-toggle" style={{display:"flex",background:"#F0F1F3",borderRadius:12,padding:3,gap:3}}>
+                {[{id:"home",label:"Home Water"},{id:"scan",label:"Bottle Scan"}].map(v=>{
+                  const on=tbvView===v.id;
+                  return(
+                    <button key={v.id} onClick={()=>setTbvView(v.id)} data-testid={`tbv-toggle-${v.id}`} style={{flex:1,padding:"9px 0",borderRadius:10,border:"none",background:on?"#FFFFFF":"transparent",color:on?"#0A1A2E":"#A6A8AB",fontSize:12,fontWeight:on?800:600,cursor:"pointer",boxShadow:on?"0 1px 4px rgba(0,0,0,0.1)":"none",transition:"all 0.2s ease"}}>
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Home Water sub-view ── */}
+            {tbvView==="home"&&phase==="landing"&&(
+              <div style={{padding:"28px 20px 20px"}} data-testid="home-landing">
+                <div style={{textAlign:"center",marginBottom:24}}>
+                  <h1 style={{fontSize:28,fontWeight:900,color:"#0A1A2E",lineHeight:1.1,marginBottom:10,letterSpacing:"-1px"}}>
+                    What's <span style={{color:"#51B0E6"}}>actually</span> in<br/>your water?
+                  </h1>
               <p style={{fontSize:13,color:"#A6A8AB",lineHeight:1.6,maxWidth:320,margin:"0 auto 18px"}}>
                 Get a free water intelligence report — see every contaminant detected at <strong style={{color:"#0A1A2E"}}>your exact address</strong>, and the long-term risks if nothing changes.
               </p>
@@ -904,7 +934,7 @@ export default function TrustButVerify(){
                 {Object.keys(CITY_DATA).map(city=>(
                   <button 
                     key={city} 
-                    onClick={()=>{setInput(city);setInputMode("city");setTimeout(startScan,100);}}
+                    onClick={()=>{setInput(city);setInputMode("city");startScan(city);}}
                     data-testid={`city-btn-${city.toLowerCase().replace(/[,\s]+/g,'-')}`}
                     style={{background:"#FFFFFF",border:"1px solid #C8E2F4",color:"#2A8FCA",padding:"6px 12px",borderRadius:20,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
                   >
@@ -914,12 +944,10 @@ export default function TrustButVerify(){
               </div>
             </div>
           </div>
-        )}
+            )}
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* HOME TAB - SCANNING STATE */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {tab==="home"&&phase==="scanning"&&(
+            {/* ── Home Water scanning animation ── */}
+            {tbvView==="home"&&phase==="scanning"&&(
           <div style={{maxWidth:360,margin:"60px auto",padding:"0 20px",textAlign:"center"}} data-testid="home-scanning">
             {/* Animated Water Drop */}
             <div style={{position:"relative",width:80,height:80,margin:"0 auto 22px"}}>
@@ -961,271 +989,296 @@ export default function TrustButVerify(){
               ))}
             </div>
           </div>
-        )}
+            )}
 
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* SCAN/BOTTLE TAB */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {tab==="bottle"&&(
-          <div data-testid="bottle-tab">
-            {/* Header */}
-            <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",padding:"18px 20px",color:"#FFFFFF",textAlign:"center"}}>
-              <div style={{fontSize:10,color:"#51B0E6",letterSpacing:"2px",marginBottom:5}}>BOTTLE INTELLIGENCE</div>
-              <h2 style={{fontSize:20,fontWeight:900,marginBottom:4,letterSpacing:"-0.5px"}}>What's in your bottle?</h2>
-              <p style={{fontSize:11,color:"#94A3B8",maxWidth:280,margin:"0 auto"}}>Scan any plastic water bottle to see its full contamination profile.</p>
-            </div>
-            <BottleScanView onBridge={()=>{setTab("home");setPhase("landing");}}/>
+            {/* ── Bottle Scan sub-view ── */}
+            {tbvView==="scan"&&(
+              <div data-testid="bottle-tab">
+                <div style={{padding:"18px 20px",textAlign:"center"}}>
+                  <div style={{fontSize:10,color:"#51B0E6",letterSpacing:"2px",marginBottom:5}}>BOTTLE INTELLIGENCE</div>
+                  <h2 style={{fontSize:20,fontWeight:900,marginBottom:4,letterSpacing:"-0.5px",color:"#1A2B3C"}}>What's in your bottle?</h2>
+                  <p style={{fontSize:11,color:"#64748B",maxWidth:280,margin:"0 auto"}}>Scan any plastic water bottle to see its full contamination profile.</p>
+                </div>
+                <BottleScanView onBridge={()=>{setTbvView("home");setPhase("landing");}}/>
+              </div>
+            )}
           </div>
         )}
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* REPORT TAB - WITH DATA */}
+        {/* WTR INTEL TAB — Report + Learn combined */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {tab==="report"&&data&&(
-          <div style={{padding:"14px 16px 20px"}} data-testid="report-tab">
-            {/* Report Header Card */}
-            <div className="tbv-card" style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:18,padding:"18px",marginBottom:12,color:"#FFFFFF",position:"relative",overflow:"hidden"}}>
-              <div style={{position:"absolute",top:-30,right:-30,width:110,height:110,borderRadius:"50%",background:"#51B0E60D"}}/>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:3}}>TRUST BUT VERIFY™ REPORT</div>
-                  <h2 style={{fontSize:20,fontWeight:900,margin:"0 0 2px",letterSpacing:"-0.5px"}} data-testid="report-city">{data.city}</h2>
-                  {input&&inputMode!=="city"&&(
-                    <div style={{fontSize:9,color:"#51B0E6",marginBottom:3,fontWeight:700}}>
-                      {inputMode==="address"?`🏠 ${input}`:`📍 ZIP ${input}`}
-                    </div>
-                  )}
-                  <div style={{fontSize:10,color:"#94A3B8",marginBottom:8}}>{data.utility} · {data.source}</div>
-                  <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-                    <span style={{fontSize:9,color:"#CBD5E1"}}>TDS: <strong style={{color:"#51B0E6"}}>{data.tds}</strong></span>
-                    <span style={{fontSize:9,color:"#CBD5E1"}}>pH: <strong style={{color:"#51B0E6"}}>{data.ph}</strong></span>
-                    <span style={{fontSize:9,color:"#CBD5E1"}}>Hardness: <strong style={{color:"#51B0E6"}}>{data.hardness}</strong></span>
-                  </div>
-                </div>
-                <RiskGauge score={riskScore} animated={gaugeOn}/>
+        {tab==="wtr-intel"&&(
+          <div data-testid="insights-tab">
+            {/* Segmented toggle */}
+            <div style={{padding:"14px 16px 0",position:"sticky",top:0,zIndex:50,background:"#FFFFFF"}}>
+              <div data-testid="insights-toggle" style={{display:"flex",background:"#F0F1F3",borderRadius:12,padding:3,gap:3}}>
+                {[{id:"report",label:"Report",badge:data?riskScore:null},{id:"learn",label:"Learn"}].map(v=>{
+                  const on=insightView===v.id;
+                  return(
+                    <button key={v.id} onClick={()=>setInsightView(v.id)} data-testid={`insights-toggle-${v.id}`} style={{flex:1,padding:"9px 0",borderRadius:10,border:"none",background:on?"#FFFFFF":"transparent",color:on?"#0A1A2E":"#A6A8AB",fontSize:12,fontWeight:on?800:600,cursor:"pointer",boxShadow:on?"0 1px 4px rgba(0,0,0,0.1)":"none",transition:"all 0.2s ease",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+                      {v.label}
+                      {v.badge!=null&&<span style={{background:on?"linear-gradient(135deg,#51B0E6,#2A8FCA)":"#E4F1FA",color:on?"#FFFFFF":"#51B0E6",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:20,minWidth:18,textAlign:"center"}}>{v.badge}</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-            
-            {/* High Risk Alert */}
-            {highRisk.length>0&&(
-              <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderLeft:"4px solid #D93025",borderRadius:10,padding:"11px 14px",marginBottom:10,animation:"slideUp 0.4s 0.1s ease forwards",opacity:0,display:"flex",alignItems:"flex-start",gap:10}} data-testid="high-risk-alert">
-                <Icon name="hazard" size={18} color="#D93025"/>
-                <div>
-                  <div style={{fontSize:10,fontWeight:800,color:"#D93025",marginBottom:3}}>{highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length>1?"S":""} FOUND</div>
-                  <div style={{fontSize:10,color:"#742A2A"}}>{highRisk.map(c=>c.name).join(" · ")} — levels exceed health guidelines</div>
-                </div>
-              </div>
-            )}
-            
-            {/* Weekly Alerts */}
-            <div style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 14px",display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
-              <Icon name="bell" size={22} color="#51B0E6"/>
-              <div style={{flex:1}}>
-                <div style={{fontSize:11,fontWeight:800,color:"#FFFFFF",marginBottom:1}}>Weekly Water Report — {data.city?.split(",")[0]}</div>
-                <div style={{fontSize:9,color:"#94A3B8"}}>Enable push alerts when contamination levels change</div>
-              </div>
-              <button style={{background:"#51B0E6",color:"#fff",border:"none",padding:"7px 11px",borderRadius:7,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>ENABLE</button>
-            </div>
-            
-            {/* Health Calculator */}
-            <HealthCalc city={data.city} riskScore={riskScore}/>
-            
-            {/* Contaminants List */}
-            <div style={{fontSize:9,fontWeight:800,color:"#A6A8AB",letterSpacing:"1.5px",marginBottom:8}}>CONTAMINANTS IN {data.city?.toUpperCase().split(",")[0]}</div>
-            <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}} data-testid="contaminants-list">
-              {data.contaminants.map((c,i)=>(
-                <div 
-                  key={c.name} 
-                  data-testid={`contaminant-${c.name.toLowerCase().replace(/[()]/g,'').replace(/\s+/g,'-')}`}
-                  style={{
-                    background:"#FFFFFF",
-                    border:"1px solid #C8E2F4",
-                    borderLeft:`3px solid ${RISK_COLOR[c.risk]}`,
-                    borderRadius:10,padding:"11px 13px",
-                    animation:`slideUp 0.4s ${i*0.06}s ease forwards`,
-                    opacity:0
-                  }}
-                >
+
+            {/* ── Report view ── */}
+            {insightView==="report"&&data&&(
+              <div style={{padding:"14px 16px 20px"}} data-testid="report-tab">
+                {/* Report Header Card */}
+                <div className="tbv-card" style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:18,padding:"18px",marginBottom:12,color:"#FFFFFF",position:"relative",overflow:"hidden"}}>
+                  <div style={{position:"absolute",top:-30,right:-30,width:110,height:110,borderRadius:"50%",background:"#51B0E60D"}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                     <div style={{flex:1}}>
-                      <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3,flexWrap:"wrap"}}>
-                        <span style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>{c.name}</span>
-                        <span style={{fontSize:8,fontWeight:700,color:RISK_COLOR[c.risk],background:RISK_BG[c.risk],padding:"1px 6px",borderRadius:10}}>{RISK_LABEL[c.risk]}</span>
-                        <span style={{fontSize:8,color:"#A6A8AB",background:"#F0F1F3",padding:"1px 6px",borderRadius:10}}>{c.category}</span>
+                      <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:3}}>TRUST BUT VERIFY™ REPORT</div>
+                      <h2 style={{fontSize:20,fontWeight:900,margin:"0 0 2px",letterSpacing:"-0.5px"}} data-testid="report-city">{data.city}</h2>
+                      {input&&inputMode!=="city"&&(
+                        <div style={{fontSize:9,color:"#51B0E6",marginBottom:3,fontWeight:700}}>
+                          {inputMode==="address"?`🏠 ${input}`:`📍 ZIP ${input}`}
+                        </div>
+                      )}
+                      <div style={{fontSize:10,color:"#94A3B8",marginBottom:8}}>{data.utility} · {data.source}</div>
+                      <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                        <span style={{fontSize:9,color:"#CBD5E1"}}>TDS: <strong style={{color:"#51B0E6"}}>{data.tds}</strong></span>
+                        <span style={{fontSize:9,color:"#CBD5E1"}}>pH: <strong style={{color:"#51B0E6"}}>{data.ph}</strong></span>
+                        <span style={{fontSize:9,color:"#CBD5E1"}}>Hardness: <strong style={{color:"#51B0E6"}}>{data.hardness}</strong></span>
                       </div>
-                      <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.5}}>{c.detail}</div>
                     </div>
-                    {typeof c.level==="number"&&(
-                      <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-                        <div style={{fontSize:14,fontWeight:900,color:RISK_COLOR[c.risk]}}>{c.level}<span style={{fontSize:8}}>{c.unit}</span></div>
-                        <div style={{fontSize:8,color:"#A6A8AB"}}>limit: {c.limit}{c.unit}</div>
+                    <RiskGauge score={riskScore} animated={gaugeOn}/>
+                  </div>
+                </div>
+                
+                {/* High Risk Alert */}
+                {highRisk.length>0&&(
+                  <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderLeft:"4px solid #D93025",borderRadius:10,padding:"11px 14px",marginBottom:10,animation:"slideUp 0.4s 0.1s ease forwards",opacity:0,display:"flex",alignItems:"flex-start",gap:10}} data-testid="high-risk-alert">
+                    <Icon name="hazard" size={18} color="#D93025"/>
+                    <div>
+                      <div style={{fontSize:10,fontWeight:800,color:"#D93025",marginBottom:3}}>{highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length>1?"S":""} FOUND</div>
+                      <div style={{fontSize:10,color:"#742A2A"}}>{highRisk.map(c=>c.name).join(" · ")} — levels exceed health guidelines</div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Weekly Alerts */}
+                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 14px",display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
+                  <Icon name="bell" size={22} color="#51B0E6"/>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:11,fontWeight:800,color:"#FFFFFF",marginBottom:1}}>Weekly Water Report — {data.city?.split(",")[0]}</div>
+                    <div style={{fontSize:9,color:"#94A3B8"}}>Enable push alerts when contamination levels change</div>
+                  </div>
+                  <button style={{background:"#51B0E6",color:"#fff",border:"none",padding:"7px 11px",borderRadius:7,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>ENABLE</button>
+                </div>
+                
+                {/* Health Calculator */}
+                <HealthCalc city={data.city} riskScore={riskScore}/>
+                
+                {/* Contaminants List */}
+                <div style={{fontSize:9,fontWeight:800,color:"#A6A8AB",letterSpacing:"1.5px",marginBottom:8}}>CONTAMINANTS IN {data.city?.toUpperCase().split(",")[0]}</div>
+                <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}} data-testid="contaminants-list">
+                  {data.contaminants.map((c,i)=>(
+                    <div 
+                      key={c.name} 
+                      data-testid={`contaminant-${c.name.toLowerCase().replace(/[()]/g,'').replace(/\s+/g,'-')}`}
+                      style={{
+                        background:"#FFFFFF",
+                        border:"1px solid #C8E2F4",
+                        borderLeft:`3px solid ${RISK_COLOR[c.risk]}`,
+                        borderRadius:10,padding:"11px 13px",
+                        animation:`slideUp 0.4s ${i*0.06}s ease forwards`,
+                        opacity:0
+                      }}
+                    >
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                        <div style={{flex:1}}>
+                          <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3,flexWrap:"wrap"}}>
+                            <span style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>{c.name}</span>
+                            <span style={{fontSize:8,fontWeight:700,color:RISK_COLOR[c.risk],background:RISK_BG[c.risk],padding:"1px 6px",borderRadius:10}}>{RISK_LABEL[c.risk]}</span>
+                            <span style={{fontSize:8,color:"#A6A8AB",background:"#F0F1F3",padding:"1px 6px",borderRadius:10}}>{c.category}</span>
+                          </div>
+                          <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.5}}>{c.detail}</div>
+                        </div>
+                        {typeof c.level==="number"&&(
+                          <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
+                            <div style={{fontSize:14,fontWeight:900,color:RISK_COLOR[c.risk]}}>{c.level}<span style={{fontSize:8}}>{c.unit}</span></div>
+                            <div style={{fontSize:8,color:"#A6A8AB"}}>limit: {c.limit}{c.unit}</div>
+                          </div>
+                        )}
+                        {typeof c.level==="string"&&(
+                          <div style={{background:"#FFF8EE",color:"#F29423",fontSize:8,fontWeight:700,padding:"2px 7px",borderRadius:7,flexShrink:0,marginLeft:8}}>DETECTED</div>
+                        )}
                       </div>
-                    )}
-                    {typeof c.level==="string"&&(
-                      <div style={{background:"#FFF8EE",color:"#F29423",fontSize:8,fontWeight:700,padding:"2px 7px",borderRadius:7,flexShrink:0,marginLeft:8}}>DETECTED</div>
-                    )}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* What Gets Removed Table */}
+                <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,overflow:"hidden",marginBottom:12}}>
+                  <div style={{background:"#0A1A2E",padding:"11px 16px",display:"flex",justifyContent:"space-between"}}>
+                    <div style={{fontSize:11,fontWeight:800,color:"#FFFFFF"}}>Home WTR Hub — What Gets Removed</div>
+                    <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"1px"}}>{data.city?.split(",")[0].toUpperCase()}</div>
+                  </div>
+                  {data.contaminants.map((c,i)=>(
+                    <div key={c.name} style={{display:"grid",gridTemplateColumns:"1fr auto auto",padding:"9px 14px",gap:8,alignItems:"center",borderBottom:"1px solid #E4F1FA",background:i%2===0?"#FFFFFF":"#F0F1F3"}}>
+                      <div>
+                        <span style={{fontSize:10,fontWeight:700,color:"#0A1A2E"}}>{c.name}</span>
+                        <span style={{fontSize:8,color:"#A6A8AB",marginLeft:5}}>{c.category}</span>
+                      </div>
+                      <div style={{fontSize:9,color:RISK_COLOR[c.risk],fontWeight:700}}>{typeof c.level==="number"?`${c.level} ${c.unit}`:"Detected"}</div>
+                      <div style={{background:"#F0FAF4",color:"#1E8A4C",fontSize:8,fontWeight:800,padding:"2px 8px",borderRadius:20}}>✓ 99%+</div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* WTR Hub Animation */}
+                {showHub&&(
+                  <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,padding:"14px",marginBottom:12}} data-testid="wtr-hub-section">
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                      <div style={{width:30,height:30,borderRadius:7,background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13}}>◈</div>
+                      <div>
+                        <div style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>Generosity™ Home WTR Hub</div>
+                        <div style={{fontSize:8,color:"#51B0E6"}}>Active Alkaline Technology · 4-Stage</div>
+                      </div>
+                    </div>
+                    <WTRHubAnimation contaminants={data.contaminants} active={animating}/>
+                  </div>
+                )}
+                
+                {/* Email Capture */}
+                <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:14,padding:"16px",marginBottom:12}} data-testid="email-capture">
+                  <div style={{fontSize:12,fontWeight:900,color:"#0A1A2E",marginBottom:4}}>Get your full report + $100 off</div>
+                  <div style={{fontSize:10,color:"#A6A8AB",marginBottom:12,lineHeight:1.5}}>Receive the complete {data.city?.split(",")[0]} analysis and an exclusive offer.</div>
+                  {!submitted?(
+                    <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                      <input 
+                        type="email" 
+                        value={email} 
+                        onChange={e=>setEmail(e.target.value)}
+                        placeholder="Your email address"
+                        data-testid="email-input"
+                        style={{padding:"11px 13px",borderRadius:8,border:"1px solid #C8E2F4",fontSize:12,fontFamily:"inherit",background:"#FFFFFF",color:"#0A1A2E"}}
+                      />
+                      <button 
+                        onClick={()=>{if(email)setSubmitted(true);}}
+                        data-testid="submit-email-btn"
+                        style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer"}}
+                      >
+                        GET FULL REPORT + $100 OFF →
+                      </button>
+                      <div style={{fontSize:9,color:"#A6A8AB",textAlign:"center"}}>No spam. Unsubscribe anytime.</div>
+                    </div>
+                  ):(
+                    <div style={{textAlign:"center",padding:"10px 0"}} data-testid="email-success">
+                      <div style={{fontSize:22,marginBottom:5}}>✓</div>
+                      <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>Report sent! Check your email.</div>
+                      <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>Discount code: <strong>WELCOME100</strong></div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* CTA Section */}
+                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:16,padding:"22px 18px",textAlign:"center",color:"#FFFFFF",marginBottom:10}}>
+                  <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:7}}>THE SOLUTION</div>
+                  <h3 style={{fontSize:19,fontWeight:900,marginBottom:7,letterSpacing:"-0.5px"}}>Trust but Verify™ your Water.</h3>
+                  <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
+                    The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
+                  </p>
+                  <a href="https://generositywtr.myshopify.com/products/home-hydration-hub" target="_blank" rel="noopener noreferrer" style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
+                    GET THE HOME WTR HUB →
+                  </a>
+                  <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
+                    {["30-Day Guarantee","30-Min Install","Financing Available"].map(t=>(
+                      <div key={t} style={{fontSize:9,color:"#64748B",display:"flex",alignItems:"center",gap:3}}>
+                        <span style={{color:"#1E8A4C"}}>✓</span>{t}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            {/* What Gets Removed Table */}
-            <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,overflow:"hidden",marginBottom:12}}>
-              <div style={{background:"#0A1A2E",padding:"11px 16px",display:"flex",justifyContent:"space-between"}}>
-                <div style={{fontSize:11,fontWeight:800,color:"#FFFFFF"}}>Home WTR Hub — What Gets Removed</div>
-                <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"1px"}}>{data.city?.split(",")[0].toUpperCase()}</div>
-              </div>
-              {data.contaminants.map((c,i)=>(
-                <div key={c.name} style={{display:"grid",gridTemplateColumns:"1fr auto auto",padding:"9px 14px",gap:8,alignItems:"center",borderBottom:"1px solid #E4F1FA",background:i%2===0?"#FFFFFF":"#F0F1F3"}}>
+                
+                {/* Dealer/Partner CTA */}
+                <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:10,padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
                   <div>
-                    <span style={{fontSize:10,fontWeight:700,color:"#0A1A2E"}}>{c.name}</span>
-                    <span style={{fontSize:8,color:"#A6A8AB",marginLeft:5}}>{c.category}</span>
+                    <div style={{fontSize:10,fontWeight:800,color:"#0A1A2E"}}>Are you a Dealer or Distributor?</div>
+                    <div style={{fontSize:9,color:"#A6A8AB",marginTop:1}}>Use Trust But Verify™ as your sales tool.</div>
                   </div>
-                  <div style={{fontSize:9,color:RISK_COLOR[c.risk],fontWeight:700}}>{typeof c.level==="number"?`${c.level} ${c.unit}`:"Detected"}</div>
-                  <div style={{background:"#F0FAF4",color:"#1E8A4C",fontSize:8,fontWeight:800,padding:"2px 8px",borderRadius:20}}>✓ 99%+</div>
+                  <a href="https://generositywater.com/generosity-partners-paywall" target="_blank" rel="noopener noreferrer" style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #51B0E6",padding:"7px 12px",borderRadius:8,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",textDecoration:"none"}}>
+                    PARTNER PORTAL →
+                  </a>
                 </div>
-              ))}
-            </div>
-            
-            {/* WTR Hub Animation */}
-            {showHub&&(
-              <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,padding:"14px",marginBottom:12}} data-testid="wtr-hub-section">
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                  <div style={{width:30,height:30,borderRadius:7,background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13}}>◈</div>
-                  <div>
-                    <div style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>Generosity™ Home WTR Hub</div>
-                    <div style={{fontSize:8,color:"#51B0E6"}}>Active Alkaline Technology · 4-Stage</div>
-                  </div>
-                </div>
-                <WTRHubAnimation contaminants={data.contaminants} active={animating}/>
               </div>
             )}
-            
-            {/* Email Capture - Light gray background */}
-            <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:14,padding:"16px",marginBottom:12}} data-testid="email-capture">
-              <div style={{fontSize:12,fontWeight:900,color:"#0A1A2E",marginBottom:4}}>Get your full report + $100 off</div>
-              <div style={{fontSize:10,color:"#A6A8AB",marginBottom:12,lineHeight:1.5}}>Receive the complete {data.city?.split(",")[0]} analysis and an exclusive offer.</div>
-              {!submitted?(
-                <div style={{display:"flex",flexDirection:"column",gap:7}}>
-                  <input 
-                    type="email" 
-                    value={email} 
-                    onChange={e=>setEmail(e.target.value)}
-                    placeholder="Your email address"
-                    data-testid="email-input"
-                    style={{padding:"11px 13px",borderRadius:8,border:"1px solid #C8E2F4",fontSize:12,fontFamily:"inherit",background:"#FFFFFF",color:"#0A1A2E"}}
-                  />
-                  <button 
-                    onClick={()=>{if(email)setSubmitted(true);}}
-                    data-testid="submit-email-btn"
-                    style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer"}}
-                  >
-                    GET FULL REPORT + $100 OFF →
-                  </button>
-                  <div style={{fontSize:9,color:"#A6A8AB",textAlign:"center"}}>No spam. Unsubscribe anytime.</div>
-                </div>
-              ):(
-                <div style={{textAlign:"center",padding:"10px 0"}} data-testid="email-success">
-                  <div style={{fontSize:22,marginBottom:5}}>✓</div>
-                  <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>Report sent! Check your email.</div>
-                  <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>Discount code: <strong>WELCOME100</strong></div>
-                </div>
-              )}
-            </div>
-            
-            {/* CTA Section */}
-            <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:16,padding:"22px 18px",textAlign:"center",color:"#FFFFFF",marginBottom:10}}>
-              <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:7}}>THE SOLUTION</div>
-              <h3 style={{fontSize:19,fontWeight:900,marginBottom:7,letterSpacing:"-0.5px"}}>Trust but Verify™ your Water.</h3>
-              <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
-                The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
-              </p>
-              <a href="https://generositywtr.myshopify.com/products/home-hydration-hub" target="_blank" rel="noopener noreferrer" style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
-                GET THE HOME WTR HUB →
-              </a>
-              <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
-                {["30-Day Guarantee","30-Min Install","Financing Available"].map(t=>(
-                  <div key={t} style={{fontSize:9,color:"#64748B",display:"flex",alignItems:"center",gap:3}}>
-                    <span style={{color:"#1E8A4C"}}>✓</span>{t}
+
+            {/* ── Report: no data ── */}
+            {insightView==="report"&&!data&&(
+              <div style={{padding:"60px 20px",textAlign:"center"}} data-testid="report-empty">
+                <div style={{fontSize:44,marginBottom:14}}>📊</div>
+                <h3 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:7}}>No Report Yet</h3>
+                <p style={{fontSize:12,color:"#A6A8AB",marginBottom:18}}>Enter your address on the Home tab to generate your free water intelligence report.</p>
+                <button 
+                  onClick={()=>{setTab("tbv");setPhase("landing");}}
+                  data-testid="go-test-water-btn"
+                  style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 22px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer"}}
+                >
+                  TEST MY WATER →
+                </button>
+              </div>
+            )}
+
+            {/* ── Learn view ── */}
+            {insightView==="learn"&&(
+              <div style={{padding:"18px"}} data-testid="learn-tab">
+                <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:14}}>Water Intelligence Library</h2>
+                
+                {/* Learn Cards */}
+                {[
+                  {iconName:"hazard",title:"PFAS: Forever Chemicals",desc:"Found in 45% of US tap water. Linked to cancer, immune disruption, and reproductive harm. EPA set new limits at 4 ppt in 2024 — 1,000x stricter than before.",tag:"HIGH RISK",tc:"#D93025"},
+                  {iconName:"alert",title:"Lead: No Safe Level",desc:"Irreversible neurological damage in children under 6. From aging pipes in pre-1986 homes. Chicago has 400,000+ lead service lines.",tag:"HIGH RISK",tc:"#D93025"},
+                  {iconName:"atom",title:"Chromium-6 (Erin Brockovich)",desc:"Found in 75% of US tap water. CA health goal is 0.02 ppb — most cities test 10–25x this level.",tag:"HIGH RISK",tc:"#D93025"},
+                  {iconName:"flask",title:"Microplastics",desc:"Found in 94% of US tap water, human blood, lungs, placentas and breast milk. Average American ingests 5 grams per week.",tag:"EMERGING",tc:"#F29423"},
+                  {iconName:"droplet",title:"Why Bottled Water Isn't the Answer",desc:"70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.",tag:"MYTH",tc:"#51B0E6"},
+                  {iconName:"filter",title:"How Reverse Osmosis Works",desc:"Filters to 0.0001 microns — smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.",tag:"SOLUTION",tc:"#1E8A4C"}
+                ].map((item,i)=>(
+                  <div key={i} style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:12,padding:"14px",marginBottom:8}} data-testid={`learn-card-${i}`}>
+                    <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                      <div style={{width:36,height:36,borderRadius:8,background:"#FFFFFF",border:`1px solid ${item.tc}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <Icon name={item.iconName} size={20} color={item.tc}/>
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5,flexWrap:"wrap"}}>
+                          <div style={{fontSize:12,fontWeight:800,color:"#0A1A2E"}}>{item.title}</div>
+                          <div style={{fontSize:8,fontWeight:700,color:item.tc,background:`${item.tc}14`,padding:"2px 7px",borderRadius:10,letterSpacing:"0.4px"}}>{item.tag}</div>
+                        </div>
+                        <div style={{fontSize:11,color:"#A6A8AB",lineHeight:1.6}}>{item.desc}</div>
+                      </div>
+                    </div>
                   </div>
                 ))}
-              </div>
-            </div>
-            
-            {/* Dealer/Partner CTA - Light gray background */}
-            <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:10,padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-              <div>
-                <div style={{fontSize:10,fontWeight:800,color:"#0A1A2E"}}>Are you a Dealer or Distributor?</div>
-                <div style={{fontSize:9,color:"#A6A8AB",marginTop:1}}>Use Trust But Verify™ as your sales tool.</div>
-              </div>
-              <a href="https://generositywater.com/generosity-partners-paywall" target="_blank" rel="noopener noreferrer" style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #51B0E6",padding:"7px 12px",borderRadius:8,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",textDecoration:"none"}}>
-                PARTNER PORTAL →
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* REPORT TAB - NO DATA */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {tab==="report"&&!data&&(
-          <div style={{padding:"60px 20px",textAlign:"center"}} data-testid="report-empty">
-            <div style={{fontSize:44,marginBottom:14}}>📊</div>
-            <h3 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:7}}>No Report Yet</h3>
-            <p style={{fontSize:12,color:"#A6A8AB",marginBottom:18}}>Enter your address on the Home tab to generate your free water intelligence report.</p>
-            <button 
-              onClick={()=>{setTab("home");setPhase("landing");}}
-              data-testid="go-test-water-btn"
-              style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 22px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer"}}
-            >
-              TEST MY WATER →
-            </button>
-          </div>
-        )}
-
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* LEARN TAB */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
-        {tab==="learn"&&(
-          <div style={{padding:"18px"}} data-testid="learn-tab">
-            <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:14}}>Water Intelligence Library</h2>
-            
-            {/* Learn Cards */}
-            {[
-              {iconName:"hazard",title:"PFAS: Forever Chemicals",desc:"Found in 45% of US tap water. Linked to cancer, immune disruption, and reproductive harm. EPA set new limits at 4 ppt in 2024 — 1,000x stricter than before.",tag:"HIGH RISK",tc:"#D93025"},
-              {iconName:"alert",title:"Lead: No Safe Level",desc:"Irreversible neurological damage in children under 6. From aging pipes in pre-1986 homes. Chicago has 400,000+ lead service lines.",tag:"HIGH RISK",tc:"#D93025"},
-              {iconName:"atom",title:"Chromium-6 (Erin Brockovich)",desc:"Found in 75% of US tap water. CA health goal is 0.02 ppb — most cities test 10–25x this level.",tag:"HIGH RISK",tc:"#D93025"},
-              {iconName:"flask",title:"Microplastics",desc:"Found in 94% of US tap water, human blood, lungs, placentas and breast milk. Average American ingests 5 grams per week.",tag:"EMERGING",tc:"#F29423"},
-              {iconName:"droplet",title:"Why Bottled Water Isn't the Answer",desc:"70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.",tag:"MYTH",tc:"#51B0E6"},
-              {iconName:"filter",title:"How Reverse Osmosis Works",desc:"Filters to 0.0001 microns — smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.",tag:"SOLUTION",tc:"#1E8A4C"}
-            ].map((item,i)=>(
-              <div key={i} style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:12,padding:"14px",marginBottom:8}} data-testid={`learn-card-${i}`}>
-                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <div style={{width:36,height:36,borderRadius:8,background:"#FFFFFF",border:`1px solid ${item.tc}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                    <Icon name={item.iconName} size={20} color={item.tc}/>
-                  </div>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5,flexWrap:"wrap"}}>
-                      <div style={{fontSize:12,fontWeight:800,color:"#0A1A2E"}}>{item.title}</div>
-                      <div style={{fontSize:8,fontWeight:700,color:item.tc,background:`${item.tc}14`,padding:"2px 7px",borderRadius:10,letterSpacing:"0.4px"}}>{item.tag}</div>
-                    </div>
-                    <div style={{fontSize:11,color:"#A6A8AB",lineHeight:1.6}}>{item.desc}</div>
-                  </div>
+                
+                {/* Bottom CTA */}
+                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:14,padding:"18px",textAlign:"center",color:"#FFFFFF",marginTop:6}}>
+                  <div style={{marginBottom:6}}><Icon name="droplet" size={28} color="#51B0E6"/></div>
+                  <div style={{fontSize:14,fontWeight:800,marginBottom:5}}>Knowledge is only useful if you act on it.</div>
+                  <div style={{fontSize:11,color:"#94A3B8",marginBottom:12}}>The Home WTR Hub removes everything in this library — 1,000+ contaminants.</div>
+                  <button style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px 22px",borderRadius:10,fontSize:11,fontWeight:800,cursor:"pointer"}}>
+                    LEARN MORE →
+                  </button>
                 </div>
               </div>
-            ))}
-            
-            {/* Bottom CTA */}
-            <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:14,padding:"18px",textAlign:"center",color:"#FFFFFF",marginTop:6}}>
-              <div style={{marginBottom:6}}><Icon name="droplet" size={28} color="#51B0E6"/></div>
-              <div style={{fontSize:14,fontWeight:800,marginBottom:5}}>Knowledge is only useful if you act on it.</div>
-              <div style={{fontSize:11,color:"#94A3B8",marginBottom:12}}>The Home WTR Hub removes everything in this library — 1,000+ contaminants.</div>
-              <button style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px 22px",borderRadius:10,fontSize:11,fontWeight:800,cursor:"pointer"}}>
-                LEARN MORE →
-              </button>
-            </div>
+            )}
           </div>
         )}
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* WTR BTL TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {tab==="wtr-btl"&&(<WTRBottleScreen />)}
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* WTR HUB TAB */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {tab==="wtr-hub"&&(<WTRHubScreen />)}
 
       </div>
 
@@ -1240,8 +1293,7 @@ export default function TrustButVerify(){
               key={t.id} 
               onClick={()=>{
                 setTab(t.id);
-                if(t.id==="home"&&data)setPhase("results");
-                if(t.id==="home"&&!data)setPhase("landing");
+                if(t.id==="tbv")setPhase("landing");
               }}
               data-testid={`nav-${t.id}`}
               style={{
@@ -1266,13 +1318,20 @@ export default function TrustButVerify(){
                 </div>
               )}
               <NavIcon id={t.id} active={active}/>
-              <div style={{fontSize:9,fontWeight:active?800:500,color:active?"#51B0E6":"#A6A8AB",letterSpacing:"0.3px",lineHeight:1}}>{t.label}</div>
+              <div style={{fontSize:8,fontWeight:active?800:500,color:active?"#51B0E6":"#A6A8AB",letterSpacing:"0.3px",lineHeight:1.2,textAlign:"center"}}>{t.label}</div>
               {active&&<div style={{position:"absolute",bottom:3,width:4,height:4,borderRadius:"50%",background:"#51B0E6",boxShadow:"0 0 6px #51B0E6"}}/>}
             </button>
           );
         })}
       </div>
       
+      {/* Profile Overlay */}
+      {showProfile && (
+        <div style={{position:"fixed",inset:0,zIndex:500,background:"#fff",overflowY:"auto",animation:"slideUp 0.3s ease"}}>
+          <style>{`@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+          <ProfileScreen onClose={()=>setShowProfile(false)} />
+        </div>
+      )}
     </div>
   );
 }
