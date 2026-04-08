@@ -1,6 +1,7 @@
 {
-  "buildCommand": "cd frontend && npm install --legacy-peer-deps && npx craco build",
-  "outputDirectory": "frontend/build",
+  "buildCommand": "npx craco build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "outputDirectory": "build",
   "framework": null,
   "headers": [
     {
