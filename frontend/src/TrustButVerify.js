@@ -1256,20 +1256,21 @@ export default function TrustButVerify(){
                   </div>
                 )}
                 
-                {/* Weekly Alerts */}
-                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 14px",display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
+                {/* Weekly Alerts — opens email capture */}
+                <div 
+                  onClick={()=>{const el=document.querySelector('[data-testid="email-capture"]');if(el)el.scrollIntoView({behavior:'smooth'});}}
+                  style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 14px",display:"flex",gap:10,alignItems:"center",marginBottom:12,cursor:"pointer"}}>
                   <Icon name="bell" size={22} color="#51B0E6"/>
                   <div style={{flex:1}}>
                     <div style={{fontSize:11,fontWeight:800,color:"#FFFFFF",marginBottom:1}}>Weekly Water Report — {data.city?.split(",")[0]}</div>
                     <div style={{fontSize:9,color:"#94A3B8"}}>Enable push alerts when contamination levels change</div>
                   </div>
-                  <button style={{background:"#51B0E6",color:"#fff",border:"none",padding:"7px 11px",borderRadius:7,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>ENABLE</button>
+                  <button 
+                    onClick={(e)=>{e.stopPropagation();const el=document.querySelector('[data-testid="email-capture"]');if(el)el.scrollIntoView({behavior:'smooth'});}}
+                    style={{background:"#51B0E6",color:"#fff",border:"none",padding:"7px 11px",borderRadius:7,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>ENABLE</button>
                 </div>
                 
-                {/* Health Calculator */}
-                <HealthCalc city={data.city} riskScore={riskScore}/>
-                
-                {/* Contaminants List */}
+                {/* Contaminants List — MOVED ABOVE Health Calculator */}
                 <div style={{fontSize:9,fontWeight:800,color:"#A6A8AB",letterSpacing:"1.5px",marginBottom:8}}>CONTAMINANTS IN {data.city?.toUpperCase().split(",")[0]}</div>
                 <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}} data-testid="contaminants-list">
                   {data.contaminants.map((c,i)=>(
@@ -1306,6 +1307,28 @@ export default function TrustButVerify(){
                       </div>
                     </div>
                   ))}
+                </div>
+                
+                {/* Health Calculator — MOVED BELOW Contaminants */}
+                <HealthCalc city={data.city} riskScore={riskScore}/>
+                
+                {/* CTA Section — MOVED ABOVE What Gets Removed */}
+                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:16,padding:"22px 18px",textAlign:"center",color:"#FFFFFF",marginBottom:10}}>
+                  <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:7}}>THE SOLUTION</div>
+                  <h3 style={{fontSize:19,fontWeight:900,marginBottom:7,letterSpacing:"-0.5px"}}>Trust but Verify™ your Water.</h3>
+                  <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
+                    The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
+                  </p>
+                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}`} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('shopify_cta_clicked',{city:data?.city,risk_score:riskScore,discount_code:'WELCOME100'})} style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
+                    GET THE HOME WTR HUB →
+                  </a>
+                  <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
+                    {["30-Day Guarantee","30-Min Install","Financing Available"].map(t=>(
+                      <div key={t} style={{fontSize:9,color:"#64748B",display:"flex",alignItems:"center",gap:3}}>
+                        <span style={{color:"#1E8A4C"}}>✓</span>{t}
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 
                 {/* What Gets Removed Table */}
@@ -1510,25 +1533,6 @@ export default function TrustButVerify(){
                       )}
                     </div>
                   )}
-                </div>
-                
-                {/* CTA Section */}
-                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:16,padding:"22px 18px",textAlign:"center",color:"#FFFFFF",marginBottom:10}}>
-                  <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:7}}>THE SOLUTION</div>
-                  <h3 style={{fontSize:19,fontWeight:900,marginBottom:7,letterSpacing:"-0.5px"}}>Trust but Verify™ your Water.</h3>
-                  <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
-                    The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
-                  </p>
-                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}`} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('shopify_cta_clicked',{city:data?.city,risk_score:riskScore,discount_code:'WELCOME100'})} style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
-                    GET THE HOME WTR HUB →
-                  </a>
-                  <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
-                    {["30-Day Guarantee","30-Min Install","Financing Available"].map(t=>(
-                      <div key={t} style={{fontSize:9,color:"#64748B",display:"flex",alignItems:"center",gap:3}}>
-                        <span style={{color:"#1E8A4C"}}>✓</span>{t}
-                      </div>
-                    ))}
-                  </div>
                 </div>
                 
                 {/* Dealer/Partner CTA */}
