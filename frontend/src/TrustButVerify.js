@@ -721,6 +721,10 @@ export default function TrustButVerify(){
   const [insightView,setInsightView]=useState("report");
   const [tbvView,setTbvView]=useState("home");
   const [showProfile,setShowProfile]=useState(false);
+  const [inputError, setInputError] = useState("");
+  const [isScanning, setIsScanning] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef=useRef(null);
   
   const SCAN_STEPS=[
@@ -745,7 +749,26 @@ export default function TrustButVerify(){
   
   function startScan(directInput){
     const scanInput = (typeof directInput === 'string') ? directInput : input;
-    if(!scanInput || !scanInput.trim())return;
+    setInputError("");
+
+    if(!scanInput || !scanInput.trim()){
+      setInputError(
+        inputMode === "address" ? "Enter your address to scan" :
+        inputMode === "zip"     ? "Enter a ZIP code to scan"  :
+                                  "Enter a city and state to scan"
+      );
+      inputRef.current?.classList.add('input-error');
+      setTimeout(() => inputRef.current?.classList.remove('input-error'), 400);
+      return;
+    }
+
+    // Prevent double-fire
+    if(isScanning) return;
+    setIsScanning(true);
+
+    // Sanitize input (basic — strip HTML tags)
+    const cleanInput = scanInput.replace(/<[^>]*>/g, '').trim().slice(0, 100);
+
     setPhase("scanning");
     setScanStep(0);
     let step=0;
@@ -755,13 +778,20 @@ export default function TrustButVerify(){
       if(step>=SCAN_STEPS.length){
         clearInterval(t);
         setTimeout(()=>{
-          const city=resolveCity(scanInput);
-          const raw=city?CITY_DATA[city]:GENERIC_DATA(scanInput);
-          setData({...raw,city:city||scanInput});
+          const city=resolveCity(cleanInput);
+          if(!city){
+            // Track miss — no fabricated data
+            setPhase("not_found");
+            setIsScanning(false);
+            return;
+          }
+          const raw=CITY_DATA[city];
+          setData({...raw,city:city});
           setPhase("results");
           setTab("wtr-intel");
           setTimeout(()=>{setShowHub(true);setGaugeOn(true);},300);
           setTimeout(()=>setAnimating(true),700);
+          setIsScanning(false);
         },300);
       }
     },480);
@@ -795,6 +825,8 @@ export default function TrustButVerify(){
         input:focus{outline:none;border-color:#51B0E6!important;box-shadow:0 0 0 3px #51B0E622!important}
         button:active{opacity:0.85;transform:scale(0.98)}
         button:hover{opacity:0.95}
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+        .input-error { animation: shake 0.35s ease; border-color: #FF3B30 !important; }
       `}</style>
 
       {/* HEADER - White */}
@@ -881,11 +913,10 @@ export default function TrustButVerify(){
               </div>
               
               {/* Privacy Notice */}
-              {inputMode==="address"&&(
-                <div style={{display:"flex",alignItems:"center",gap:6,background:"#F0FAF4",border:"1px solid #1E8A4C33",borderRadius:8,padding:"6px 12px",maxWidth:320,margin:"0 auto 9px",fontSize:10,color:"#276749"}}>
-                  <Icon name="lock" size={14} color="#1E8A4C"/> Your address is never stored. Used only to match your water utility.
-                </div>
-              )}
+              <div style={{display:"flex",alignItems:"center",gap:6,background:"#F0FAF4",border:"1px solid #1E8A4C33",borderRadius:8,padding:"6px 12px",maxWidth:320,margin:"0 auto 9px",fontSize:10,color:"#276749"}}>
+                <Icon name="lock" size={14} color="#1E8A4C"/>
+                {inputMode==="address"?"Your address is never stored. Used only to match your water utility.":"Your data is never stored. Used only to match your water utility."}
+              </div>
               
               {/* Search Input */}
               <div style={{display:"flex",gap:0,borderRadius:12,overflow:"hidden",border:"2px solid #51B0E6",boxShadow:"0 4px 18px rgba(81,176,230,0.14)",maxWidth:380,margin:"0 auto"}}>
@@ -910,19 +941,21 @@ export default function TrustButVerify(){
                   SCAN <Icon name="scan" size={14} color="#FFFFFF"/>
                 </button>
               </div>
+              {inputError&&<div style={{fontSize:10,color:"#D93025",marginTop:6,fontWeight:600}} data-testid="input-error">{inputError}</div>}
               <div style={{fontSize:9,color:"#C5C6C8",marginTop:7}}>Address · ZIP · City · EPA SDWIS + EWG Database</div>
             </div>
             
             {/* Stats Row - Light gray cards */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:18}}>
               {[
-                ["200M+","Americans exposed to PFAS"],
-                ["94%","tap water has microplastics"],
-                ["$0","to get your report"]
-              ].map(([n,t])=>(
+                ["200M+","Americans exposed to PFAS","USGS 2023"],
+                ["94%","tap water has microplastics","ORB Media / Columbia"],
+                ["$0","to get your report",""]
+              ].map(([n,t,src])=>(
                 <div key={n} style={{background:"#F0F1F3",border:"1px solid #C8E2F4",borderRadius:10,padding:"13px 8px",textAlign:"center",boxShadow:"0 2px 8px rgba(166,168,171,0.08)"}}>
                   <div style={{fontSize:19,fontWeight:900,color:"#51B0E6",lineHeight:1}}>{n}</div>
                   <div style={{fontSize:9,color:"#A6A8AB",marginTop:4,lineHeight:1.3}}>{t}</div>
+                  {src&&<div style={{fontSize:7,color:"#C5C6C8",marginTop:3,fontStyle:"italic"}}>{src}</div>}
                 </div>
               ))}
             </div>
@@ -990,6 +1023,66 @@ export default function TrustButVerify(){
             </div>
           </div>
             )}
+
+{/* ── Location Not Found — Lead Capture ── */}
+{phase==="not_found"&&(
+  <div style={{maxWidth:360,margin:"40px auto",padding:"0 20px",textAlign:"center"}} data-testid="not-found">
+    <div style={{width:60,height:60,borderRadius:"50%",background:"#FFF8EE",border:"2px solid #F2942344",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
+      <Icon name="pin" size={28} color="#F29423"/>
+    </div>
+    <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:8}}>We don't have data for this location yet</h2>
+    <p style={{fontSize:12,color:"#A6A8AB",lineHeight:1.6,marginBottom:18}}>Enter your email and we'll notify you when data is available. We're adding 50 new cities monthly.</p>
+
+    {!submitted?(
+      <div style={{maxWidth:300,margin:"0 auto"}}>
+        <input
+          type="email"
+          value={email}
+          onChange={e=>{setEmail(e.target.value);setEmailError("");}}
+          placeholder="Your email address"
+          data-testid="not-found-email-input"
+          style={{width:"100%",padding:"11px 13px",borderRadius:8,border:"1px solid #C8E2F4",fontSize:12,fontFamily:"inherit",background:"#FFFFFF",color:"#0A1A2E",marginBottom:8,boxSizing:"border-box"}}
+        />
+        {emailError&&<div style={{fontSize:10,color:"#D93025",marginBottom:6,textAlign:"left"}}>{emailError}</div>}
+        <button
+          onClick={()=>{
+            const emailTrimmed=email.trim().toLowerCase();
+            if(!emailTrimmed||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)){
+              setEmailError("Please enter a valid email address");
+              return;
+            }
+            setSubmitted(true);
+          }}
+          data-testid="not-found-submit-btn"
+          style={{width:"100%",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer",boxSizing:"border-box"}}
+        >
+          NOTIFY ME WHEN AVAILABLE →
+        </button>
+      </div>
+    ):(
+      <div style={{textAlign:"center",padding:"10px 0"}} data-testid="not-found-success">
+        <div style={{fontSize:22,marginBottom:5}}>✓</div>
+        <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>You're on the list!</div>
+        <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>We'll email you when data for this area is ready.</div>
+      </div>
+    )}
+
+    <div style={{marginTop:24}}>
+      <div style={{fontSize:9,color:"#A6A8AB",marginBottom:8}}>TRY A COVERED CITY</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center"}}>
+        {Object.keys(CITY_DATA).map(city=>(
+          <button
+            key={city}
+            onClick={()=>{setInput(city);setInputMode("city");setPhase("landing");setTimeout(()=>startScan(city),100);}}
+            style={{background:"#FFFFFF",border:"1px solid #C8E2F4",color:"#2A8FCA",padding:"6px 12px",borderRadius:20,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
+          >
+            {city}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
 
             {/* ── Bottle Scan sub-view ── */}
             {tbvView==="scan"&&(
@@ -1139,7 +1232,7 @@ export default function TrustButVerify(){
                       <div style={{width:30,height:30,borderRadius:7,background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13}}>◈</div>
                       <div>
                         <div style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>Generosity™ Home WTR Hub</div>
-                        <div style={{fontSize:8,color:"#51B0E6"}}>Active Alkaline Technology · 4-Stage</div>
+                        <div style={{fontSize:8,color:"#51B0E6"}}>Active Alkaline Technology · Multi-Stage</div>
                       </div>
                     </div>
                     <WTRHubAnimation contaminants={data.contaminants} active={animating}/>
@@ -1148,8 +1241,8 @@ export default function TrustButVerify(){
                 
                 {/* Email Capture */}
                 <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:14,padding:"16px",marginBottom:12}} data-testid="email-capture">
-                  <div style={{fontSize:12,fontWeight:900,color:"#0A1A2E",marginBottom:4}}>Get your full report + $100 off</div>
-                  <div style={{fontSize:10,color:"#A6A8AB",marginBottom:12,lineHeight:1.5}}>Receive the complete {data.city?.split(",")[0]} analysis and an exclusive offer.</div>
+                  <div style={{fontSize:12,fontWeight:900,color:"#0A1A2E",marginBottom:4}}>Get an extra $100 off the Home WTR Hub</div>
+                  <div style={{fontSize:10,color:"#A6A8AB",marginBottom:12,lineHeight:1.5}}>Sale price $1,399.99 → Your price $1,299.99 with code WELCOME100</div>
                   {!submitted?(
                     <div style={{display:"flex",flexDirection:"column",gap:7}}>
                       <input 
@@ -1165,7 +1258,7 @@ export default function TrustButVerify(){
                         data-testid="submit-email-btn"
                         style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer"}}
                       >
-                        GET FULL REPORT + $100 OFF →
+                        GET MY $100 OFF →
                       </button>
                       <div style={{fontSize:9,color:"#A6A8AB",textAlign:"center"}}>No spam. Unsubscribe anytime.</div>
                     </div>
@@ -1185,7 +1278,7 @@ export default function TrustButVerify(){
                   <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
                     The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
                   </p>
-                  <a href="https://generositywtr.myshopify.com/products/home-hydration-hub" target="_blank" rel="noopener noreferrer" style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
+                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}`} target="_blank" rel="noopener noreferrer" style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
                     GET THE HOME WTR HUB →
                   </a>
                   <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
