@@ -821,6 +821,49 @@ export default function TrustButVerify(){
     },480);
   }
   
+  // ── Email capture handler — sends to backend proxy ──
+  async function handleEmailSubmit(scanPhase) {
+    const emailTrimmed = email.trim().toLowerCase();
+    if (!emailTrimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+
+    // Optimistic UI
+    setSubmitted(true);
+    trackEvent('email_captured', { city: data?.city, risk_score: data ? getRiskScore(data.contaminants) : 0, scan_phase: scanPhase });
+
+    try {
+      const payload = {
+        email: emailTrimmed,
+        zip: input && /^\d{5}$/.test(input.trim()) ? input.trim() : null,
+        city: data?.city || input || null,
+        risk_score: data ? getRiskScore(data.contaminants) : 0,
+        high_concern_contaminants: data?.contaminants?.filter(c => c.risk === 'high').map(c => c.name) || [],
+        source: 'wtr_app',
+        session_id: getSessionId(),
+        address: inputMode === 'address' ? input : null,
+        scan_phase: scanPhase
+      };
+
+      const resp = await fetch('https://generosity-dashboard.vercel.app/api/wtr/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    } catch (err) {
+      // DLQ: save to localStorage for retry
+      try {
+        const dlq = JSON.parse(localStorage.getItem('wtr_capture_dlq') || '[]');
+        dlq.push({ email: emailTrimmed, city: data?.city || input, ts: Date.now(), scan_phase: scanPhase });
+        localStorage.setItem('wtr_capture_dlq', JSON.stringify(dlq.slice(-20)));
+      } catch (e) {}
+      console.warn('[WTR Capture] Failed, queued for retry:', err.message);
+    }
+  }
+
   const riskScore=data?getRiskScore(data.contaminants):0;
   const highRisk=data?.contaminants.filter(c=>c.risk==="high")||[];
   
@@ -1069,14 +1112,7 @@ export default function TrustButVerify(){
         />
         {emailError&&<div style={{fontSize:10,color:"#D93025",marginBottom:6,textAlign:"left"}}>{emailError}</div>}
         <button
-          onClick={()=>{
-            const emailTrimmed=email.trim().toLowerCase();
-            if(!emailTrimmed||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)){
-              setEmailError("Please enter a valid email address");
-              return;
-            }
-            setSubmitted(true);
-          }}
+          onClick={()=>handleEmailSubmit('not_found')}
           data-testid="not-found-submit-btn"
           style={{width:"100%",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer",boxSizing:"border-box"}}
         >
@@ -1278,7 +1314,7 @@ export default function TrustButVerify(){
                         style={{padding:"11px 13px",borderRadius:8,border:"1px solid #C8E2F4",fontSize:12,fontFamily:"inherit",background:"#FFFFFF",color:"#0A1A2E"}}
                       />
                       <button 
-                        onClick={()=>{if(email){trackEvent('email_captured',{city:data?.city,risk_score:riskScore});setSubmitted(true);}}}
+                        onClick={()=>handleEmailSubmit('results')}
                         data-testid="submit-email-btn"
                         style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer"}}
                       >
