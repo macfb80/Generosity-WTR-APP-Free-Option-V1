@@ -1,5 +1,5 @@
 {
-  "buildCommand": "source ~/.nvm/nvm.sh && nvm install 18 && nvm use 18 && npx craco build",
+  "buildCommand": "NODE_OPTIONS=--openssl-legacy-provider npx craco build",
   "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "build",
   "framework": null,
