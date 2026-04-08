@@ -4,6 +4,7 @@ import BottleScanView from "./components/BottleScanView";
 import WTRBottleScreen from "./components/WTRBottleScreen";
 import WTRHubScreen from "./components/WTRHubScreen";
 import ProfileScreen from "./components/ProfileScreen";
+import { requestPushPermission, isPushSupported, registerServiceWorker } from './push';
 
 // ─── GENEROSITY™ OFFICIAL BRAND PALETTE (Updated) ────────────────────────────
 // White background (#FFFFFF) - clean, professional look
@@ -745,7 +746,13 @@ export default function TrustButVerify(){
   const [isScanning, setIsScanning] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [engagementPhase, setEngagementPhase] = useState("idle"); // "idle" | "push_prompt" | "household" | "complete"
+  const [householdProfile, setHouseholdProfile] = useState({ has_children: null, is_pregnant: null, has_filter: null });
+  const [pushResult, setPushResult] = useState(null);
+  const [capturedProspectId, setCapturedProspectId] = useState(null);
   const inputRef=useRef(null);
+
+  useEffect(() => { registerServiceWorker(); }, []);
   
   const SCAN_STEPS=[
     "Locating water utility...",
@@ -833,6 +840,9 @@ export default function TrustButVerify(){
     setSubmitted(true);
     trackEvent('email_captured', { city: data?.city, risk_score: data ? getRiskScore(data.contaminants) : 0, scan_phase: scanPhase });
 
+    // Start engagement flow after short delay
+    setTimeout(() => setEngagementPhase("push_prompt"), 2000);
+
     try {
       const payload = {
         email: emailTrimmed,
@@ -853,6 +863,8 @@ export default function TrustButVerify(){
       });
 
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const result = await resp.json();
+      if (result.prospect_id) setCapturedProspectId(result.prospect_id);
     } catch (err) {
       // DLQ: save to localStorage for retry
       try {
@@ -1323,10 +1335,150 @@ export default function TrustButVerify(){
                       <div style={{fontSize:9,color:"#A6A8AB",textAlign:"center"}}>No spam. Unsubscribe anytime.</div>
                     </div>
                   ):(
-                    <div style={{textAlign:"center",padding:"10px 0"}} data-testid="email-success">
-                      <div style={{fontSize:22,marginBottom:5}}>✓</div>
-                      <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>Report sent! Check your email.</div>
-                      <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>Discount code: <strong>WELCOME100</strong></div>
+                    <div style={{textAlign:"center",padding:"12px 0"}} data-testid="engagement-flow">
+
+                      {/* Phase 0: Brief success flash */}
+                      {engagementPhase === "idle" && (
+                        <div>
+                          <div style={{fontSize:22,marginBottom:5}}>✓</div>
+                          <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>Report sent! Check your email.</div>
+                          <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>Discount code: WELCOME100</div>
+                        </div>
+                      )}
+
+                      {/* Phase 1: Push notification prompt */}
+                      {engagementPhase === "push_prompt" && (
+                        <div style={{maxWidth:320,margin:"0 auto",padding:"4px 0"}} data-testid="push-prompt">
+                          <div style={{width:44,height:44,borderRadius:"50%",background:"#EFF6FF",border:"2px solid #51B0E644",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px"}}>
+                            <Icon name="alert" size={20} color="#51B0E6"/>
+                          </div>
+                          <div style={{fontSize:13,fontWeight:800,color:"#0A1A2E",marginBottom:4}}>Water quality changes. You should know.</div>
+                          <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.5,marginBottom:12}}>Get an alert when contamination levels change in your area. We only notify when it matters.</div>
+                          <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+                            <button
+                              onClick={async()=>{
+                                trackEvent('push_permission_requested',{city:data?.city});
+                                const result = await requestPushPermission(data?.zip || data?.city?.match(/\d{5}/)?.[0], capturedProspectId, {});
+                                setPushResult(result);
+                                trackEvent(result.granted ? 'push_permission_granted' : 'push_permission_denied', {city:data?.city});
+                                setEngagementPhase("household");
+                              }}
+                              style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"9px 20px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer"}}
+                            >
+                              ENABLE ALERTS
+                            </button>
+                            <button
+                              onClick={()=>{trackEvent('push_permission_dismissed',{city:data?.city});setEngagementPhase("household");}}
+                              style={{background:"transparent",color:"#A6A8AB",border:"1px solid #E2E8F0",padding:"9px 16px",borderRadius:8,fontSize:11,fontWeight:600,cursor:"pointer"}}
+                            >
+                              Not now
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Phase 2: Household profile (3 questions) */}
+                      {engagementPhase === "household" && (
+                        <div style={{maxWidth:320,margin:"0 auto",padding:"4px 0",textAlign:"left"}} data-testid="household-profile">
+                          <div style={{fontSize:13,fontWeight:800,color:"#0A1A2E",marginBottom:3,textAlign:"center"}}>Personalize your risk assessment</div>
+                          <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.5,marginBottom:14,textAlign:"center"}}>Quick questions to tailor your report to your household.</div>
+
+                          {/* Q1: Children */}
+                          <div style={{marginBottom:12}}>
+                            <div style={{fontSize:10,fontWeight:700,color:"#475569",marginBottom:6}}>Children under 12 at home?</div>
+                            <div style={{display:"flex",gap:6}}>
+                              {[{label:"Yes",val:true},{label:"No",val:false}].map(opt=>(
+                                <button key={opt.label} onClick={()=>setHouseholdProfile(p=>({...p,has_children:opt.val}))}
+                                  style={{flex:1,padding:"8px",borderRadius:8,border: householdProfile.has_children===opt.val ? "2px solid #51B0E6" : "1px solid #E2E8F0",
+                                    background: householdProfile.has_children===opt.val ? "#EFF6FF" : "#fff",
+                                    color: householdProfile.has_children===opt.val ? "#2A8FCA" : "#64748B",
+                                    fontSize:11,fontWeight:700,cursor:"pointer"}}
+                                >{opt.label}</button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Q2: Pregnant */}
+                          <div style={{marginBottom:12}}>
+                            <div style={{fontSize:10,fontWeight:700,color:"#475569",marginBottom:6}}>Anyone pregnant or trying to conceive?</div>
+                            <div style={{display:"flex",gap:6}}>
+                              {[{label:"Yes",val:true},{label:"No",val:false}].map(opt=>(
+                                <button key={opt.label} onClick={()=>setHouseholdProfile(p=>({...p,is_pregnant:opt.val}))}
+                                  style={{flex:1,padding:"8px",borderRadius:8,border: householdProfile.is_pregnant===opt.val ? "2px solid #51B0E6" : "1px solid #E2E8F0",
+                                    background: householdProfile.is_pregnant===opt.val ? "#EFF6FF" : "#fff",
+                                    color: householdProfile.is_pregnant===opt.val ? "#2A8FCA" : "#64748B",
+                                    fontSize:11,fontWeight:700,cursor:"pointer"}}
+                                >{opt.label}</button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Q3: Filter */}
+                          <div style={{marginBottom:14}}>
+                            <div style={{fontSize:10,fontWeight:700,color:"#475569",marginBottom:6}}>Water filter currently installed?</div>
+                            <div style={{display:"flex",gap:6}}>
+                              {[{label:"Yes",val:true},{label:"No",val:false},{label:"Not sure",val:"unsure"}].map(opt=>(
+                                <button key={opt.label} onClick={()=>setHouseholdProfile(p=>({...p,has_filter:opt.val}))}
+                                  style={{flex:1,padding:"8px",borderRadius:8,border: householdProfile.has_filter===opt.val ? "2px solid #51B0E6" : "1px solid #E2E8F0",
+                                    background: householdProfile.has_filter===opt.val ? "#EFF6FF" : "#fff",
+                                    color: householdProfile.has_filter===opt.val ? "#2A8FCA" : "#64748B",
+                                    fontSize:10,fontWeight:700,cursor:"pointer"}}
+                                >{opt.label}</button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div style={{display:"flex",gap:8}}>
+                            <button
+                              onClick={async()=>{
+                                trackEvent('household_profile_submitted',{...householdProfile, city:data?.city});
+                                try {
+                                  await fetch('https://generosity-dashboard.vercel.app/api/wtr/capture', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      email: email,
+                                      zip: data?.zip,
+                                      city: data?.city,
+                                      source: 'household_profile_update',
+                                      household_profile: householdProfile
+                                    })
+                                  });
+                                } catch(e) {}
+                                setEngagementPhase("complete");
+                              }}
+                              style={{flex:1,background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"10px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer"}}
+                            >
+                              PERSONALIZE MY REPORT
+                            </button>
+                            <button
+                              onClick={()=>{trackEvent('household_profile_skipped',{city:data?.city});setEngagementPhase("complete");}}
+                              style={{background:"transparent",color:"#A6A8AB",border:"1px solid #E2E8F0",padding:"10px 12px",borderRadius:8,fontSize:10,fontWeight:600,cursor:"pointer"}}
+                            >
+                              Skip
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Phase 3: Complete — show personalized message + discount */}
+                      {engagementPhase === "complete" && (
+                        <div data-testid="engagement-complete">
+                          <div style={{fontSize:22,marginBottom:5}}>✓</div>
+                          <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>You're all set!</div>
+                          <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>Discount code: <span style={{fontWeight:700,color:"#0A1A2E"}}>WELCOME100</span></div>
+                          {householdProfile.has_children && (
+                            <div style={{marginTop:8,padding:"8px 12px",background:"#FFF8EE",border:"1px solid #F2942333",borderRadius:8,fontSize:10,color:"#92400E",lineHeight:1.5,textAlign:"left"}}>
+                              Children are especially vulnerable to lead and PFAS. The Home WTR Hub removes 99%+ of both.
+                            </div>
+                          )}
+                          {householdProfile.is_pregnant && (
+                            <div style={{marginTop:8,padding:"8px 12px",background:"#FFF1F2",border:"1px solid #E1194233",borderRadius:8,fontSize:10,color:"#9F1239",lineHeight:1.5,textAlign:"left"}}>
+                              PFAS bioaccumulate in breast milk. Filtration before and during pregnancy is critical.
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
