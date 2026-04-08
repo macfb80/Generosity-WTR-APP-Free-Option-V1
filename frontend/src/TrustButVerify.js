@@ -984,10 +984,10 @@ export default function TrustButVerify(){
             {tbvView==="home"&&phase==="landing"&&(
               <div style={{padding:"28px 20px 20px"}} data-testid="home-landing">
                 <div style={{textAlign:"center",marginBottom:24}}>
-                  <h1 style={{fontSize:28,fontWeight:900,color:"#0A1A2E",lineHeight:1.1,marginBottom:10,letterSpacing:"-1px"}}>
-                    What's <span style={{color:"#51B0E6"}}>actually</span> in<br/>your water?
+                  <h1 style={{fontSize:24,fontWeight:900,color:"#0A1A2E",lineHeight:1.1,marginBottom:10,letterSpacing:"-1px",whiteSpace:"nowrap"}}>
+                    What's <span style={{color:"#51B0E6"}}>actually</span> in your water?
                   </h1>
-              <p style={{fontSize:13,color:"#A6A8AB",lineHeight:1.6,maxWidth:320,margin:"0 auto 18px"}}>
+              <p style={{fontSize:13,color:"#A6A8AB",lineHeight:1.5,maxWidth:360,margin:"0 auto 18px"}}>
                 Get a free water intelligence report — see every contaminant detected at <strong style={{color:"#0A1A2E"}}>your exact address</strong>, and the long-term risks if nothing changes.
               </p>
               
