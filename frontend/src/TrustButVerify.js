@@ -1051,7 +1051,7 @@ export default function TrustButVerify(){
                 </button>
               </div>
               {inputError&&<div style={{fontSize:10,color:"#D93025",marginTop:6,fontWeight:600}} data-testid="input-error">{inputError}</div>}
-              <div style={{fontSize:9,color:"#C5C6C8",marginTop:7}}>Address · ZIP · City · EPA SDWIS + EWG Database</div>
+              <div style={{fontSize:9,color:"#C5C6C8",marginTop:7}}>Address · ZIP · City · EPA SDWIS + UCMR 5 Report</div>
             </div>
             
             {/* Stats Row - Light gray cards */}
