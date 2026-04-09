@@ -8,7 +8,9 @@ const C = {
   green:"#1E8A4C", warning:"#F29423", danger:"#D93025", orange:"#E07020",
 };
 
-const API_BASE = 'https://generosity-dashboard.vercel.app';
+const API_BASE = 'https://generosity-sales-engine-mvp-api.onrender.com';
+const SERVICE_TOKEN = '3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102';
+const DASHBOARD_BASE = 'https://generosity-dashboard.vercel.app';
 
 // ── Stroke-based SVG icons (matching nav bar / app style) ─────────────
 function PIcon({ name, size = 16, color = "#6B7A8D" }) {
@@ -63,7 +65,7 @@ async function connectOura() {
 
   try {
     // Use backend proxy to avoid CORS
-    const proxyRes = await fetch(`${API_BASE}/api/wtr/oura-proxy`, {
+    const proxyRes = await fetch(`${DASHBOARD_BASE}/api/wtr/oura-proxy`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ oura_token: token }),
@@ -506,7 +508,9 @@ export default function ProfileScreen({ onClose }) {
       const email = profile.email?.trim();
       if (!email) { setLoadingProfile(false); return; }
       try {
-        const res = await fetch(`${API_BASE}/api/wtr/profile?email=${encodeURIComponent(email)}`);
+        const res = await fetch(`${API_BASE}/api/wtr/profile?email=${encodeURIComponent(email)}`, {
+          headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}` },
+        });
         if (!res.ok) { setLoadingProfile(false); return; }
         const data = await res.json();
         if (!cancelled && data.ok && data.profile) {
@@ -599,7 +603,7 @@ export default function ProfileScreen({ onClose }) {
       try {
         await fetch(`${API_BASE}/api/wtr/profile/nhs`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_TOKEN}` },
           body: JSON.stringify({
             email,
             nhs_score: nhsData.score,
@@ -639,7 +643,7 @@ export default function ProfileScreen({ onClose }) {
     try {
       const res = await fetch(`${API_BASE}/api/wtr/profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_TOKEN}` },
         body: JSON.stringify({
           email: profile.email.trim().toLowerCase(),
           first_name: profile.firstName.trim(),
