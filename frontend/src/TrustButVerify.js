@@ -1071,7 +1071,7 @@ export default function TrustButVerify(){
         <img 
           src="/generosity-logo.png" 
           alt="Generosity Water Intelligence" 
-          style={{height:40,width:"auto",cursor:"pointer"}}
+          style={{height:48,width:"auto",cursor:"pointer"}}
           onClick={()=>{setPhase("landing");setTab("tbv");setData(null);setSubmitted(false);setEngagementPhase("idle");setInput("");setInputError("");window.scrollTo(0,0);}}
           onTouchStart={()=>{founderLongPressRef.current=setTimeout(()=>setShowFounderLogin(true),3000);}}
           onTouchEnd={()=>{clearTimeout(founderLongPressRef.current);}}
@@ -1140,7 +1140,7 @@ export default function TrustButVerify(){
                       flex:1,
                       background:inputMode===m.id?"#FFFFFF":"transparent",
                       border:inputMode===m.id?"1px solid #C8E2F4":"1px solid transparent",
-                      borderRadius:8,padding:"6px 4px",fontSize:9,
+                      borderRadius:8,padding:"5px 3px",fontSize:8,
                       fontWeight:inputMode===m.id?800:500,
                       color:inputMode===m.id?"#51B0E6":"#A6A8AB",
                       cursor:"pointer",
@@ -1149,7 +1149,7 @@ export default function TrustButVerify(){
                       display:"flex",alignItems:"center",justifyContent:"center",gap:4
                     }}
                   >
-                    <Icon name={m.iconName} size={12} color={inputMode===m.id?"#51B0E6":"#A6A8AB"}/>{m.label}
+                    <Icon name={m.iconName} size={11} color={inputMode===m.id?"#51B0E6":"#A6A8AB"}/>{m.label}
                   </button>
                 ))}
               </div>
