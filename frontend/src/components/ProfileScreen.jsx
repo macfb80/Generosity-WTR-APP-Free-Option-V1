@@ -57,54 +57,29 @@ async function connectOura() {
   }
 
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const headers = { 'Authorization': `Bearer ${token}` };
+    // Use backend proxy to avoid CORS
+    const proxyRes = await fetch('https://generosity-dashboard.vercel.app/api/wtr/oura-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ oura_token: token }),
+    });
 
-    const [readinessRes, sleepRes, activityRes, hrvRes] = await Promise.all([
-      fetch(`https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=${yesterday}&end_date=${today}`, { headers }),
-      fetch(`https://api.ouraring.com/v2/usercollection/daily_sleep?start_date=${yesterday}&end_date=${today}`, { headers }),
-      fetch(`https://api.ouraring.com/v2/usercollection/daily_activity?start_date=${yesterday}&end_date=${today}`, { headers }),
-      fetch(`https://api.ouraring.com/v2/usercollection/heartrate?start_datetime=${yesterday}T00:00:00-07:00&end_datetime=${today}T23:59:59-07:00`, { headers }),
-    ]);
-
-    if (readinessRes.status === 401) {
-      localStorage.removeItem('oura_pat');
-      return { error: 'Invalid token \u2014 please reconnect' };
+    if (!proxyRes.ok) {
+      const err = await proxyRes.json().catch(() => ({}));
+      if (proxyRes.status === 401 || err.error?.includes('Invalid')) {
+        localStorage.removeItem('oura_pat');
+        return { error: 'Invalid token. Please reconnect.' };
+      }
+      throw new Error(err.error || 'Proxy failed');
     }
 
-    const readiness = await readinessRes.json();
-    const sleep = await sleepRes.json();
-    const activity = await activityRes.json();
-    const hrv = await hrvRes.json();
+    const data = await proxyRes.json();
+    if (!data.ok || !data.metrics) throw new Error('No data returned');
 
-    const latestReadiness = readiness.data?.[readiness.data.length - 1];
-    const latestSleep = sleep.data?.[sleep.data.length - 1];
-    const latestActivity = activity.data?.[activity.data.length - 1];
-
-    const hrvValues = hrv.data?.filter(d => d.source === 'sleep')?.map(d => d.bpm) || [];
-    const avgHrv = hrvValues.length > 0 ? Math.round(hrvValues.reduce((a,b) => a+b, 0) / hrvValues.length) : null;
-
-    const metrics = {
-      readiness_score: latestReadiness?.score ?? null,
-      sleep_score: latestSleep?.score ?? null,
-      sleep_total_hours: latestSleep?.contributors?.total_sleep ? Math.round(latestSleep.contributors.total_sleep / 3600 * 10) / 10 : null,
-      sleep_efficiency: latestSleep?.contributors?.efficiency ?? null,
-      sleep_deep_pct: latestSleep?.contributors?.deep_sleep ?? null,
-      sleep_rem_pct: latestSleep?.contributors?.rem_sleep ?? null,
-      hrv_avg: avgHrv,
-      hrv_balance: latestReadiness?.contributors?.hrv_balance ?? null,
-      body_temp_deviation: latestReadiness?.contributors?.body_temperature ?? null,
-      resting_heart_rate: latestReadiness?.contributors?.resting_heart_rate ?? null,
-      activity_score: latestActivity?.score ?? null,
-      active_calories: latestActivity?.active_calories ?? null,
-      steps: latestActivity?.steps ?? null,
-      recovery_index: latestReadiness?.contributors?.recovery_index ?? null,
-    };
-
-    return { connected: true, metrics, ts: new Date().toISOString(), source: 'oura_api_v2' };
+    return { connected: true, metrics: data.metrics, ts: new Date().toISOString(), source: data.source || 'oura_api_v2' };
   } catch (err) {
-    console.error('[Oura] Fetch failed:', err.message);
+    console.error('[Oura] Proxy fetch failed:', err.message);
+    // Fallback to mock data for demo
     return { connected: true, metrics: mockOuraData(), ts: new Date().toISOString(), source: 'demo_fallback' };
   }
 }
