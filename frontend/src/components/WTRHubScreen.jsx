@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { WaterInfoSheet } from './WTRHub/WaterInfoSheet';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Legend,
@@ -907,6 +908,7 @@ export default function WTRHubScreen() {
   const { tele, usage, hist, loading, isMock, wsStatus, flushing, chartWin, setChartWin, forceWash, resetFilter } = useWtrHub();
   const [expandedFilter, setExpandedFilter] = useState(null);
   const [showOffline,    setShowOffline]    = useState(false);
+  const [openSheet,      setOpenSheet]      = useState(null); // 'incoming' | 'filtered' | null
 
   useEffect(() => {
     if (tele && !tele.online) setShowOffline(true);
@@ -1003,18 +1005,33 @@ export default function WTRHubScreen() {
               <div style={{ fontSize: 24, fontWeight: 700, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>
                 Home WTR Hub
               </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 4, letterSpacing: 0.5 }}>
-                Gen-2 {"\u00B7"} 1,200 GPD {"\u00B7"} 11-Stage RO
+              {/* Address line */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="rgba(200,220,240,0.75)" strokeWidth="1.5">
+                  <path d="M7 1C4.8 1 3 2.8 3 5c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z"/>
+                  <circle cx="7" cy="5" r="1.5" fill="rgba(200,220,240,0.75)" stroke="none"/>
+                </svg>
+                <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(200,220,240,0.85)" }}>Your Home</span>
               </div>
-              {/* TDS Hero Display */}
-              <div style={{ marginTop: 12, display: "flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 42, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>
-                  {fmt(tds ?? 3)}
+              {/* Stat pills */}
+              <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                {[
+                  { val: `${fmt(tds ?? 3)} ppm`, lbl: "Output TDS" },
+                  { val: `${fmt(score)}`, lbl: "Quality" },
+                  { val: `${usage ? fmt(usage.todayGal * 3.785, 1) : '0'} L`, lbl: "Today" },
+                ].map(s => (
+                  <div key={s.lbl} style={{ background: "rgba(255,255,255,0.10)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "10px 14px" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: -0.5 }}>{s.val}</div>
+                    <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.55)", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 2 }}>{s.lbl}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Active status */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: connected || isMock ? "#34C759" : "#FF9500", boxShadow: connected || isMock ? "0 0 8px rgba(52,199,89,0.8)" : "0 0 8px rgba(255,149,0,0.6)" }} />
+                <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.65)" }}>
+                  {connected || isMock ? 'System active' : 'System offline'}
                 </span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>TDS ppm</span>
-              </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>
-                Output Quality: <span style={{ color: "#FFFFFF", fontWeight: 700 }}>{tdsLabel(tds)}</span>
               </div>
             </div>
 
@@ -1041,68 +1058,84 @@ export default function WTRHubScreen() {
       {/* ── CARDS ── */}
       <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 12, animation: "fadeInUp 0.3s ease" }}>
 
-        {/* ── CARD 1: WATER QUALITY ── */}
-        <div style={{
-          background: C.card, borderRadius: 20, padding: 20,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
-          textAlign: "center",
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 20 }}>
-            Water Quality
-          </div>
+        {/* ── CARD 1: DUAL-RING WATER QUALITY ── */}
+        {(() => {
+          const inTds = 342; // Demo incoming TDS — in production from WTR-ORACLE by ZIP
+          const outTds = tds ?? 3;
+          const outScore = score;
+          const outLabel = tdsLabel(outTds);
+          const inQuality = Math.max(10, Math.min(100, 100 - (inTds / 5)));
+          const outPct = outScore / 100;
+          const inPct = inQuality / 100;
+          const OR = 105, IR = 75;
+          const OC = 2 * Math.PI * OR, IC = 2 * Math.PI * IR;
+          const outerOff = OC * (1 - outPct);
+          const innerOff = IC * (1 - inPct);
+          const reductionPct = inTds > 0 ? Math.round(((inTds - outTds) / inTds) * 1000) / 10 : 0;
 
-          {tds != null ? (
-            <>
-              <div style={{ position: "relative", width: RING_SIZE, height: RING_SIZE, margin: "0 auto" }}>
-                <svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
-                  <circle cx={RING_CX} cy={RING_CY} r={RING_R} fill="none" stroke="#F0F0F5" strokeWidth="8" />
-                  <circle
-                    cx={RING_CX} cy={RING_CY} r={RING_R}
-                    fill="none" stroke={scoreCol} strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={`${ringFill} ${ringCirc}`}
-                    transform={`rotate(-90 ${RING_CX} ${RING_CY})`}
-                    style={{ transition: "stroke-dasharray 1.5s cubic-bezier(0.34,1.56,0.64,1), stroke 0.8s ease" }}
-                  />
-                </svg>
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", flexDirection: "column",
-                  alignItems: "center", justifyContent: "center",
-                  pointerEvents: "none",
-                }}>
-                  <div style={{ fontSize: 48, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -2, lineHeight: 1 }}>
-                    {fmt(score)}
+          return (
+            <div style={{ background: C.card, borderRadius: 24, overflow: "hidden", boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
+              {/* Header */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 0" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#AEAEB2", letterSpacing: 1.2, textTransform: "uppercase" }}>Water Quality</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(52,199,89,0.12)", borderRadius: 20, padding: "4px 10px" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#34C759" }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#28A046" }}>Live</span>
+                </div>
+              </div>
+
+              {/* Dual ring SVG */}
+              <div style={{ display: "flex", justifyContent: "center", padding: "24px 20px 8px" }}>
+                <div style={{ position: "relative", width: 240, height: 240 }}>
+                  <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: "rotate(-90deg)" }}>
+                    <defs>
+                      <linearGradient id="outerG" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#51B0E6"/><stop offset="50%" stopColor="#34C759"/><stop offset="100%" stopColor="#28A046"/>
+                      </linearGradient>
+                      <linearGradient id="innerG" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#FF9500"/><stop offset="100%" stopColor="#FFCC00"/>
+                      </linearGradient>
+                    </defs>
+                    <circle cx="120" cy="120" r={OR} fill="none" stroke="#F2F2F7" strokeWidth="18"/>
+                    <circle cx="120" cy="120" r={OR} fill="none" stroke="url(#outerG)" strokeWidth="18" strokeLinecap="round" strokeDasharray={OC} strokeDashoffset={outerOff} style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(0.34,1.56,0.64,1)" }}/>
+                    <circle cx="120" cy="120" r={IR} fill="none" stroke="#F2F2F7" strokeWidth="16"/>
+                    <circle cx="120" cy="120" r={IR} fill="none" stroke="url(#innerG)" strokeWidth="16" strokeLinecap="round" strokeDasharray={IC} strokeDashoffset={innerOff} style={{ transition: "stroke-dashoffset 1.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s" }}/>
+                  </svg>
+                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ fontSize: 56, fontWeight: 800, color: "#1C1C1E", letterSpacing: -2, lineHeight: 1, fontFamily: "inherit" }}>{fmt(outScore)}</div>
+                    <div style={{ fontSize: 16, fontWeight: 500, color: "#6E6E73", marginTop: 4 }}>{outLabel}</div>
                   </div>
                 </div>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 8 }}>
-                {tdsLabel(tds)}
-              </div>
-            </>
-          ) : (
-            <>
-              <div style={{ position: "relative", width: RING_SIZE, height: RING_SIZE, margin: "0 auto" }}>
-                <svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
-                  <circle cx={RING_CX} cy={RING_CY} r={RING_R} fill="none" stroke="#F0F0F5" strokeWidth="8" />
-                </svg>
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", flexDirection: "column",
-                  alignItems: "center", justifyContent: "center",
-                  pointerEvents: "none",
-                }}>
-                  <div style={{ fontSize: 48, fontWeight: 700, color: "#D1D5DB", letterSpacing: -2, lineHeight: 1 }}>
-                    {"\u2014"}
+
+              {/* Tappable label cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "8px 20px 20px" }}>
+                <button onClick={()=>setOpenSheet('incoming')} style={{ backgroundColor: "rgba(174,174,178,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#6E6E73" }}>Incoming Water</span>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(174,174,178,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#AEAEB2" }}>i</span>
                   </div>
-                </div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: "#1C1C1E", letterSpacing: -1, lineHeight: 1 }}>{inTds}</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: "#AEAEB2", marginTop: 3 }}>TDS ppm</div>
+                  <div style={{ marginTop: 6 }}><span style={{ fontSize: 10, fontWeight: 700, color: "#FF9500", background: "rgba(255,149,0,0.10)", padding: "3px 8px", borderRadius: 20 }}>Moderate</span></div>
+                </button>
+                <button onClick={()=>setOpenSheet('filtered')} style={{ backgroundColor: "rgba(52,199,89,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#6E6E73" }}>Filtered Output</span>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(52,199,89,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#28A046" }}>i</span>
+                  </div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: "#28A046", letterSpacing: -1, lineHeight: 1 }}>{fmt(outTds)}</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: "#AEAEB2", marginTop: 3 }}>TDS ppm</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "#28A046", display: "flex", alignItems: "center", gap: 3, marginTop: 6 }}><span>↓</span> {reductionPct}% reduction</div>
+                </button>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 8 }}>
-                Connecting{"\u2026"}
-              </div>
-            </>
-          )}
-        </div>
+            </div>
+          );
+        })()}
+
+        {/* Bottom Sheets */}
+        <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="Your Home" zip="92203" />
+        <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="Your Home" zip="92203" />
 
         {/* ── CARD 2: TODAY ── */}
         <div style={{
