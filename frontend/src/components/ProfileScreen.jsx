@@ -357,7 +357,7 @@ function WearableCard({w, status, onToggle}) {
           </div>
           <div style={{fontSize:12,color:C.muted,marginTop:1}}>{w.desc}</div>
           {on && status?.source === 'demo_fallback' && (
-            <div style={{fontSize:10,color:C.warning,marginTop:2}}>Demo data \u2014 CORS blocked real API</div>
+            <div style={{fontSize:10,color:C.warning,marginTop:2}}>Reconnect for live data</div>
           )}
         </div>
 
@@ -457,6 +457,24 @@ export default function ProfileScreen({ onClose }) {
   useEffect(() => {
     try { localStorage.setItem('wtr_intake', JSON.stringify(intake)); } catch(e) {}
   }, [intake]);
+
+  // Auto-connect Oura on mount if token exists (fetches fresh data every time)
+  useEffect(() => {
+    let cancelled = false;
+    const autoFetch = async () => {
+      let token = null;
+      try { token = localStorage.getItem('oura_pat'); } catch(e) {}
+      if (!token) return;
+      const res = await connectOura();
+      if (!cancelled && res && !res.error) {
+        setWearables(s => ({ ...s, oura: res }));
+      }
+    };
+    autoFetch();
+    // Refresh every 5 minutes
+    const interval = setInterval(autoFetch, 5 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
 
   // Merge wearable metrics into biometrics
   useEffect(() => {
