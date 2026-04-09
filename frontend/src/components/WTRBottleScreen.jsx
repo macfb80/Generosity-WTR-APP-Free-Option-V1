@@ -644,17 +644,16 @@ export default function WTRBottleScreen() {
     hist.map(h => { const v = h.sensors?.[key]?.val; return v != null ? parseFloat(v) : null; })
         .filter(v => v != null);
 
-  const phVal    = s.ph?.val        ?? null;
+  const volVal    = s.volume?.val    ?? null;
   const tempVal  = s.waterTemp?.val ?? null;
   const levelVal = s.waterLevel?.val?? null;
   const battVal  = tele?.batt       ?? null;
 
-  const phColor = () => {
-    if (!phVal) return "#51B0E6";
-    const v = parseFloat(phVal);
-    if (v < 6.5 || v > 9.5) return "#FF3B30";
-    if (v >= 7.2 && v <= 9.0) return "#34C759";
-    return "#FF9500";
+  const volColor = () => {
+    if (!volVal) return "#51B0E6";
+    const v = parseFloat(volVal);
+    if (v < 100) return "#FF9500";
+    return "#34C759";
   };
 
   const isLive = ble === "connected" || tele !== null;
@@ -952,7 +951,7 @@ export default function WTRBottleScreen() {
 
             {/* Run Test button — compact, below ring */}
             {testPhase === null && (
-              <button onClick={startTest} style={{
+              <button onClick={runTest} style={{
                 margin: "16px auto 0", display: "flex", alignItems: "center", gap: 8,
                 background: "linear-gradient(135deg, #51B0E6, #2A8FCA)", color: "#fff",
                 border: "none", padding: "10px 24px", borderRadius: 30,
