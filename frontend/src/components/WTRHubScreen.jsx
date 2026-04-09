@@ -1011,7 +1011,7 @@ export default function WTRHubScreen() {
                   <path d="M7 1C4.8 1 3 2.8 3 5c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z"/>
                   <circle cx="7" cy="5" r="1.5" fill="rgba(200,220,240,0.75)" stroke="none"/>
                 </svg>
-                <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(200,220,240,0.85)" }}>Your Home</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(200,220,240,0.85)" }}>1234 Crestview Dr, Palm Desert, CA</span>
               </div>
               {/* Stat pills */}
               <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
@@ -1028,7 +1028,7 @@ export default function WTRHubScreen() {
               </div>
               {/* Active status */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: connected || isMock ? "#34C759" : "#FF9500", boxShadow: connected || isMock ? "0 0 8px rgba(52,199,89,0.8)" : "0 0 8px rgba(255,149,0,0.6)" }} />
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: connected || isMock ? "#1E8A4C" : "#FF9500", boxShadow: connected || isMock ? "0 0 8px rgba(30,138,76,0.8)" : "0 0 8px rgba(255,149,0,0.6)" }} />
                 <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.65)" }}>
                   {connected || isMock ? 'System active' : 'System offline'}
                 </span>
@@ -1077,10 +1077,10 @@ export default function WTRHubScreen() {
             <div style={{ background: C.card, borderRadius: 24, overflow: "hidden", boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
               {/* Header */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 0" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#AEAEB2", letterSpacing: 1.2, textTransform: "uppercase" }}>Water Quality</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(52,199,89,0.12)", borderRadius: 20, padding: "4px 10px" }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#34C759" }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#28A046" }}>Live</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.2, textTransform: "uppercase" }}>Water Quality</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(30,138,76,0.12)", borderRadius: 20, padding: "4px 10px" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1E8A4C" }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#166938" }}>Live</span>
                 </div>
               </div>
 
@@ -1090,20 +1090,20 @@ export default function WTRHubScreen() {
                   <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: "rotate(-90deg)" }}>
                     <defs>
                       <linearGradient id="outerG" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#51B0E6"/><stop offset="50%" stopColor="#34C759"/><stop offset="100%" stopColor="#28A046"/>
+                        <stop offset="0%" stopColor="#51B0E6"/><stop offset="50%" stopColor="#1E8A4C"/><stop offset="100%" stopColor="#166938"/>
                       </linearGradient>
                       <linearGradient id="innerG" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#FF9500"/><stop offset="100%" stopColor="#FFCC00"/>
                       </linearGradient>
                     </defs>
-                    <circle cx="120" cy="120" r={OR} fill="none" stroke="#F2F2F7" strokeWidth="18"/>
+                    <circle cx="120" cy="120" r={OR} fill="none" stroke="#F0F1F3" strokeWidth="18"/>
                     <circle cx="120" cy="120" r={OR} fill="none" stroke="url(#outerG)" strokeWidth="18" strokeLinecap="round" strokeDasharray={OC} strokeDashoffset={outerOff} style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(0.34,1.56,0.64,1)" }}/>
-                    <circle cx="120" cy="120" r={IR} fill="none" stroke="#F2F2F7" strokeWidth="16"/>
+                    <circle cx="120" cy="120" r={IR} fill="none" stroke="#F0F1F3" strokeWidth="16"/>
                     <circle cx="120" cy="120" r={IR} fill="none" stroke="url(#innerG)" strokeWidth="16" strokeLinecap="round" strokeDasharray={IC} strokeDashoffset={innerOff} style={{ transition: "stroke-dashoffset 1.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s" }}/>
                   </svg>
                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ fontSize: 56, fontWeight: 800, color: "#1C1C1E", letterSpacing: -2, lineHeight: 1, fontFamily: "inherit" }}>{fmt(outScore)}</div>
-                    <div style={{ fontSize: 16, fontWeight: 500, color: "#6E6E73", marginTop: 4 }}>{outLabel}</div>
+                    <div style={{ fontSize: 56, fontWeight: 800, color: "#0A1A2E", letterSpacing: -2, lineHeight: 1, fontFamily: "inherit" }}>{fmt(outScore)}</div>
+                    <div style={{ fontSize: 16, fontWeight: 500, color: "#A6A8AB", marginTop: 4 }}>{outLabel}</div>
                   </div>
                 </div>
               </div>
@@ -1112,21 +1112,21 @@ export default function WTRHubScreen() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "8px 20px 20px" }}>
                 <button onClick={()=>setOpenSheet('incoming')} style={{ backgroundColor: "rgba(174,174,178,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#6E6E73" }}>Incoming Water</span>
-                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(174,174,178,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#AEAEB2" }}>i</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Incoming Water</span>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(166,168,171,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#A6A8AB" }}>i</span>
                   </div>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: "#1C1C1E", letterSpacing: -1, lineHeight: 1 }}>{inTds}</div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "#AEAEB2", marginTop: 3 }}>TDS ppm</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: "#0A1A2E", letterSpacing: -1, lineHeight: 1 }}>{inTds}</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
                   <div style={{ marginTop: 6 }}><span style={{ fontSize: 10, fontWeight: 700, color: "#FF9500", background: "rgba(255,149,0,0.10)", padding: "3px 8px", borderRadius: 20 }}>Moderate</span></div>
                 </button>
-                <button onClick={()=>setOpenSheet('filtered')} style={{ backgroundColor: "rgba(52,199,89,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+                <button onClick={()=>setOpenSheet('filtered')} style={{ backgroundColor: "rgba(30,138,76,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#6E6E73" }}>Filtered Output</span>
-                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(52,199,89,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#28A046" }}>i</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Filtered Output</span>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(30,138,76,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#166938" }}>i</span>
                   </div>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: "#28A046", letterSpacing: -1, lineHeight: 1 }}>{fmt(outTds)}</div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "#AEAEB2", marginTop: 3 }}>TDS ppm</div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#28A046", display: "flex", alignItems: "center", gap: 3, marginTop: 6 }}><span>↓</span> {reductionPct}% reduction</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: "#166938", letterSpacing: -1, lineHeight: 1 }}>{fmt(outTds)}</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "#166938", display: "flex", alignItems: "center", gap: 3, marginTop: 6 }}><span>↓</span> {reductionPct}% reduction</div>
                 </button>
               </div>
             </div>
@@ -1134,8 +1134,8 @@ export default function WTRHubScreen() {
         })()}
 
         {/* Bottom Sheets */}
-        <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="Your Home" zip="92203" />
-        <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="Your Home" zip="92203" />
+        <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" />
+        <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" />
 
         {/* ── CARD 2: TODAY ── */}
         <div style={{

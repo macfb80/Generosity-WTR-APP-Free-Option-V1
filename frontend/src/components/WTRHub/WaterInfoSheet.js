@@ -5,14 +5,14 @@
 import React, { useEffect } from 'react';
 import { safeLabel } from '../../utils/textCleanup';
 
-const GREEN = '#34C759';
-const GREEN_DK = '#28A046';
+const GREEN = '#1E8A4C';
+const GREEN_DK = '#166938';
 const AMBER = '#FF9500';
-const GRAY_1 = '#1C1C1E';
-const GRAY_2 = '#6E6E73';
-const GRAY_3 = '#AEAEB2';
-const GRAY_4 = '#D1D1D6';
-const GRAY_5 = '#F2F2F7';
+const GRAY_1 = '#0A1A2E';
+const GRAY_2 = '#A6A8AB';
+const GRAY_3 = '#A6A8AB';
+const GRAY_4 = '#C5C6C8';
+const GRAY_5 = '#F0F1F3';
 const GREEN_SOFT = 'rgba(52,199,89,0.08)';
 
 const INCOMING = [
@@ -101,7 +101,7 @@ export function WaterInfoSheet({ type, isOpen, onClose, incomingTds, filteredTds
               <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_3, marginTop: 2 }}>ppm TDS</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: GRAY_2, marginTop: 4 }}>Before Filter</div>
             </div>
-            <div style={{ fontSize: 24, color: GRAY_3, textAlign: 'center' }}>\u2192</div>
+            <div style={{ fontSize: 24, color: GRAY_3, textAlign: 'center' }}>→</div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 32, fontWeight: 900, color: GREEN_DK, letterSpacing: -1, lineHeight: 1, fontFamily: 'inherit' }}>{filteredTds}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_3, marginTop: 2 }}>ppm TDS</div>
@@ -125,7 +125,7 @@ export function WaterInfoSheet({ type, isOpen, onClose, incomingTds, filteredTds
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_1 }}>{safeLabel(c.name)}</div>
                       <div style={{ fontSize: 11, color: GRAY_2, marginTop: 1 }}>
-                        {isIn ? safeLabel(c.context || '') : `${c.removedPct}% removed \u00B7 ${safeLabel(c.method || '')}`}
+                        {isIn ? safeLabel(c.context || '') : `${c.removedPct}% removed · ${safeLabel(c.method || '')}`}
                       </div>
                     </div>
                   </div>
@@ -152,7 +152,7 @@ export function WaterInfoSheet({ type, isOpen, onClose, incomingTds, filteredTds
 
           {/* CTA */}
           <button onClick={onClose} style={{ background: 'linear-gradient(135deg, #1A5F8A, #51B0E6)', borderRadius: 16, padding: 14, width: '100%', color: 'white', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit', letterSpacing: -0.2 }}>
-            {isIn ? 'See Full Water Intelligence Report \u2192' : 'View Full System Report \u2192'}
+            {isIn ? 'See Full Water Intelligence Report →' : 'View Full System Report →'}
           </button>
         </div>
       </div>
