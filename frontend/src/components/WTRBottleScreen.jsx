@@ -130,7 +130,8 @@ function waterScore(sensors) {
   const ph   = sensors.ph  ? parseFloat(sensors.ph.val)        : null;
   const temp = sensors.waterTemp ? parseFloat(sensors.waterTemp.val) : null;
   if (tds  != null) { if (tds>500) s-=40; else if(tds>300) s-=25; else if(tds>150) s-=12; else if(tds>35) s-=5; }
-  if (volVal != null) { const v = parseFloat(volVal); if (v < 50) s-=20; else if(v < 200) s-=5; }
+  const vol = sensors.volume ? parseFloat(sensors.volume.val) : null;
+  if (vol != null) { if (vol < 50) s-=20; else if(vol < 200) s-=5; }
   if (temp != null && temp > 30) s -= 8;
   return Math.max(0, Math.min(100, Math.round(s)));
 }
