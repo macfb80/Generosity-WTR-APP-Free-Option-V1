@@ -130,7 +130,7 @@ function waterScore(sensors) {
   const ph   = sensors.ph  ? parseFloat(sensors.ph.val)        : null;
   const temp = sensors.waterTemp ? parseFloat(sensors.waterTemp.val) : null;
   if (tds  != null) { if (tds>500) s-=40; else if(tds>300) s-=25; else if(tds>150) s-=12; else if(tds>35) s-=5; }
-  if (ph   != null) { if (ph<6.5||ph>9.5) s-=30; else if(ph<7.0||ph>9.0) s-=10; }
+  if (volVal != null) { const v = parseFloat(volVal); if (v < 50) s-=20; else if(v < 200) s-=5; }
   if (temp != null && temp > 30) s -= 8;
   return Math.max(0, Math.min(100, Math.round(s)));
 }
@@ -438,7 +438,7 @@ export default function WTRBottleScreen() {
   const [showGoal,     setShowGoal]     = useState(false);
   const [log,          setLog]          = useState([]);
   const [tab,          setTab]          = useState("live");
-  const [testPhase,    setTestPhase]    = useState(null); // null | "tds" | "ph" | "temp" | "done"
+  const [testPhase,    setTestPhase]    = useState(null); // null | "tds" | "vol" | "temp" | "done"
   const [demoActive,   setDemoActive]   = useState(false);
 
   const devRef   = useRef(null);
@@ -510,7 +510,7 @@ export default function WTRBottleScreen() {
       promise,
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error(
-          `${label} timed out after 15 s. Power-cycle the Smart Lid and try again.`
+          `${label} timed out after 15 s. Power-cycle the Smart Cap and try again.`
         )), GATT_TIMEOUT_MS)
       ),
     ]);
@@ -543,7 +543,7 @@ export default function WTRBottleScreen() {
         setBle("idle"); stopPoll(); setTele(null);
       });
       devRef.current = dev;
-      addLog(`Connecting to "${dev.name || "PP02 Smart Lid"}"\u2026`);
+      addLog(`Connecting to "${dev.name || "PP02 Smart Cap"}"\u2026`);
 
       const srv = await withTimeout(dev.gatt.connect(), "GATT connection");
       const svc = await withTimeout(srv.getPrimaryService(SVC), "Service discovery");
@@ -627,7 +627,7 @@ export default function WTRBottleScreen() {
   // ── Water test simulation ──────────────────────────────────────
   const runTest = useCallback(() => {
     setTestPhase("tds");
-    setTimeout(() => setTestPhase("ph"), 1500);
+    setTimeout(() => setTestPhase("vol"), 1500);
     setTimeout(() => setTestPhase("temp"), 3000);
     setTimeout(() => setTestPhase("done"), 4500);
     setTimeout(() => setTestPhase(null), 8000);
@@ -847,18 +847,18 @@ export default function WTRBottleScreen() {
             border: "1px solid #F0F1F3",
           }}>
             <img src="/bottle-lineup-5colors.jpg" alt="Generosity WTR BTL lineup"
-              style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }} />
+              style={{ width: "100%", height: "auto", objectFit: "contain", display: "block", maxHeight: 300 }} />
           </div>
 
           <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.7, maxWidth: 300 }}>
-            Connect your Generosity{"\u2122"} Smart Lid to monitor live water quality, track daily hydration, and receive real-time TDS readings.
+            Connect your Generosity{"\u2122"} Smart Cap to monitor live water quality, track consumption volume, and receive real-time TDS readings.
           </div>
 
           {/* Features grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, width: "100%" }}>
             {[
               { icon: <BtlIcon name="droplet" size={20} color="#51B0E6" />, label: "TDS\nMonitoring" },
-              { icon: <BtlIcon name="testTube" size={20} color="#34C759" />, label: "pH\nTracking" },
+              { icon: <BtlIcon name="ruler" size={20} color="#34C759" />, label: "Volume\nTracking" },
               { icon: <BtlIcon name="thermometer" size={20} color="#FF9500" />, label: "Temp\nSensor" },
             ].map((f, i) => (
               <div key={i} style={{
@@ -909,7 +909,7 @@ export default function WTRBottleScreen() {
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: "#0A1A2E", marginBottom: 8 }}>
-              Searching for Smart Lid
+              Searching for Smart Cap
             </div>
             <div style={{ fontSize: 13, color: "#A6A8AB", lineHeight: 1.6 }}>
               Make sure Bluetooth is on and the lid is powered up
@@ -949,6 +949,20 @@ export default function WTRBottleScreen() {
               subtitle={tdsRaw != null ? `${tdsLabel(tdsRaw)} \u00B7 ${tdsRaw} ppm` : "Analyzing..."}
             />
 
+            {/* Run Test button — compact, below ring */}
+            {testPhase === null && (
+              <button onClick={startTest} style={{
+                margin: "16px auto 0", display: "flex", alignItems: "center", gap: 8,
+                background: "linear-gradient(135deg, #51B0E6, #2A8FCA)", color: "#fff",
+                border: "none", padding: "10px 24px", borderRadius: 30,
+                fontSize: 12, fontWeight: 800, cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(81,176,230,0.35)",
+                letterSpacing: "0.3px",
+              }}>
+                <BtlIcon name="flask" size={14} color="#FFFFFF" /> RUN WATER TEST
+              </button>
+            )}
+
             {/* Quick stats row below ring */}
             <div style={{
               display: "flex", justifyContent: "center", gap: 24,
@@ -957,7 +971,7 @@ export default function WTRBottleScreen() {
             }}>
               {[
                 { label: "TDS", val: tdsRaw != null ? `${tdsRaw}` : "\u2014", unit: "ppm", c: col },
-                { label: "pH", val: phVal ?? "\u2014", unit: "", c: phColor() },
+                { label: "VOL", val: volVal ?? "\u2014", unit: "mL", c: volColor() },
                 { label: "Temp", val: tempF ?? "\u2014", unit: "\u00B0F", c: "#FF9500" },
               ].map((m, i) => (
                 <div key={i} style={{ textAlign: "center", minWidth: 60 }}>
@@ -987,13 +1001,13 @@ export default function WTRBottleScreen() {
               sublabel={tdsRaw != null ? (tdsRaw <= 35 ? "\u2713 Excellent" : tdsRaw <= 150 ? "\u2713 Good" : "\u26A0 Elevated") : null}
             />
             <MetricCard
-              icon={<BtlIcon name="testTube" size={15} color={phColor()} />}
-              label="pH"
-              value={phVal}
-              unit=""
-              color={phColor()}
-              hist={histOf("ph")}
-              sublabel={phVal != null ? (parseFloat(phVal) >= 7.2 && parseFloat(phVal) <= 9.0 ? "\u2713 Optimal" : "\u26A0 Check") : null}
+              icon={<BtlIcon name="ruler" size={15} color={volColor()} />}
+              label="VOLUME"
+              value={volVal}
+              unit="mL"
+              color={volColor()}
+              hist={histOf("volume")}
+              sublabel={volVal != null ? (parseFloat(volVal) >= 100 ? "\u2713 Good" : "\u26A0 Low") : null}
             />
             <MetricCard
               icon={<BtlIcon name="thermometer" size={15} color="#FF9500" />}
@@ -1059,7 +1073,7 @@ export default function WTRBottleScreen() {
                   Run Water Quality Test
                 </div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>
-                  Tap to analyze TDS, pH, and temperature
+                  Tap to analyze TDS, Volume, and temperature
                 </div>
               </div>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round">
@@ -1075,12 +1089,12 @@ export default function WTRBottleScreen() {
               <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>
                 {testPhase === "done" ? "TEST COMPLETE" : "TESTING IN PROGRESS"}
               </div>
-              {["tds", "ph", "temp"].map((phase, i) => {
-                const labels = { tds: "Analyzing TDS...", ph: "Checking pH levels...", temp: "Measuring temperature..." };
-                const doneLabels = { tds: `TDS: ${tdsRaw ?? 24} ppm`, ph: `pH: ${phVal ?? "7.40"}`, temp: `Temp: ${tempF ?? "68"}\u00B0F` };
-                const icons = { tds: <BtlIcon name="droplet" size={16} color="#51B0E6" />, ph: <BtlIcon name="testTube" size={16} color="#34C759" />, temp: <BtlIcon name="thermometer" size={16} color="#FF9500" /> };
+              {["tds", "vol", "temp"].map((phase, i) => {
+                const labels = { tds: "Analyzing TDS...", vol: "Measuring Volume...", temp: "Measuring temperature..." };
+                const doneLabels = { tds: `TDS: ${tdsRaw ?? 24} ppm`, vol: `Volume: ${volVal ?? "450"} mL`, temp: `Temp: ${tempF ?? "68"}\u00B0F` };
+                const icons = { tds: <BtlIcon name="droplet" size={16} color="#51B0E6" />, vol: <BtlIcon name="ruler" size={16} color="#34C759" />, temp: <BtlIcon name="thermometer" size={16} color="#FF9500" /> };
                 const isActive = testPhase === phase;
-                const isDone = testPhase === "done" || (phase === "tds" && (testPhase === "ph" || testPhase === "temp")) || (phase === "ph" && testPhase === "temp");
+                const isDone = testPhase === "done" || (phase === "tds" && (testPhase === "vol" || testPhase === "temp")) || (phase === "vol" && testPhase === "temp");
                 return (
                   <div key={phase} style={{
                     display: "flex", alignItems: "center", gap: 12,
@@ -1292,7 +1306,7 @@ export default function WTRBottleScreen() {
               }}>
                 <div style={{ fontSize: 14, fontWeight: 700 }}>Intelligent Smart Cap</div>
                 <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>
-                  Real-time TDS, pH, and temperature sensors
+                  Real-time TDS, Volume, and temperature sensors
                 </div>
               </div>
             </div>
