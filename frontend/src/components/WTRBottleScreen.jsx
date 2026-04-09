@@ -108,11 +108,11 @@ function parseInfo(buf) {
 
 function tdsColor(ppm) {
   if (ppm == null) return "#51B0E6";
-  if (ppm <=  35)  return "#1E8A4C";
-  if (ppm <= 150)  return "#F29423";
-  if (ppm <= 300)  return "#E07020";
-  if (ppm <= 500)  return "#D93025";
-  return "#A01420";
+  if (ppm <=  35)  return "#34C759";
+  if (ppm <= 150)  return "#51B0E6";
+  if (ppm <= 300)  return "#FF9500";
+  if (ppm <= 500)  return "#FF3B30";
+  return "#D93025";
 }
 
 function tdsLabel(ppm) {
@@ -122,11 +122,6 @@ function tdsLabel(ppm) {
   if (ppm <= 300)  return "Moderate";
   if (ppm <= 500)  return "Poor";
   return "Unsafe";
-}
-
-function tdsGlow(ppm) {
-  const c = tdsColor(ppm);
-  return `0 0 60px ${c}40, 0 0 120px ${c}18`;
 }
 
 function waterScore(sensors) {
@@ -141,7 +136,7 @@ function waterScore(sensors) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SPARKLINE
+// SPARKLINE (light mode)
 // ═══════════════════════════════════════════════════════════════
 
 function Sparkline({ data = [], color = "#51B0E6", w = 80, h = 28 }) {
@@ -156,686 +151,277 @@ function Sparkline({ data = [], color = "#51B0E6", w = 80, h = 28 }) {
         points={pts}
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="2"
         strokeLinejoin="round"
         strokeLinecap="round"
-        opacity="0.9"
+        opacity="0.85"
       />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// DUAL RING HERO COMPONENT
-// Outer ring  →  Daily water consumption   (brand blue #51B0E6)
-// Inner ring  →  TDS quality               (TDS color scale)
+// OURA-STYLE SCORE RING
 // ═══════════════════════════════════════════════════════════════
 
-function DualRing({ consumePct = 0, tdsRaw = null, goalML = 2000, dailyML = 0 }) {
-  const SIZE   = 290;
-  const CX     = SIZE / 2;
-  const CY     = SIZE / 2;
-  const OR     = 124;   // outer ring radius
-  const IR     = 93;    // inner ring radius
-  const OSW    = 20;    // outer stroke width
-  const ISW    = 18;    // inner stroke width
-  const OCirc  = 2 * Math.PI * OR;
-  const ICirc  = 2 * Math.PI * IR;
-  const ROT    = "rotate(-90 145 145)";
-
-  const oFill  = (Math.min(100, consumePct) / 100) * OCirc;
-  const tdsPct = tdsRaw != null ? Math.min(100, (tdsRaw / 500) * 100) : 0;
-  const iFill  = (tdsPct / 100) * ICirc;
-
-  const col    = tdsColor(tdsRaw);
-  const lbl    = tdsLabel(tdsRaw);
-  const score  = tdsRaw != null ? Math.round(100 - tdsPct) : null;
+function ScoreRing({ score = 0, label = "WATER QUALITY", size = 200, color = "#51B0E6", subtitle = "" }) {
+  const R = (size - 24) / 2;
+  const CX = size / 2;
+  const CY = size / 2;
+  const circ = 2 * Math.PI * R;
+  const fill = (Math.min(100, Math.max(0, score)) / 100) * circ;
 
   return (
-    <div style={{ position: "relative", width: SIZE, height: SIZE, margin: "0 auto" }}>
-
-      {/* Ambient background glow — shifts with TDS color */}
-      <div style={{
-        position:     "absolute",
-        inset:        30,
-        borderRadius: "50%",
-        background:   `radial-gradient(circle, ${col}14 0%, transparent 70%)`,
-        filter:       "blur(24px)",
-        transition:   "background 1.2s ease",
-        pointerEvents: "none",
-      }} />
-
-      {/* Fine dot grid texture behind rings */}
-      <div style={{
-        position:     "absolute",
-        inset:        0,
-        borderRadius: "50%",
-        backgroundImage: `radial-gradient(circle, #51B0E608 1px, transparent 1px)`,
-        backgroundSize: "12px 12px",
-        opacity:      0.6,
-        pointerEvents: "none",
-      }} />
-
-      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
-        {/* ── Outer track ── */}
-        <circle cx={CX} cy={CY} r={OR} fill="none" stroke="#1A2535" strokeWidth={OSW} />
-
-        {/* ── Outer fill (consumption, blue) ── */}
+    <div style={{ position: "relative", width: size, height: size, margin: "0 auto" }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Track */}
+        <circle cx={CX} cy={CY} r={R} fill="none" stroke="#E8ECF0" strokeWidth="12" />
+        {/* Fill */}
         <circle
-          cx={CX} cy={CY} r={OR}
+          cx={CX} cy={CY} r={R}
           fill="none"
-          stroke="#51B0E6"
-          strokeWidth={OSW}
+          stroke={color}
+          strokeWidth="12"
           strokeLinecap="round"
-          strokeDasharray={`${oFill} ${OCirc}`}
-          transform={ROT}
-          style={{ transition: "stroke-dasharray 1.1s cubic-bezier(0.34,1.56,0.64,1)" }}
+          strokeDasharray={`${fill} ${circ}`}
+          transform={`rotate(-90 ${CX} ${CY})`}
+          style={{ transition: "stroke-dasharray 1.5s cubic-bezier(0.34,1.56,0.64,1), stroke 0.8s ease" }}
         />
-        {/* Outer glow layer */}
+        {/* Soft glow layer */}
         <circle
-          cx={CX} cy={CY} r={OR}
+          cx={CX} cy={CY} r={R}
           fill="none"
-          stroke="#51B0E635"
-          strokeWidth={OSW + 10}
+          stroke={`${color}30`}
+          strokeWidth="20"
           strokeLinecap="round"
-          strokeDasharray={`${oFill} ${OCirc}`}
-          transform={ROT}
-          style={{ transition: "stroke-dasharray 1.1s cubic-bezier(0.34,1.56,0.64,1)", filter: "blur(8px)" }}
+          strokeDasharray={`${fill} ${circ}`}
+          transform={`rotate(-90 ${CX} ${CY})`}
+          style={{ transition: "stroke-dasharray 1.5s cubic-bezier(0.34,1.56,0.64,1)", filter: "blur(8px)" }}
         />
-
-        {/* ── Inner track ── */}
-        <circle cx={CX} cy={CY} r={IR} fill="none" stroke="#1A2535" strokeWidth={ISW} />
-
-        {/* ── Inner fill (TDS quality, color-coded) ── */}
-        <circle
-          cx={CX} cy={CY} r={IR}
-          fill="none"
-          stroke={col}
-          strokeWidth={ISW}
-          strokeLinecap="round"
-          strokeDasharray={`${iFill} ${ICirc}`}
-          transform={ROT}
-          style={{ transition: "stroke-dasharray 1.1s cubic-bezier(0.34,1.56,0.64,1), stroke 1s ease" }}
-        />
-        {/* Inner glow layer */}
-        <circle
-          cx={CX} cy={CY} r={IR}
-          fill="none"
-          stroke={`${col}40`}
-          strokeWidth={ISW + 12}
-          strokeLinecap="round"
-          strokeDasharray={`${iFill} ${ICirc}`}
-          transform={ROT}
-          style={{ transition: "stroke-dasharray 1.1s cubic-bezier(0.34,1.56,0.64,1), stroke 1s ease", filter: "blur(10px)" }}
-        />
-
-        {/* ── Ring endpoint dot — outer ── */}
-        {consumePct > 2 && (
-          <circle
-            cx={CX + OR * Math.cos(((consumePct / 100) * 360 - 90) * Math.PI / 180)}
-            cy={CY + OR * Math.sin(((consumePct / 100) * 360 - 90) * Math.PI / 180)}
-            r={OSW / 2 - 1}
-            fill="#51B0E6"
-          />
-        )}
-        {/* ── Ring endpoint dot — inner ── */}
-        {tdsRaw != null && tdsPct > 2 && (
-          <circle
-            cx={CX + IR * Math.cos(((tdsPct / 100) * 360 - 90) * Math.PI / 180)}
-            cy={CY + IR * Math.sin(((tdsPct / 100) * 360 - 90) * Math.PI / 180)}
-            r={ISW / 2 - 1}
-            fill={col}
-            style={{ transition: "fill 1s ease" }}
-          />
-        )}
       </svg>
-
-      {/* ── Center Content ── */}
+      {/* Center */}
       <div style={{
-        position:       "absolute",
-        inset:          0,
-        display:        "flex",
-        flexDirection:  "column",
-        alignItems:     "center",
-        justifyContent: "center",
-        gap:            0,
-        pointerEvents:  "none",
+        position: "absolute", inset: 0,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        pointerEvents: "none",
       }}>
-        {/* Large TDS number */}
         <div style={{
-          fontSize:           tdsRaw != null ? 58 : 40,
-          fontWeight:         800,
-          color:              tdsRaw != null ? col : "#2A3A4E",
+          fontSize: size > 160 ? 52 : 36,
+          fontWeight: 800,
+          color: "#0A1A2E",
           fontVariantNumeric: "tabular-nums",
-          letterSpacing:      -3,
-          lineHeight:         1,
-          transition:         "color 1s ease, font-size 0.3s ease",
-          textShadow:         tdsRaw != null ? tdsGlow(tdsRaw) : "none",
-          fontFamily:         "system-ui, -apple-system",
+          letterSpacing: -2,
+          lineHeight: 1,
         }}>
-          {tdsRaw != null ? tdsRaw : "\u2014"}
+          {score != null ? score : "\u2014"}
         </div>
-        {/* ppm unit */}
         <div style={{
-          fontSize:      13,
-          fontWeight:    600,
-          color:         "#3A4A5E",
-          letterSpacing: 2.5,
-          textTransform: "uppercase",
-          marginTop:     4,
-        }}>ppm</div>
-        {/* Quality label */}
-        <div style={{
-          marginTop:     8,
-          fontSize:      12,
-          fontWeight:    700,
-          color:         col,
-          letterSpacing: 1,
-          textTransform: "uppercase",
-          transition:    "color 1s ease",
+          fontSize: 10, fontWeight: 700, color: "#A6A8AB",
+          letterSpacing: 2, textTransform: "uppercase", marginTop: 6,
         }}>
-          {lbl}
+          {label}
         </div>
-      </div>
-
-      {/* ── Consumption badge (top) ── */}
-      <div style={{
-        position:       "absolute",
-        top:            8,
-        left:           "50%",
-        transform:      "translateX(-50%)",
-        background:     "#0D1825CC",
-        border:         "1px solid #1A253570",
-        borderRadius:   30,
-        padding:        "4px 14px",
-        fontSize:       11,
-        fontWeight:     700,
-        color:          "#51B0E6",
-        letterSpacing:  0.5,
-        whiteSpace:     "nowrap",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-      }}>
-        <BtlIcon name="droplet" size={12} color="#51B0E6" /> {Math.round(consumePct)}% {"\u2014"} {dailyML} mL
-      </div>
-
-      {/* ── TDS badge (bottom) ── */}
-      {tdsRaw != null && (
-        <div style={{
-          position:       "absolute",
-          bottom:         8,
-          left:           "50%",
-          transform:      "translateX(-50%)",
-          background:     `${col}18`,
-          border:         `1px solid ${col}40`,
-          borderRadius:   30,
-          padding:        "4px 14px",
-          fontSize:       11,
-          fontWeight:     700,
-          color:          col,
-          letterSpacing:  0.5,
-          whiteSpace:     "nowrap",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          transition:     "all 1s ease",
-        }}>
-          TDS {"\u00B7"} {lbl}
-        </div>
-      )}
-
-      {/* ── Ring labels (sides) ── */}
-      <div style={{ position: "absolute", left: -2, top: "50%", transform: "translateY(-50%) rotate(-90deg)", fontSize: 9, fontWeight: 700, color: "#51B0E660", letterSpacing: 2, textTransform: "uppercase" }}>
-        INTAKE
-      </div>
-      <div style={{ position: "absolute", right: -2, top: "50%", transform: "translateY(-50%) rotate(90deg)", fontSize: 9, fontWeight: 700, color: `${col}60`, letterSpacing: 2, textTransform: "uppercase", transition: "color 1s" }}>
-        TDS
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TDS SCALE BAR
-// ═══════════════════════════════════════════════════════════════
-
-function TDSScaleBar({ tdsRaw }) {
-  const bands = [
-    { min: 0,   max: 35,  label: "Excellent", short: "0\u201335",   color: "#1E8A4C" },
-    { min: 35,  max: 150, label: "Good",      short: "35\u2013150", color: "#F29423" },
-    { min: 150, max: 300, label: "Moderate",  short: "150\u2013300",color: "#E07020" },
-    { min: 300, max: 500, label: "Poor",      short: "300\u2013500",color: "#D93025" },
-    { min: 500, max: 9999,label: "Unsafe",    short: "500+",   color: "#A01420" },
-  ];
-  const active = tdsRaw != null
-    ? bands.findIndex(b => tdsRaw >= b.min && tdsRaw < b.max)
-    : -1;
-  const lastBandActive = tdsRaw != null && tdsRaw >= 500 ? 4 : active;
-
-  return (
-    <div style={{ padding: "0 4px" }}>
-      <div style={{
-        display:        "flex",
-        justifyContent: "space-between",
-        marginBottom:   8,
-        alignItems:     "center",
-      }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: "#3A4A5E", letterSpacing: 1.5, textTransform: "uppercase" }}>
-          TDS Quality Scale
-        </span>
-        {tdsRaw != null && (
-          <span style={{ fontSize: 11, fontWeight: 700, color: tdsColor(tdsRaw) }}>
-            {tdsRaw} ppm {"\u2014"} {tdsLabel(tdsRaw)}
-          </span>
+        {subtitle && (
+          <div style={{ fontSize: 12, fontWeight: 500, color: "#6B7280", marginTop: 4 }}>
+            {subtitle}
+          </div>
         )}
       </div>
+    </div>
+  );
+}
 
-      {/* Bar segments */}
-      <div style={{ display: "flex", gap: 3, marginBottom: 6 }}>
-        {bands.map((b, i) => {
-          const isActive = i === lastBandActive;
-          return (
-            <div
-              key={b.label}
-              style={{
-                flex:         i === 1 ? 2 : i === 2 ? 2 : 1,
-                height:       isActive ? 10 : 6,
-                borderRadius: 5,
-                background:   isActive ? b.color : `${b.color}35`,
-                boxShadow:    isActive ? `0 0 12px ${b.color}80` : "none",
-                transition:   "all 0.6s ease",
-                marginTop:    isActive ? -2 : 0,
-              }}
-            />
-          );
-        })}
-      </div>
+// ═══════════════════════════════════════════════════════════════
+// HYDRATION RING (smaller, Oura Activity style)
+// ═══════════════════════════════════════════════════════════════
 
-      {/* Labels */}
-      <div style={{ display: "flex", gap: 3 }}>
-        {bands.map((b, i) => {
-          const isActive = i === lastBandActive;
-          return (
-            <div
-              key={b.label}
-              style={{
-                flex:          i === 1 ? 2 : i === 2 ? 2 : 1,
-                textAlign:     "center",
-                fontSize:      isActive ? 10 : 9,
-                fontWeight:    isActive ? 800 : 500,
-                color:         isActive ? b.color : "#3A4A5E",
-                transition:    "all 0.6s ease",
-                letterSpacing: 0.2,
-                lineHeight:    1.3,
-              }}
-            >
-              <div>{b.short}</div>
-              <div style={{ opacity: isActive ? 1 : 0.6 }}>{b.label}</div>
-            </div>
-          );
-        })}
+function HydrationRing({ consumePct = 0, dailyML = 0, goalML = 2000 }) {
+  const SIZE = 130;
+  const R = 50;
+  const circ = 2 * Math.PI * R;
+  const fill = (Math.min(100, consumePct) / 100) * circ;
+  const isDone = consumePct >= 100;
+
+  return (
+    <div style={{ position: "relative", width: SIZE, height: SIZE }}>
+      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
+        <circle cx={SIZE/2} cy={SIZE/2} r={R} fill="none" stroke="#E8ECF0" strokeWidth="9" />
+        <circle
+          cx={SIZE/2} cy={SIZE/2} r={R}
+          fill="none"
+          stroke={isDone ? "#34C759" : "#51B0E6"}
+          strokeWidth="9"
+          strokeLinecap="round"
+          strokeDasharray={`${fill} ${circ}`}
+          transform={`rotate(-90 ${SIZE/2} ${SIZE/2})`}
+          style={{ transition: "stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)" }}
+        />
+      </svg>
+      <div style={{
+        position: "absolute", inset: 0,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: isDone ? "#34C759" : "#51B0E6" }}>
+          {consumePct}%
+        </div>
+        <div style={{ fontSize: 9, color: "#A6A8AB", fontWeight: 500 }}>
+          {(dailyML/1000).toFixed(1)}L
+        </div>
       </div>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STAT CARD
+// TIMELINE CHART (Oura sleep stages style)
 // ═══════════════════════════════════════════════════════════════
 
-function StatCard({ icon, label, value, unit, color, hist = [], sublabel, onClick }) {
+function TimelineChart({ data = [], w = 320, h = 100 }) {
+  if (data.length < 2) {
+    return (
+      <div style={{ width: w, height: h, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: 12, color: "#A6A8AB" }}>Collecting readings...</span>
+      </div>
+    );
+  }
+  const vals = data.map(d => d.sensors?.tds?.raw ?? 0);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const rng = max - min || 1;
+  const pad = 4;
+  const pts = vals
+    .map((v, i) => `${pad + (i / (vals.length - 1)) * (w - pad * 2)},${pad + (h - pad * 2) - ((v - min) / rng) * (h - pad * 2)}`)
+    .join(" ");
+
+  // Color bands
+  const yFor = (ppm) => pad + (h - pad * 2) - ((ppm - min) / rng) * (h - pad * 2);
+
+  return (
+    <svg width={w} height={h} style={{ display: "block" }}>
+      {/* Optimal zone shading */}
+      {min < 35 && max > 0 && (
+        <rect
+          x={pad} y={Math.min(yFor(35), yFor(0))}
+          width={w - pad * 2}
+          height={Math.abs(yFor(35) - yFor(Math.max(0, min)))}
+          fill="#34C75910" rx="4"
+        />
+      )}
+      {/* Grid lines */}
+      {[0.25, 0.5, 0.75].map(pct => (
+        <line key={pct} x1={pad} y1={pad + pct * (h - pad * 2)} x2={w - pad} y2={pad + pct * (h - pad * 2)}
+              stroke="#E8ECF0" strokeWidth="1" strokeDasharray="4 4" />
+      ))}
+      {/* Area fill */}
+      <polygon
+        points={`${pad},${h - pad} ${pts} ${pad + ((vals.length - 1) / (vals.length - 1)) * (w - pad * 2)},${h - pad}`}
+        fill="url(#areaGradLight)"
+        opacity="0.3"
+      />
+      {/* Line */}
+      <polyline
+        points={pts}
+        fill="none"
+        stroke="#51B0E6"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {/* Latest dot */}
+      {vals.length > 0 && (
+        <circle
+          cx={pad + ((vals.length - 1) / (vals.length - 1)) * (w - pad * 2)}
+          cy={pad + (h - pad * 2) - ((vals[vals.length - 1] - min) / rng) * (h - pad * 2)}
+          r="5" fill="#51B0E6" stroke="#FFFFFF" strokeWidth="2"
+        />
+      )}
+      <defs>
+        <linearGradient id="areaGradLight" x1="0" y1="0" x2="0" y2={h} gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#51B0E6" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#51B0E6" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// METRIC CARD (light Oura style)
+// ═══════════════════════════════════════════════════════════════
+
+function MetricCard({ icon, label, value, unit, color = "#51B0E6", sublabel, hist = [] }) {
   const trend = hist.length >= 2 ? hist[hist.length - 1] - hist[hist.length - 2] : 0;
   const trendIcon = trend > 0.05 ? "\u2191" : trend < -0.05 ? "\u2193" : null;
 
   return (
-    <div
-      onClick={onClick}
-      style={{
-        background:    "linear-gradient(150deg, #0D1825 0%, #0A1520 100%)",
-        border:        `1px solid ${value != null ? color + "25" : "#1A2535"}`,
-        borderRadius:  22,
-        padding:       "18px 16px 14px",
-        display:       "flex",
-        flexDirection: "column",
-        gap:           0,
-        position:      "relative",
-        overflow:      "hidden",
-        cursor:        onClick ? "pointer" : "default",
-        transition:    "border-color 0.5s ease, transform 0.15s ease",
-        WebkitTapHighlightColor: "transparent",
-      }}
-    >
-      {/* Background corner glow */}
+    <div style={{
+      background: "#FFFFFF",
+      borderRadius: 20,
+      padding: "18px 16px 14px",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03)",
+      border: "1px solid #F0F1F3",
+      display: "flex",
+      flexDirection: "column",
+      gap: 0,
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      {/* Subtle corner accent */}
       <div style={{
-        position:      "absolute",
-        top:           -20, right: -20,
-        width:         80, height: 80,
-        borderRadius:  "50%",
-        background:    `radial-gradient(circle, ${color}12 0%, transparent 70%)`,
-        pointerEvents: "none",
-        transition:    "background 0.5s",
+        position: "absolute", top: -20, right: -20,
+        width: 60, height: 60, borderRadius: "50%",
+        background: `${color}08`, pointerEvents: "none",
       }} />
 
-      {/* Label + trend */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+      {/* Label */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
-          <span style={{ fontSize: 10, fontWeight: 700, color: "#556070", letterSpacing: 1.2, textTransform: "uppercase" }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.2, textTransform: "uppercase" }}>
             {label}
           </span>
         </div>
         {trendIcon && (
-          <span style={{ fontSize: 13, color: trend > 0 ? "#F29423" : "#51B0E6", fontWeight: 700 }}>
+          <span style={{ fontSize: 13, color: trend > 0 ? "#FF9500" : "#51B0E6", fontWeight: 700 }}>
             {trendIcon}
           </span>
         )}
       </div>
 
       {/* Value */}
-      <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 2 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
         <span style={{
-          fontSize:           30,
-          fontWeight:         800,
-          color:              value != null ? color : "#2A3A4E",
-          fontVariantNumeric: "tabular-nums",
-          letterSpacing:      -1,
-          lineHeight:         1,
-          fontFamily:         "system-ui, -apple-system",
-          transition:         "color 0.5s ease",
+          fontSize: 28, fontWeight: 800, color: value != null ? "#0A1A2E" : "#D1D5DB",
+          fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1,
+          transition: "color 0.3s",
         }}>
           {value ?? "\u2014"}
         </span>
         {unit && value != null && (
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#3A4A5E", letterSpacing: 0.3 }}>{unit}</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>{unit}</span>
         )}
       </div>
 
       {/* Sublabel */}
       {sublabel && (
-        <div style={{ fontSize: 10, color: sublabel.startsWith("\u26A0") ? "#F29423" : sublabel.startsWith("\u2713") ? "#1E8A4C" : "#3A4A5E", fontWeight: 600, marginBottom: 6 }}>
+        <div style={{
+          fontSize: 10, fontWeight: 600, marginBottom: 4,
+          color: sublabel.startsWith("\u26A0") ? "#FF9500" : sublabel.startsWith("\u2713") ? "#34C759" : "#A6A8AB",
+        }}>
           {sublabel}
         </div>
       )}
 
       {/* Sparkline */}
-      <div style={{ marginTop: "auto", paddingTop: 8 }}>
-        <Sparkline data={hist} color={color} w={100} h={26} />
+      <div style={{ marginTop: "auto", paddingTop: 6 }}>
+        <Sparkline data={hist} color={color} w={100} h={24} />
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// BOTTLE ILLUSTRATION (connect screen)
-// ═══════════════════════════════════════════════════════════════
-
-function BottleIllustration({ glowing = false }) {
-  return (
-    <div style={{ position: "relative", width: 180, height: 180 }}>
-      {/* Pulse rings */}
-      {[0, 1, 2].map(i => (
-        <div key={i} style={{
-          position:     "absolute",
-          inset:        i * -14,
-          borderRadius: "50%",
-          border:       `1px solid #51B0E6${glowing ? "30" : "15"}`,
-          animation:    `ringPulse 3s ease-in-out ${i * 0.6}s infinite`,
-          pointerEvents: "none",
-        }} />
-      ))}
-      {/* Circle bg */}
-      <div style={{
-        width:        "100%",
-        height:       "100%",
-        borderRadius: "50%",
-        background:   "radial-gradient(circle at 38% 32%, #1A3A5C 0%, #0A1825 55%, #060E18 100%)",
-        border:       "1.5px solid #1A2A3E",
-        display:      "flex",
-        alignItems:   "center",
-        justifyContent: "center",
-        boxShadow:    glowing
-          ? "0 0 80px #51B0E630, 0 0 160px #51B0E612, inset 0 0 50px #51B0E610"
-          : "0 0 40px #51B0E610, inset 0 0 30px #51B0E606",
-        transition:   "box-shadow 1s ease",
-        position:     "relative",
-        overflow:     "hidden",
-      }}>
-        {/* Shimmer highlight */}
-        <div style={{
-          position:     "absolute",
-          top:          "10%", left: "20%",
-          width:        "30%", height: "45%",
-          background:   "linear-gradient(135deg, #51B0E615 0%, transparent 100%)",
-          borderRadius: "50%",
-          transform:    "rotate(-20deg)",
-          pointerEvents: "none",
-        }} />
-
-        {/* Bottle SVG */}
-        <svg width={70} height={96} viewBox="0 0 70 96" fill="none">
-          {/* Cap */}
-          <rect x="27" y="2" width="16" height="10" rx="3" fill="#51B0E6" opacity="0.7"/>
-          <rect x="29" y="3" width="12" height="8" rx="2" fill="#51B0E6" opacity="0.4"/>
-
-          {/* Neck */}
-          <rect x="29" y="11" width="12" height="6" rx="1" fill="#0D2A45" stroke="#51B0E6" strokeWidth="0.8"/>
-
-          {/* Body */}
-          <path
-            d="M22 17h26v4c6 3 9 9 9 17v30c0 8-5 14-13 14H26c-8 0-13-6-13-14V38c0-8 3-14 9-17v-4z"
-            fill="#0A1E35"
-            stroke="#51B0E6"
-            strokeWidth="1"
-            opacity="0.95"
-          />
-
-          {/* Water fill gradient */}
-          <clipPath id="bottleClip">
-            <path d="M22 17h26v4c6 3 9 9 9 17v30c0 8-5 14-13 14H26c-8 0-13-6-13-14V38c0-8 3-14 9-17v-4z"/>
-          </clipPath>
-          <rect x="13" y="52" width="44" height="36" clipPath="url(#bottleClip)" fill="url(#waterGrad)" opacity="0.65"/>
-          <defs>
-            <linearGradient id="waterGrad" x1="35" y1="88" x2="35" y2="52" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#51B0E6" stopOpacity="0.9"/>
-              <stop offset="100%" stopColor="#51B0E6" stopOpacity="0.1"/>
-            </linearGradient>
-          </defs>
-
-          {/* Label area */}
-          <rect x="20" y="42" width="30" height="20" rx="4" fill="#0D1E30" stroke="#1A3050" strokeWidth="0.8" opacity="0.8"/>
-          {/* Generosity G mark */}
-          <text x="35" y="56" textAnchor="middle" fontFamily="system-ui" fontWeight="800" fontSize="11" fill="#51B0E6" opacity="0.9">{"\u0047\u2122"}</text>
-
-          {/* Sensor dots */}
-          <circle cx="25" cy="68" r="2" fill="#51B0E6" opacity="0.6"/>
-          <circle cx="35" cy="71" r="2" fill="#1E8A4C" opacity="0.6"/>
-          <circle cx="45" cy="68" r="2" fill="#F29423" opacity="0.6"/>
-
-          {/* Shine */}
-          <path d="M26 20 Q28 35 26 55" stroke="#51B0E640" strokeWidth="3" strokeLinecap="round"/>
-        </svg>
-      </div>
-
-      {/* Generosity brand mark below */}
-      <div style={{
-        position:  "absolute",
-        bottom:    -28,
-        left:      "50%",
-        transform: "translateX(-50%)",
-        fontSize:  10,
-        fontWeight: 800,
-        color:     "#51B0E660",
-        letterSpacing: 3,
-        textTransform: "uppercase",
-        whiteSpace: "nowrap",
-      }}>
-        Generosity{"\u2122"}
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// CONNECT SCREEN
-// ═══════════════════════════════════════════════════════════════
-
-function ConnectScreen({ onConnect }) {
-  return (
-    <div style={{
-      flex:           1,
-      display:        "flex",
-      flexDirection:  "column",
-      alignItems:     "center",
-      justifyContent: "center",
-      padding:        "24px 28px 48px",
-      gap:            0,
-      textAlign:      "center",
-    }}>
-      {/* Hero Product Image */}
-      <div style={{
-        width:        260,
-        height:       260,
-        borderRadius: 28,
-        overflow:     "hidden",
-        marginBottom: 32,
-        boxShadow:    "0 20px 60px rgba(81,176,230,0.15), 0 8px 24px rgba(0,0,0,0.4)",
-        border:       "1px solid #1A253540",
-      }}>
-        <img
-          src="/wtr-bottle-hero.jpg"
-          alt="Generosity™ Intelligent WTR BTL"
-          style={{
-            width:     "100%",
-            height:    "100%",
-            objectFit: "cover",
-            display:   "block",
-          }}
-        />
-      </div>
-
-      {/* Headline */}
-      <div style={{ fontSize: 26, fontWeight: 800, color: "#F0F4F8", letterSpacing: -0.8, lineHeight: 1.2, marginBottom: 12 }}>
-        Intelligent WTR BTL
-      </div>
-      <div style={{ fontSize: 14, color: "#A6A8AB", lineHeight: 1.7, maxWidth: 280, marginBottom: 36 }}>
-        Connect your Generosity{"\u2122"} Smart Lid to monitor live water quality, track daily hydration, and receive real-time TDS readings.
-      </div>
-
-      {/* CTA Button */}
-      <button
-        onClick={onConnect}
-        data-testid="connect-wtr-btl-btn"
-        style={{
-          width:         "100%",
-          maxWidth:      320,
-          padding:       "20px 0",
-          background:    "linear-gradient(135deg, #51B0E6 0%, #2A8FCA 50%, #1A7AB8 100%)",
-          color:         "#060E18",
-          border:        "none",
-          borderRadius:  18,
-          fontSize:      17,
-          fontWeight:    800,
-          letterSpacing: 0.3,
-          cursor:        "pointer",
-          boxShadow:     "0 12px 48px #51B0E650, 0 4px 12px #51B0E630",
-          position:      "relative",
-          overflow:      "hidden",
-          marginBottom:  16,
-          transition:    "transform 0.15s, box-shadow 0.15s",
-        }}
-        onMouseDown={e => e.currentTarget.style.transform = "scale(0.98)"}
-        onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
-        onTouchStart={e => e.currentTarget.style.transform = "scale(0.98)"}
-        onTouchEnd={e => e.currentTarget.style.transform = "scale(1)"}
-      >
-        {/* Shine overlay */}
-        <div style={{
-          position:     "absolute",
-          inset:        0,
-          background:   "linear-gradient(135deg, #ffffff20 0%, transparent 50%)",
-          borderRadius: 18,
-          pointerEvents: "none",
-        }} />
-        <span style={{ position: "relative", zIndex: 1 }}>Connect WTR BTL</span>
-      </button>
-
-      <div style={{ fontSize: 11, color: "#556070", maxWidth: 260, lineHeight: 1.7 }}>
-        Open in Chrome on Android or Chrome desktop. Enable Bluetooth and power on your PP02 Smart Lid before connecting.
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SCANNING SCREEN
-// ═══════════════════════════════════════════════════════════════
-
-function ScanningScreen({ onCancel }) {
-  return (
-    <div style={{
-      flex:           1,
-      display:        "flex",
-      flexDirection:  "column",
-      alignItems:     "center",
-      justifyContent: "center",
-      gap:            28,
-    }}>
-      {/* Triple spinner */}
-      <div style={{ position: "relative", width: 90, height: 90 }}>
-        {[
-          { size: 90, dur: "1s",   dir: "normal",  sw: 2.5, color: "#51B0E6" },
-          { size: 66, dur: "1.6s", dir: "reverse", sw: 1.5, color: "#51B0E680" },
-          { size: 44, dur: "2.2s", dir: "normal",  sw: 1,   color: "#51B0E640" },
-        ].map(({ size, dur, dir, sw, color }, i) => (
-          <div key={i} style={{
-            position:  "absolute",
-            inset:     (90 - size) / 2,
-            borderRadius: "50%",
-            border:    `${sw}px solid transparent`,
-            borderTop: `${sw}px solid ${color}`,
-            animation: `spin ${dur} linear ${dir} infinite`,
-          }} />
-        ))}
-        <div style={{
-          position:       "absolute",
-          inset:          0,
-          display:        "flex",
-          alignItems:     "center",
-          justifyContent: "center",
-          fontSize:       22,
-        }}>
-          <BtlIcon name="droplet" size={22} color="#51B0E6" />
-        </div>
-      </div>
-
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#F0F4F8", marginBottom: 8 }}>
-          Searching for PP02 Smart Lid
-        </div>
-        <div style={{ fontSize: 13, color: "#556070", lineHeight: 1.6 }}>
-          Make sure Bluetooth is on<br />and the lid is powered up
-        </div>
-      </div>
-
-      <button
-        onClick={onCancel}
-        data-testid="cancel-scan-btn"
-        style={{
-          background:   "transparent",
-          border:       "1px solid #1A2535",
-          borderRadius: 14,
-          color:        "#556070",
-          padding:      "12px 32px",
-          fontSize:     13,
-          fontWeight:   600,
-          cursor:       "pointer",
-          transition:   "border-color 0.2s, color 0.2s",
-        }}
-      >
-        Cancel
-      </button>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -852,12 +438,15 @@ export default function WTRBottleScreen() {
   const [showGoal,     setShowGoal]     = useState(false);
   const [log,          setLog]          = useState([]);
   const [tab,          setTab]          = useState("live");
+  const [testPhase,    setTestPhase]    = useState(null); // null | "tds" | "ph" | "temp" | "done"
+  const [demoActive,   setDemoActive]   = useState(false);
 
   const devRef   = useRef(null);
   const wRef     = useRef(null);
   const nRef     = useRef(null);
   const timerRef = useRef(null);
   const rxBuf    = useRef([]);
+  const demoRef  = useRef(null);
 
   // ── Logging ──────────────────────────────────────────────────
   const addLog = useCallback((msg, bytes) => {
@@ -935,7 +524,6 @@ export default function WTRBottleScreen() {
     try {
       setBle("scanning"); setErrMsg("");
 
-      // 1. Request device — try service filter first, fall back to broad scan
       let dev;
       try {
         dev = await navigator.bluetooth.requestDevice({
@@ -944,7 +532,7 @@ export default function WTRBottleScreen() {
         });
       } catch (filterErr) {
         if (filterErr.name === "NotFoundError") { setBle("idle"); return; }
-        addLog("Filtered scan failed — retrying with broad scan\u2026");
+        addLog("Filtered scan failed \u2014 retrying with broad scan\u2026");
         dev = await navigator.bluetooth.requestDevice({
           acceptAllDevices: true,
           optionalServices: [SVC],
@@ -957,10 +545,7 @@ export default function WTRBottleScreen() {
       devRef.current = dev;
       addLog(`Connecting to "${dev.name || "PP02 Smart Lid"}"\u2026`);
 
-      // 2. GATT connect with 15-second timeout
       const srv = await withTimeout(dev.gatt.connect(), "GATT connection");
-
-      // 3. Service + characteristic discovery (each with timeout)
       const svc = await withTimeout(srv.getPrimaryService(SVC), "Service discovery");
       wRef.current = await withTimeout(svc.getCharacteristic(WCHR), "Write characteristic");
       nRef.current = await withTimeout(svc.getCharacteristic(NCHR), "Notify characteristic");
@@ -971,7 +556,6 @@ export default function WTRBottleScreen() {
       addLog("\u2713 Connected");
       startPoll();
     } catch(e) {
-      // Clean up partial connection
       try { if (devRef.current?.gatt?.connected) devRef.current.gatt.disconnect(); } catch (_) {}
       if (e.name === "NotFoundError") {
         setBle("idle");
@@ -1003,6 +587,52 @@ export default function WTRBottleScreen() {
 
   useEffect(() => () => stopPoll(), [stopPoll]);
 
+  // ── Demo mode ─────────────────────────────────────────────────
+  const startDemo = useCallback(() => {
+    setDemoActive(true);
+    const demoTick = () => {
+      const baseTds = 24 + Math.floor(Math.random() * 12);
+      const basePh  = 720 + Math.floor(Math.random() * 40);
+      const baseTemp = 195 + Math.floor(Math.random() * 30);
+      const fakeInfo = {
+        state: 1,
+        charging: false,
+        batt: 82 + Math.floor(Math.random() * 10),
+        fw: 501,
+        sensors: {
+          tds: { label: "TDS", val: baseTds, unit: "ppm", raw: baseTds, type: 2, status: 0 },
+          ph: { label: "pH", val: (basePh / 100).toFixed(2), unit: "pH", raw: basePh, type: 3, status: 0 },
+          waterTemp: { label: "Water Temp", val: (baseTemp / 10).toFixed(1), unit: "°C", raw: baseTemp, type: 5, status: 0 },
+          waterLevel: { label: "Water Level", val: 180 + Math.floor(Math.random() * 40), unit: "mm", raw: 180, type: 4, status: 0 },
+          volume: { label: "Volume", val: 400 + Math.floor(Math.random() * 200), unit: "mL", raw: 400 + Math.floor(Math.random() * 200), type: 6, status: 0 },
+        },
+        ts: Date.now(),
+      };
+      setTele(fakeInfo);
+      setHist(p => [...p.slice(-(MAX_HIST - 1)), fakeInfo]);
+      setIntake(p => Math.min(p + Math.floor(Math.random() * 40) + 10, 2500));
+    };
+    demoTick();
+    demoRef.current = setInterval(demoTick, POLL_MS);
+  }, []);
+
+  const stopDemo = useCallback(() => {
+    setDemoActive(false);
+    clearInterval(demoRef.current);
+    setTele(null); setHist([]); setIntake(0);
+  }, []);
+
+  useEffect(() => () => clearInterval(demoRef.current), []);
+
+  // ── Water test simulation ──────────────────────────────────────
+  const runTest = useCallback(() => {
+    setTestPhase("tds");
+    setTimeout(() => setTestPhase("ph"), 1500);
+    setTimeout(() => setTestPhase("temp"), 3000);
+    setTimeout(() => setTestPhase("done"), 4500);
+    setTimeout(() => setTestPhase(null), 8000);
+  }, []);
+
   // ── Derived values ────────────────────────────────────────────
   const s          = tele?.sensors ?? {};
   const tdsRaw     = s.tds?.raw    ?? null;
@@ -1021,445 +651,25 @@ export default function WTRBottleScreen() {
   const phColor = () => {
     if (!phVal) return "#51B0E6";
     const v = parseFloat(phVal);
-    if (v < 6.5 || v > 9.5) return "#D93025";
-    if (v >= 7.2 && v <= 9.0) return "#1E8A4C";
-    return "#F29423";
+    if (v < 6.5 || v > 9.5) return "#FF3B30";
+    if (v >= 7.2 && v <= 9.0) return "#34C759";
+    return "#FF9500";
   };
 
   const isLive = ble === "connected" || tele !== null;
+  const isDemo = demoActive && ble !== "connected";
+  const tempF  = tempVal != null ? (parseFloat(tempVal) * 9/5 + 32).toFixed(0) : null;
 
-  // ── LIVE TAB ──────────────────────────────────────────────────
-  const LiveTab = () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14, paddingBottom: 12 }}>
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════
 
-      {/* HERO: DUAL RINGS */}
-      <div style={{
-        background: "linear-gradient(165deg, #0A1A2E 0%, #060E18 100%)",
-        borderRadius: 28,
-        padding: "24px 16px 18px",
-        border: "1px solid #1A253560",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 16,
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        {/* Subtle animated grid */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "linear-gradient(#51B0E606 1px, transparent 1px), linear-gradient(90deg, #51B0E606 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-          pointerEvents: "none",
-        }}/>
-
-        <DualRing
-          consumePct={consumePct}
-          tdsRaw={tdsRaw}
-          goalML={goalML}
-          dailyML={intake}
-        />
-
-        <TDSScaleBar tdsRaw={tdsRaw} />
-
-        {/* Intake row */}
-        <div style={{
-          width: "100%",
-          background: "#0A152080",
-          borderRadius: 16,
-          padding: "12px 16px",
-          border: "1px solid #1A253550",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}>
-          <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#3A4A5E", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
-              Today's Intake
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
-              <span style={{ fontSize: 26, fontWeight: 800, color: "#51B0E6", fontVariantNumeric: "tabular-nums", fontFamily: "system-ui" }}>
-                {intake}
-              </span>
-              <span style={{ fontSize: 12, color: "#3A4A5E", fontWeight: 600 }}>/ {goalML} mL</span>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div style={{ flex: 1 }}>
-            <div style={{ height: 5, background: "#1A2535", borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
-              <div style={{
-                height: "100%",
-                width: `${consumePct}%`,
-                background: consumePct >= 100
-                  ? "linear-gradient(90deg, #1E8A4C, #27A05A)"
-                  : "linear-gradient(90deg, #51B0E6, #2A8FCA)",
-                borderRadius: 3,
-                transition: "width 1s cubic-bezier(0.34,1.56,0.64,1)",
-                boxShadow: consumePct > 5 ? "0 0 8px #51B0E650" : "none",
-              }} />
-            </div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: consumePct >= 100 ? "#1E8A4C" : "#3A4A5E" }}>
-              {consumePct >= 100 ? <><BtlIcon name="target" size={10} color="#1E8A4C" /> Daily goal reached!</> : `${goalML - intake} mL remaining`}
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowGoal(v => !v)}
-            data-testid="set-goal-btn"
-            style={{
-              background: "#1A2535",
-              border: "1px solid #2A3545",
-              borderRadius: 12,
-              color: "#51B0E6",
-              padding: "8px 12px",
-              fontSize: 11,
-              fontWeight: 700,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              letterSpacing: 0.3,
-            }}
-          >
-            Set Goal
-          </button>
-        </div>
-
-        {/* Goal editor */}
-        {showGoal && (
-          <div style={{ width: "100%", display: "flex", gap: 8 }}>
-            <input
-              value={goalInput}
-              onChange={e => setGoalInput(e.target.value)}
-              placeholder="Daily goal in mL (250\u20135000)"
-              data-testid="goal-input"
-              style={{
-                flex: 1,
-                background: "#0A1320",
-                border: "1px solid #1A2535",
-                borderRadius: 12,
-                color: "#F0F4F8",
-                padding: "11px 14px",
-                fontSize: 14,
-                fontVariantNumeric: "tabular-nums",
-                outline: "none",
-                fontFamily: "DM Sans, sans-serif",
-              }}
-            />
-            <button onClick={applyGoal} data-testid="apply-goal-btn" style={{
-              background: "#51B0E6", color: "#060E18", border: "none",
-              borderRadius: 12, padding: "11px 20px",
-              fontWeight: 800, fontSize: 14, cursor: "pointer",
-            }}>Set</button>
-            <button onClick={resetIntake} data-testid="reset-intake-btn" style={{
-              background: "#1A2535", color: "#A6A8AB",
-              border: "1px solid #2A3545", borderRadius: 12,
-              padding: "11px 14px", fontWeight: 700, fontSize: 12, cursor: "pointer",
-            }}>Reset</button>
-          </div>
-        )}
-      </div>
-
-      {/* 4 STAT CARDS */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        <StatCard
-          icon={<BtlIcon name="thermometer" size={15} color="#51B0E6" />}
-          label="Water Temp"
-          value={tempVal}
-          unit="\u00B0C"
-          color="#51B0E6"
-          hist={histOf("waterTemp")}
-          sublabel={tempVal != null ? (parseFloat(tempVal) > 30 ? "\u26A0 Too warm" : "\u2713 Optimal") : null}
-        />
-        <StatCard
-          icon={<BtlIcon name="testTube" size={15} color={phColor()} />}
-          label="pH Level"
-          value={phVal}
-          unit="pH"
-          color={phColor()}
-          hist={histOf("ph")}
-          sublabel={phVal != null ? (parseFloat(phVal) >= 7.2 && parseFloat(phVal) <= 9.0 ? "\u2713 Optimal range" : "\u26A0 Check pH") : null}
-        />
-        <StatCard
-          icon={<BtlIcon name="battery" size={15} color={battVal != null ? (battVal > 50 ? "#1E8A4C" : battVal > 20 ? "#F29423" : "#D93025") : "#51B0E6"} />}
-          label="Battery"
-          value={battVal}
-          unit="%"
-          color={battVal != null ? (battVal > 50 ? "#1E8A4C" : battVal > 20 ? "#F29423" : "#D93025") : "#51B0E6"}
-          hist={histOf("battTemp")}
-          sublabel={tele?.charging ? "\u26A1 Charging" : battVal != null && battVal < 20 ? "\u26A0 Low battery" : null}
-        />
-        <StatCard
-          icon={<BtlIcon name="ruler" size={15} color="#2A8FCA" />}
-          label="Water Level"
-          value={levelVal}
-          unit="mm"
-          color="#2A8FCA"
-          hist={histOf("waterLevel")}
-          sublabel={levelVal != null ? (levelVal > 200 ? "\u2713 Full" : levelVal > 50 ? "\u26A0 Getting low" : "\u26A0 Almost empty") : null}
-        />
-      </div>
-
-      {/* DEVICE STATUS */}
-      {tele && (
-        <div style={{
-          display: "flex",
-          background: "#0D1825",
-          borderRadius: 18,
-          border: "1px solid #1A2535",
-          overflow: "hidden",
-        }}>
-          {[
-            { label: "Status",   value: ["Standby","Running","Charging"][tele.state] ?? "\u2014", color: "#1E8A4C" },
-            { label: "Firmware", value: `v${(tele.fw / 100).toFixed(1)}`,                    color: "#51B0E6" },
-            { label: "Last Sync",value: new Date(tele.ts).toLocaleTimeString(),               color: "#A6A8AB" },
-          ].map(({ label, value, color }, i) => (
-            <div key={label} style={{
-              flex: 1,
-              padding: "12px 8px",
-              textAlign: "center",
-              borderRight: i < 2 ? "1px solid #1A2535" : "none",
-            }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "#3A4A5E", letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 4 }}>
-                {label}
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color }}>{value}</div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  // ── SENSORS TAB ───────────────────────────────────────────────
-  const SensorsTab = () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {Object.values(s).length === 0 ? (
-        <div style={{ textAlign: "center", padding: "56px 0", color: "#3A4A5E" }}>
-          <div style={{ marginBottom: 14 }}><BtlIcon name="signal" size={36} color="#556070" /></div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: "#556070", marginBottom: 6 }}>No sensor data yet</div>
-          <div style={{ fontSize: 12 }}>Waiting for first poll\u2026</div>
-        </div>
-      ) : Object.values(s).map((sensor, i) => (
-        <div key={i} style={{
-          display:        "flex",
-          justifyContent: "space-between",
-          alignItems:     "center",
-          background:     "linear-gradient(145deg, #0D1825, #0A1520)",
-          borderRadius:   18,
-          padding:        "14px 18px",
-          border:         `1px solid ${sensor.type === 0x02 ? col + "35" : "#1A253540"}`,
-          transition:     "border-color 0.5s",
-        }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#A6A8AB", letterSpacing: 0.3 }}>
-                {sensor.label}
-              </span>
-              {sensor.type === 0x02 && tdsRaw != null && (
-                <span style={{
-                  fontSize: 9, fontWeight: 800,
-                  padding: "2px 7px", borderRadius: 10,
-                  background: `${col}20`, color: col,
-                  letterSpacing: 0.8, textTransform: "uppercase",
-                }}>
-                  {tdsLabel(tdsRaw)}
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: 10, color: "#3A4A5E", fontFamily: "DM Mono, monospace" }}>
-              Type 0x{sensor.type?.toString(16).toUpperCase().padStart(2,"0")} {"\u00B7"} Raw {sensor.raw}
-            </div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{
-              fontSize:           26,
-              fontWeight:         800,
-              color:              sensor.type === 0x02 ? col : "#51B0E6",
-              fontVariantNumeric: "tabular-nums",
-              fontFamily:         "system-ui",
-              letterSpacing:      -0.5,
-              transition:         "color 0.5s",
-            }}>
-              {sensor.val}
-            </div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#3A4A5E" }}>{sensor.unit}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  // ── HISTORY TAB ───────────────────────────────────────────────
-  const HistoryTab = () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        {[
-          { key: "tds",        label: "TDS",         unit: "ppm", color: col           },
-          { key: "ph",         label: "pH",           unit: "pH",  color: "#51B0E6"     },
-          { key: "waterTemp",  label: "Water Temp",   unit: "\u00B0C",  color: "#2A8FCA"     },
-          { key: "waterLevel", label: "Water Level",  unit: "mm",  color: "#1E8A4C"     },
-        ].map(({ key, label, unit, color }) => {
-          const data   = histOf(key);
-          const latest = data[data.length - 1];
-          const min    = data.length ? Math.min(...data) : null;
-          const max    = data.length ? Math.max(...data) : null;
-          return (
-            <div key={key} style={{
-              background:    "#0D1825",
-              borderRadius:  20,
-              padding:       "14px 14px 12px",
-              border:        `1px solid ${color}20`,
-            }}>
-              <div style={{ fontSize: 10, color: "#556070", fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>
-                {label}
-              </div>
-              <Sparkline data={data} color={color} w={120} h={36} />
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 8 }}>
-                <span style={{ fontSize: 20, fontWeight: 800, color, fontVariantNumeric: "tabular-nums", fontFamily: "system-ui" }}>
-                  {latest != null ? latest : "\u2014"}
-                </span>
-                <span style={{ fontSize: 10, color: "#3A4A5E", fontWeight: 600 }}>{unit}</span>
-              </div>
-              {min != null && (
-                <div style={{ fontSize: 9, color: "#3A4A5E", marginTop: 2 }}>
-                  {"\u2193"} {min}  {"\u00B7"}  {"\u2191"} {max}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Log table */}
-      <div style={{
-        background:    "#0D1825",
-        borderRadius:  20,
-        padding:       "14px 16px",
-        border:        "1px solid #1A2535",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <span style={{ fontSize: 10, color: "#3A4A5E", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>
-            Reading Log ({hist.length} / {MAX_HIST})
-          </span>
-        </div>
-        <div style={{ maxHeight: 220, overflowY: "auto" }}>
-          {hist.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 24, color: "#3A4A5E", fontSize: 12 }}>No readings yet</div>
-          ) : [...hist].reverse().map((h, i) => (
-            <div key={i} style={{
-              display:         "grid",
-              gridTemplateColumns: "56px 1fr 1fr 1fr",
-              padding:         "6px 0",
-              borderBottom:    "1px solid #1A2535",
-              fontSize:        11,
-              color:           "#A6A8AB",
-              alignItems:      "center",
-            }}>
-              <span style={{ fontSize: 10, color: "#3A4A5E", fontFamily: "DM Mono, monospace" }}>
-                {new Date(h.ts).toLocaleTimeString()}
-              </span>
-              <span>
-                TDS: <b style={{ color: tdsColor(h.sensors?.tds?.raw) }}>
-                  {h.sensors?.tds?.val ?? "\u2014"}
-                </b>
-              </span>
-              <span>pH: <b style={{ color: "#51B0E6" }}>{h.sensors?.ph?.val ?? "\u2014"}</b></span>
-              <span>T: <b style={{ color: "#2A8FCA" }}>{h.sensors?.waterTemp?.val ?? "\u2014"}{"\u00B0"}</b></span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  // ── DEBUG TAB ─────────────────────────────────────────────────
-  const DebugTab = () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-        {[
-          { label: "Poll 0x10", fn: () => send(CMD_INFO),     color: "#51B0E6" },
-          { label: "Activate",  fn: () => send(CMD_ACTIVATE), color: "#2A8FCA" },
-          { label: "Reset",     fn: resetIntake,               color: "#F29423" },
-        ].map(({ label, fn, color }) => (
-          <button
-            key={label}
-            onClick={fn}
-            disabled={ble !== "connected"}
-            style={{
-              padding:       "11px 4px",
-              background:    ble === "connected" ? `${color}15` : "#0D1825",
-              color:         ble === "connected" ? color : "#3A4A5E",
-              border:        `1px solid ${ble === "connected" ? color + "40" : "#1A2535"}`,
-              borderRadius:  12,
-              fontSize:      11,
-              fontWeight:    700,
-              letterSpacing: 0.5,
-              textTransform: "uppercase",
-              cursor:        ble === "connected" ? "pointer" : "not-allowed",
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div style={{
-        background:  "#020810",
-        borderRadius: 18,
-        padding:     "12px 14px",
-        fontFamily:  "DM Mono, 'SF Mono', 'Fira Code', monospace",
-        fontSize:    10.5,
-        maxHeight:   360,
-        overflowY:   "auto",
-        border:      "1px solid #1A2535",
-        lineHeight:  1.7,
-      }}>
-        {log.length === 0 ? (
-          <div style={{ color: "#3A4A5E", textAlign: "center", padding: "24px 0" }}>
-            BLE packet log appears here after connection
-          </div>
-        ) : log.map((entry, i) => (
-          <div key={i} style={{ marginBottom: 4, paddingBottom: 4, borderBottom: "1px solid #0D1825" }}>
-            <span style={{ color: "#3A4A5E" }}>{entry.t} </span>
-            <span style={{ color: entry.msg.includes("RX") || entry.msg.includes("\u2190") ? "#1E8A4C" : "#51B0E6", fontWeight: 600 }}>
-              {entry.msg}
-            </span>
-            {entry.hex && (
-              <div style={{ color: "#A6A8AB", marginTop: 2, wordBreak: "break-all" }}>
-                {entry.hex}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <button
-        onClick={() => setLog([])}
-        data-testid="clear-log-btn"
-        style={{
-          background:   "transparent",
-          border:       "1px solid #1A2535",
-          borderRadius: 12,
-          color:        "#3A4A5E",
-          padding:      "10px 0",
-          fontSize:     12,
-          fontWeight:   600,
-          cursor:       "pointer",
-        }}
-      >
-        Clear Log
-      </button>
-    </div>
-  );
-
-  // ── ROOT ──────────────────────────────────────────────────────
   return (
     <div data-testid="wtr-btl-screen" style={{
-      fontFamily:              "DM Sans, -apple-system, BlinkMacSystemFont, sans-serif",
-      background:              "#0A1520",
+      fontFamily:              "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Nunito', 'Figtree', 'Manrope', sans-serif",
+      background:              "#F8F9FB",
       minHeight:               "100%",
-      color:                   "#F0F4F8",
+      color:                   "#0A1A2E",
       display:                 "flex",
       flexDirection:           "column",
       maxWidth:                480,
@@ -1468,224 +678,760 @@ export default function WTRBottleScreen() {
       MozOsxFontSmoothing:     "grayscale",
     }}>
 
-      {/* ── Fonts ── */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
-        rel="stylesheet"
-      />
-
       {/* ── Animations ── */}
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 4px 20px rgba(81,176,230,0.3); }
+          50%      { box-shadow: 0 4px 30px rgba(81,176,230,0.6); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
         @keyframes ringPulse {
-          0%, 100% { opacity: 0.4; transform: scale(1); }
-          50%       { opacity: 0.1; transform: scale(1.1); }
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50%       { opacity: 0.1; transform: scale(1.08); }
         }
         @keyframes blinkDot {
           0%, 100% { opacity: 1; }
           50%       { opacity: 0.3; }
         }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #1A2535; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
       `}</style>
 
-      {/* HEADER */}
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 1: HERO VISUAL
+          ═══════════════════════════════════════════════════════════ */}
       <div style={{
-        background:           "linear-gradient(180deg, #0E2035 0%, #0A1520 100%)",
-        padding:              "16px 20px 14px",
-        borderBottom:         "1px solid #1A253550",
-        position:             "sticky",
-        top:                  0,
-        zIndex:               100,
-        backdropFilter:       "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
+        position: "relative",
+        width: "100%",
+        height: isLive ? 220 : 340,
+        overflow: "hidden",
+        transition: "height 0.5s ease",
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          {/* Brand */}
-          <div>
-            <img src="/generosity-logo.png" alt="Generosity™ Water Intelligence" style={{ height: 28, marginBottom: 6, display: "block" }} />
-            <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: -0.5, lineHeight: 1 }}>
-              Intelligent WTR BTL
-            </div>
-          </div>
+        {/* Background image */}
+        <img
+          src="/bottle-cap-sensor-glow.jpg"
+          alt=""
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
+        {/* Gradient overlay to white */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(180deg, rgba(248,249,251,0) 30%, rgba(248,249,251,0.7) 70%, #F8F9FB 100%)",
+        }} />
+        {/* Dark overlay for text readability */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(180deg, rgba(10,26,46,0.5) 0%, rgba(10,26,46,0.1) 50%, transparent 100%)",
+        }} />
 
-          {/* Status + button */}
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        {/* Title overlay */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0,
+          padding: "20px 20px 0",
+          zIndex: 2,
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
+                Generosity{"\u2122"} Water Intelligence
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>
+                Intelligent WTR BTL
+              </div>
+            </div>
+
             {/* Status pill */}
-            <div data-testid="ble-status-pill" style={{
-              display:    "flex",
-              alignItems: "center",
-              gap:        5,
-              background: ble === "connected" ? "#1E8A4C18"
-                        : ble === "scanning"  ? "#F2942318"
-                        : ble === "error"     ? "#D9302518"
-                        : "#1A2535",
-              border:     `1px solid ${
-                ble === "connected" ? "#1E8A4C40"
-                : ble === "scanning" ? "#F2942340"
-                : ble === "error"    ? "#D9302540"
-                : "#2A3545"}`,
-              borderRadius: 20,
-              padding:    "5px 11px",
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: isDemo ? "rgba(81,176,230,0.2)" : ble === "connected" ? "rgba(52,199,89,0.2)" : "rgba(255,255,255,0.15)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRadius: 20, padding: "6px 12px",
+              border: "1px solid rgba(255,255,255,0.15)",
             }}>
               <div style={{
-                width:     7,
-                height:    7,
-                borderRadius: "50%",
-                background: ble === "connected" ? "#1E8A4C"
-                          : ble === "scanning"  ? "#F29423"
-                          : ble === "error"     ? "#D93025"
-                          : "#3A4A5E",
-                boxShadow:  ble === "connected" ? "0 0 8px #1E8A4C"
-                          : ble === "scanning"  ? "0 0 8px #F29423"
-                          : "none",
-                animation:  ble === "scanning" ? "blinkDot 1s ease-in-out infinite" : "none",
+                width: 6, height: 6, borderRadius: "50%",
+                background: isDemo ? "#51B0E6" : ble === "connected" ? "#34C759" : "#A6A8AB",
+                animation: (isDemo || ble === "scanning") ? "blinkDot 1s ease-in-out infinite" : "none",
               }} />
-              <span style={{
-                fontSize:      10,
-                fontWeight:    700,
-                letterSpacing: 0.8,
-                textTransform: "uppercase",
-                color: ble === "connected" ? "#1E8A4C"
-                     : ble === "scanning"  ? "#F29423"
-                     : ble === "error"     ? "#D93025"
-                     : "#3A4A5E",
-              }}>
-                {ble === "connected" ? (devRef.current?.name?.slice(0,12) || "Connected")
-                 : ble === "scanning" ? "Scanning"
-                 : ble === "error"    ? "Error"
-                 : "BLE"}
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#FFFFFF", letterSpacing: 0.5, textTransform: "uppercase" }}>
+                {isDemo ? "DEMO MODE" : ble === "connected" ? (devRef.current?.name?.slice(0,10) || "CONNECTED") : ble === "scanning" ? "SCANNING" : "OFFLINE"}
               </span>
             </div>
-
-            {/* Connect / Disconnect */}
-            {ble === "connected" ? (
-              <button
-                onClick={disconnect}
-                data-testid="disconnect-btn"
-                style={{
-                  background:    "#1A2535",
-                  color:         "#D93025",
-                  border:        "1px solid #D9302540",
-                  borderRadius:  20,
-                  padding:       "5px 14px",
-                  fontSize:      11,
-                  fontWeight:    700,
-                  cursor:        "pointer",
-                  letterSpacing: 0.3,
-                  transition:    "background 0.2s",
-                }}
-              >
-                Disconnect
-              </button>
-            ) : (
-              <button
-                onClick={connect}
-                disabled={ble === "scanning"}
-                data-testid="header-connect-btn"
-                style={{
-                  background:    ble === "scanning" ? "#1A2535" : "linear-gradient(135deg, #51B0E6, #2A8FCA)",
-                  color:         ble === "scanning" ? "#3A4A5E" : "#060E18",
-                  border:        "none",
-                  borderRadius:  20,
-                  padding:       "5px 16px",
-                  fontSize:      11,
-                  fontWeight:    800,
-                  cursor:        ble === "scanning" ? "not-allowed" : "pointer",
-                  letterSpacing: 0.3,
-                  boxShadow:     ble === "scanning" ? "none" : "0 4px 16px #51B0E640",
-                }}
-              >
-                {ble === "scanning" ? "Scanning\u2026" : "Connect"}
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Error message */}
-        {errMsg && (
-          <div data-testid="ble-error-msg" style={{
-            marginTop:  10,
-            background: "#D9302510",
-            border:     "1px solid #D9302535",
-            borderRadius: 10,
-            padding:    "8px 12px",
-            fontSize:   12,
-            color:      "#D93025",
-            lineHeight: 1.5,
-          }}>
-            <BtlIcon name="hazard" size={12} color="#D93025" /> {errMsg}
-          </div>
-        )}
+        {/* Connect / Disconnect button overlay (bottom of hero) */}
+        <div style={{
+          position: "absolute", bottom: 16, left: 20, right: 20,
+          display: "flex", gap: 8, zIndex: 2,
+        }}>
+          {ble === "connected" ? (
+            <button onClick={disconnect} data-testid="disconnect-btn" style={{
+              flex: 1, padding: "12px 0", background: "#FFFFFF", color: "#FF3B30",
+              border: "1px solid #FFE5E5", borderRadius: 14, fontSize: 13, fontWeight: 700,
+              cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}>
+              Disconnect
+            </button>
+          ) : (
+            <>
+              <button onClick={connect} disabled={ble === "scanning"} data-testid="connect-wtr-btl-btn" style={{
+                flex: 1, padding: "12px 0",
+                background: ble === "scanning" ? "#E8ECF0" : "#51B0E6",
+                color: ble === "scanning" ? "#A6A8AB" : "#FFFFFF",
+                border: "none", borderRadius: 14, fontSize: 13, fontWeight: 700,
+                cursor: ble === "scanning" ? "not-allowed" : "pointer",
+                boxShadow: ble === "scanning" ? "none" : "0 4px 16px rgba(81,176,230,0.3)",
+              }}>
+                {ble === "scanning" ? "Scanning\u2026" : "Connect Device"}
+              </button>
+              {!isLive && (
+                <button onClick={demoActive ? stopDemo : startDemo} style={{
+                  padding: "12px 20px",
+                  background: demoActive ? "#FFF3E0" : "#FFFFFF",
+                  color: demoActive ? "#FF9500" : "#0A1A2E",
+                  border: demoActive ? "1px solid #FFD699" : "1px solid #E8ECF0",
+                  borderRadius: 14, fontSize: 13, fontWeight: 700,
+                  cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                }}>
+                  {demoActive ? "Stop Demo" : "Demo"}
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
-      {/* BODY */}
-      {(ble === "idle" || ble === "error") && !tele && <ConnectScreen  onConnect={connect} />}
-      {ble === "scanning"            && <ScanningScreen onCancel={() => setBle("idle")} />}
+      {/* Error message */}
+      {errMsg && (
+        <div data-testid="ble-error-msg" style={{
+          margin: "0 16px 8px", background: "#FFF0F0", border: "1px solid #FECACA",
+          borderRadius: 14, padding: "12px 16px", fontSize: 13, color: "#DC2626", lineHeight: 1.5,
+        }}>
+          <BtlIcon name="hazard" size={13} color="#DC2626" /> {errMsg}
+        </div>
+      )}
 
-      {isLive && (
-        <>
-          {/* ── Tab bar ── */}
+      {/* ═══════════════════════════════════════════════════════════
+          CONNECT SCREEN (when idle and no data)
+          ═══════════════════════════════════════════════════════════ */}
+      {!isLive && ble !== "scanning" && (
+        <div style={{
+          padding: "0 20px 40px",
+          display: "flex", flexDirection: "column", alignItems: "center",
+          textAlign: "center", gap: 24,
+          animation: "fadeInUp 0.4s ease",
+        }}>
+          {/* Product lineup */}
           <div style={{
-            display:      "flex",
-            background:   "#0A1320",
-            borderBottom: "1px solid #1A2535",
-            padding:      "0 8px",
-            position:     "sticky",
-            top:          64,
-            zIndex:       99,
+            width: "100%", borderRadius: 20, overflow: "hidden",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+            border: "1px solid #F0F1F3",
           }}>
+            <img src="/bottle-lineup-5colors.jpg" alt="Generosity WTR BTL lineup"
+              style={{ width: "100%", height: 180, objectFit: "cover", display: "block" }} />
+          </div>
+
+          <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.7, maxWidth: 300 }}>
+            Connect your Generosity{"\u2122"} Smart Lid to monitor live water quality, track daily hydration, and receive real-time TDS readings.
+          </div>
+
+          {/* Features grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, width: "100%" }}>
             {[
-              { id: "live",    label: "Live"    },
-              { id: "sensors", label: "Sensors" },
-              { id: "history", label: "History" },
-              { id: "debug",   label: "Debug"   },
-            ].map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                data-testid={`wtr-tab-${t.id}`}
-                style={{
-                  flex:          1,
-                  padding:       "12px 4px",
-                  background:    "transparent",
-                  color:         tab === t.id ? "#51B0E6" : "#3A4A5E",
-                  border:        "none",
-                  borderBottom:  tab === t.id ? "2px solid #51B0E6" : "2px solid transparent",
-                  fontSize:      12,
-                  fontWeight:    tab === t.id ? 700 : 500,
-                  cursor:        "pointer",
-                  letterSpacing: 0.3,
-                  textTransform: "uppercase",
-                  transition:    "color 0.2s, border-color 0.2s",
-                }}
-              >
-                {t.label}
-              </button>
+              { icon: <BtlIcon name="droplet" size={20} color="#51B0E6" />, label: "TDS\nMonitoring" },
+              { icon: <BtlIcon name="testTube" size={20} color="#34C759" />, label: "pH\nTracking" },
+              { icon: <BtlIcon name="thermometer" size={20} color="#FF9500" />, label: "Temp\nSensor" },
+            ].map((f, i) => (
+              <div key={i} style={{
+                background: "#FFFFFF", borderRadius: 16, padding: "18px 8px",
+                textAlign: "center", border: "1px solid #F0F1F3",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.03)",
+              }}>
+                <div style={{ marginBottom: 8 }}>{f.icon}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", lineHeight: 1.4, whiteSpace: "pre-line" }}>
+                  {f.label}
+                </div>
+              </div>
             ))}
           </div>
 
-          {/* ── Tab content ── */}
-          <div style={{
-            padding:    "16px 16px 40px",
-            flex:       1,
-            overflowY:  "auto",
-            animation:  "fadeInUp 0.25s ease",
-          }}>
-            {tab === "live"    && <LiveTab    />}
-            {tab === "sensors" && <SensorsTab />}
-            {tab === "history" && <HistoryTab />}
-            {tab === "debug"   && <DebugTab   />}
+          <div style={{ fontSize: 11, color: "#A6A8AB", maxWidth: 280, lineHeight: 1.7 }}>
+            Requires Chrome on Android or Chrome desktop with Bluetooth enabled.
           </div>
-        </>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          SCANNING OVERLAY
+          ═══════════════════════════════════════════════════════════ */}
+      {ble === "scanning" && (
+        <div style={{
+          padding: "40px 20px", display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: 28, textAlign: "center",
+        }}>
+          <div style={{ position: "relative", width: 80, height: 80 }}>
+            {[
+              { sz: 80, dur: "1.2s", sw: 2.5, color: "#51B0E6" },
+              { sz: 56, dur: "1.8s", sw: 1.5, color: "#51B0E680" },
+            ].map(({ sz, dur, sw, color }, i) => (
+              <div key={i} style={{
+                position: "absolute", inset: (80 - sz) / 2,
+                borderRadius: "50%", border: `${sw}px solid transparent`,
+                borderTop: `${sw}px solid ${color}`,
+                animation: `spin ${dur} linear ${i % 2 === 0 ? "normal" : "reverse"} infinite`,
+              }} />
+            ))}
+            <div style={{
+              position: "absolute", inset: 0, display: "flex",
+              alignItems: "center", justifyContent: "center",
+            }}>
+              <BtlIcon name="signal" size={22} color="#51B0E6" />
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#0A1A2E", marginBottom: 8 }}>
+              Searching for Smart Lid
+            </div>
+            <div style={{ fontSize: 13, color: "#A6A8AB", lineHeight: 1.6 }}>
+              Make sure Bluetooth is on and the lid is powered up
+            </div>
+          </div>
+          <button onClick={() => setBle("idle")} data-testid="cancel-scan-btn" style={{
+            background: "#FFFFFF", border: "1px solid #E8ECF0", borderRadius: 14,
+            color: "#6B7280", padding: "12px 32px", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          }}>
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          LIVE DASHBOARD
+          ═══════════════════════════════════════════════════════════ */}
+      {isLive && (
+        <div style={{ padding: "0 16px 100px", animation: "fadeInUp 0.3s ease" }}>
+
+          {/* ── SECTION 2: Score Ring ── */}
+          <div style={{
+            background: "#FFFFFF",
+            borderRadius: 24,
+            padding: "28px 20px 24px",
+            marginBottom: 14,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+            border: "1px solid #F0F1F3",
+            textAlign: "center",
+          }}>
+            <ScoreRing
+              score={score}
+              label="WATER QUALITY"
+              size={200}
+              color={col}
+              subtitle={tdsRaw != null ? `${tdsLabel(tdsRaw)} \u00B7 ${tdsRaw} ppm` : "Analyzing..."}
+            />
+
+            {/* Quick stats row below ring */}
+            <div style={{
+              display: "flex", justifyContent: "center", gap: 24,
+              marginTop: 20, paddingTop: 16,
+              borderTop: "1px solid #F0F1F3",
+            }}>
+              {[
+                { label: "TDS", val: tdsRaw != null ? `${tdsRaw}` : "\u2014", unit: "ppm", c: col },
+                { label: "pH", val: phVal ?? "\u2014", unit: "", c: phColor() },
+                { label: "Temp", val: tempF ?? "\u2014", unit: "\u00B0F", c: "#FF9500" },
+              ].map((m, i) => (
+                <div key={i} style={{ textAlign: "center", minWidth: 60 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
+                    {m.label}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 2 }}>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: "#0A1A2E", fontVariantNumeric: "tabular-nums" }}>
+                      {m.val}
+                    </span>
+                    {m.unit && <span style={{ fontSize: 10, color: "#A6A8AB", fontWeight: 600 }}>{m.unit}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── SECTION 3: Telemetry Cards (3-up) ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+            <MetricCard
+              icon={<BtlIcon name="droplet" size={15} color={col} />}
+              label="TDS"
+              value={tdsRaw}
+              unit="ppm"
+              color={col}
+              hist={histOf("tds")}
+              sublabel={tdsRaw != null ? (tdsRaw <= 35 ? "\u2713 Excellent" : tdsRaw <= 150 ? "\u2713 Good" : "\u26A0 Elevated") : null}
+            />
+            <MetricCard
+              icon={<BtlIcon name="testTube" size={15} color={phColor()} />}
+              label="pH"
+              value={phVal}
+              unit=""
+              color={phColor()}
+              hist={histOf("ph")}
+              sublabel={phVal != null ? (parseFloat(phVal) >= 7.2 && parseFloat(phVal) <= 9.0 ? "\u2713 Optimal" : "\u26A0 Check") : null}
+            />
+            <MetricCard
+              icon={<BtlIcon name="thermometer" size={15} color="#FF9500" />}
+              label="Temp"
+              value={tempF}
+              unit={"\u00B0F"}
+              color="#FF9500"
+              hist={histOf("waterTemp")}
+              sublabel={tempVal != null ? (parseFloat(tempVal) > 30 ? "\u26A0 Warm" : "\u2713 Cool") : null}
+            />
+          </div>
+
+          {/* ── SECTION 4: TDS Timeline ── */}
+          <div style={{
+            background: "#FFFFFF", borderRadius: 20, padding: "18px 16px",
+            marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.04)", border: "1px solid #F0F1F3",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase" }}>
+                  RECENT READINGS
+                </div>
+                <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                  TDS over last {hist.length} samples
+                </div>
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: col }}>
+                {hist.length} / {MAX_HIST}
+              </div>
+            </div>
+            <TimelineChart data={hist} w={window.innerWidth > 480 ? 440 : window.innerWidth - 68} h={100} />
+          </div>
+
+          {/* ── SECTION 5: Water Test CTA ── */}
+          {testPhase == null ? (
+            <div
+              onClick={runTest}
+              style={{
+                background: "linear-gradient(135deg, #51B0E6 0%, #2A8FCA 100%)",
+                borderRadius: 20, padding: "22px 20px",
+                marginBottom: 14, cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 16,
+                boxShadow: "0 4px 20px rgba(81,176,230,0.25)",
+                animation: "pulse 3s ease-in-out infinite",
+                position: "relative", overflow: "hidden",
+              }}
+            >
+              <div style={{
+                position: "absolute", inset: 0,
+                background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)",
+                borderRadius: 20, pointerEvents: "none",
+              }} />
+              <div style={{
+                width: 48, height: 48, borderRadius: 14,
+                background: "rgba(255,255,255,0.2)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+              }}>
+                <BtlIcon name="flask" size={24} color="#FFFFFF" />
+              </div>
+              <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#FFFFFF", marginBottom: 4 }}>
+                  Run Water Quality Test
+                </div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>
+                  Tap to analyze TDS, pH, and temperature
+                </div>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
+          ) : (
+            <div style={{
+              background: "#FFFFFF", borderRadius: 20, padding: "24px 20px",
+              marginBottom: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+              border: "1px solid #F0F1F3",
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>
+                {testPhase === "done" ? "TEST COMPLETE" : "TESTING IN PROGRESS"}
+              </div>
+              {["tds", "ph", "temp"].map((phase, i) => {
+                const labels = { tds: "Analyzing TDS...", ph: "Checking pH levels...", temp: "Measuring temperature..." };
+                const doneLabels = { tds: `TDS: ${tdsRaw ?? 24} ppm`, ph: `pH: ${phVal ?? "7.40"}`, temp: `Temp: ${tempF ?? "68"}\u00B0F` };
+                const icons = { tds: <BtlIcon name="droplet" size={16} color="#51B0E6" />, ph: <BtlIcon name="testTube" size={16} color="#34C759" />, temp: <BtlIcon name="thermometer" size={16} color="#FF9500" /> };
+                const isActive = testPhase === phase;
+                const isDone = testPhase === "done" || (phase === "tds" && (testPhase === "ph" || testPhase === "temp")) || (phase === "ph" && testPhase === "temp");
+                return (
+                  <div key={phase} style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "10px 0",
+                    borderBottom: i < 2 ? "1px solid #F0F1F3" : "none",
+                    opacity: isDone || isActive ? 1 : 0.4,
+                  }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 10,
+                      background: isDone ? "#F0FFF4" : isActive ? "#EBF6FD" : "#F8F9FB",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      {isDone ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      ) : isActive ? (
+                        <div style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid transparent", borderTop: "2px solid #51B0E6", animation: "spin 0.8s linear infinite" }} />
+                      ) : icons[phase]}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#0A1A2E" : "#A6A8AB" }}>
+                        {isDone ? doneLabels[phase] : isActive ? labels[phase] : labels[phase]}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {testPhase === "done" && (
+                <div style={{
+                  marginTop: 16, background: "#EBF6FD", borderRadius: 14, padding: "14px 16px",
+                  display: "flex", alignItems: "center", gap: 10,
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#51B0E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0A1A2E" }}>
+                    Water quality score: <span style={{ color: col, fontWeight: 800 }}>{score ?? 92}/100</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── SECTION 6: Contaminant Alerts ── */}
+          {tdsRaw != null && tdsRaw > 150 && (
+            <div style={{
+              background: "#FFF8F0", borderRadius: 20, padding: "18px 16px",
+              marginBottom: 14, border: "1px solid #FFE8CC",
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#FF9500", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>
+                DETECTED CONCERNS
+              </div>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 12,
+                background: "#FFFFFF", borderRadius: 14, padding: "14px 16px",
+                border: "1px solid #FFF0E0",
+              }}>
+                <BtlIcon name="hazard" size={20} color="#FF9500" />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0A1A2E" }}>
+                    Elevated TDS ({tdsRaw} ppm)
+                  </div>
+                  <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.4, marginTop: 2 }}>
+                    Consider using a reverse osmosis or activated carbon filter.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── SECTION 7: Device Info ── */}
+          {tele && (
+            <div style={{
+              background: "#FFFFFF", borderRadius: 20, padding: "18px 16px",
+              marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.04)", border: "1px solid #F0F1F3",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase" }}>
+                  YOUR DEVICE
+                </div>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 4,
+                  background: ble === "connected" ? "#F0FFF4" : isDemo ? "#EBF6FD" : "#F8F9FB",
+                  borderRadius: 10, padding: "3px 10px",
+                }}>
+                  <div style={{
+                    width: 5, height: 5, borderRadius: "50%",
+                    background: ble === "connected" ? "#34C759" : "#51B0E6",
+                  }} />
+                  <span style={{ fontSize: 10, fontWeight: 600, color: ble === "connected" ? "#34C759" : "#51B0E6" }}>
+                    {ble === "connected" ? "Connected" : "Demo"}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                {[
+                  { label: "Battery", value: `${battVal ?? "\u2014"}%`, icon: <BtlIcon name="battery" size={14} color={battVal > 50 ? "#34C759" : "#FF9500"} /> },
+                  { label: "Firmware", value: `v${(tele.fw / 100).toFixed(1)}`, icon: <BtlIcon name="signal" size={14} color="#51B0E6" /> },
+                  { label: "Last Sync", value: new Date(tele.ts).toLocaleTimeString().slice(0, 5), icon: <BtlIcon name="target" size={14} color="#A6A8AB" /> },
+                ].map((d, i) => (
+                  <div key={i} style={{
+                    background: "#F8F9FB", borderRadius: 14, padding: "12px 10px", textAlign: "center",
+                  }}>
+                    <div style={{ marginBottom: 6 }}>{d.icon}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0A1A2E" }}>{d.value}</div>
+                    <div style={{ fontSize: 9, fontWeight: 600, color: "#A6A8AB", letterSpacing: 0.5, textTransform: "uppercase", marginTop: 2 }}>
+                      {d.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {tele.charging && (
+                <div style={{
+                  marginTop: 10, background: "#F0FFF4", borderRadius: 10, padding: "8px 14px",
+                  fontSize: 12, color: "#34C759", fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  {"\u26A1"} Charging
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── SECTION 8: Hydration Tracker ── */}
+          <div style={{
+            background: "#FFFFFF", borderRadius: 20, padding: "18px 20px",
+            marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.04)", border: "1px solid #F0F1F3",
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>
+              DAILY HYDRATION
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+              <HydrationRing consumePct={consumePct} dailyML={intake} goalML={goalML} />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: "#0A1A2E", fontVariantNumeric: "tabular-nums" }}>
+                    {(intake / 1000).toFixed(1)}L
+                  </span>
+                  <span style={{ fontSize: 13, color: "#A6A8AB", fontWeight: 500 }}>/ {(goalML / 1000).toFixed(1)}L</span>
+                </div>
+                <div style={{ fontSize: 12, color: consumePct >= 100 ? "#34C759" : "#6B7280", fontWeight: 500, marginBottom: 12 }}>
+                  {consumePct >= 100 ? "\u2713 Daily goal reached!" : `${consumePct}% of daily goal`}
+                </div>
+                {/* Progress bar */}
+                <div style={{ height: 6, background: "#E8ECF0", borderRadius: 3, overflow: "hidden", marginBottom: 10 }}>
+                  <div style={{
+                    height: "100%", width: `${consumePct}%`,
+                    background: consumePct >= 100 ? "linear-gradient(90deg, #34C759, #30D158)" : "linear-gradient(90deg, #51B0E6, #2A8FCA)",
+                    borderRadius: 3, transition: "width 1s cubic-bezier(0.34,1.56,0.64,1)",
+                  }} />
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => setShowGoal(v => !v)} data-testid="set-goal-btn" style={{
+                    background: "#F8F9FB", border: "1px solid #E8ECF0", borderRadius: 10,
+                    color: "#6B7280", padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                  }}>
+                    {showGoal ? "Close" : "Set Goal"}
+                  </button>
+                  <button onClick={resetIntake} data-testid="reset-intake-btn" style={{
+                    background: "#F8F9FB", border: "1px solid #E8ECF0", borderRadius: 10,
+                    color: "#A6A8AB", padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                  }}>
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Goal editor */}
+            {showGoal && (
+              <div style={{ display: "flex", gap: 8, marginTop: 14, paddingTop: 14, borderTop: "1px solid #F0F1F3" }}>
+                <input
+                  value={goalInput}
+                  onChange={e => setGoalInput(e.target.value)}
+                  placeholder="Daily goal mL (250\u20135000)"
+                  data-testid="goal-input"
+                  style={{
+                    flex: 1, background: "#F8F9FB", border: "1px solid #E8ECF0",
+                    borderRadius: 12, color: "#0A1A2E", padding: "11px 14px",
+                    fontSize: 14, fontVariantNumeric: "tabular-nums", outline: "none",
+                  }}
+                />
+                <button onClick={applyGoal} data-testid="apply-goal-btn" style={{
+                  background: "#51B0E6", color: "#FFFFFF", border: "none",
+                  borderRadius: 12, padding: "11px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                }}>
+                  Set
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ── SECTION: Cap Close-up ── */}
+          <div style={{
+            borderRadius: 20, overflow: "hidden", marginBottom: 14,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+          }}>
+            <div style={{ position: "relative" }}>
+              <img src="/bottle-cap-exploded.jpg" alt="Smart Cap Sensor"
+                style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
+              <div style={{
+                position: "absolute", inset: 0,
+                background: "linear-gradient(180deg, transparent 40%, rgba(10,26,46,0.8) 100%)",
+              }} />
+              <div style={{
+                position: "absolute", bottom: 14, left: 16,
+                color: "#FFFFFF",
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>Intelligent Smart Cap</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>
+                  Real-time TDS, pH, and temperature sensors
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Debug / Raw Sensors toggle ── */}
+          <div style={{
+            background: "#FFFFFF", borderRadius: 20, overflow: "hidden",
+            border: "1px solid #F0F1F3", marginBottom: 14,
+          }}>
+            <div style={{ display: "flex", borderBottom: "1px solid #F0F1F3" }}>
+              {["live", "sensors", "debug"].map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  data-testid={`wtr-tab-${t}`}
+                  style={{
+                    flex: 1, padding: "12px 4px", background: "transparent",
+                    color: tab === t ? "#51B0E6" : "#A6A8AB", border: "none",
+                    borderBottom: tab === t ? "2px solid #51B0E6" : "2px solid transparent",
+                    fontSize: 11, fontWeight: tab === t ? 700 : 500, cursor: "pointer",
+                    letterSpacing: 0.5, textTransform: "uppercase",
+                  }}
+                >
+                  {t === "live" ? "History" : t === "sensors" ? "Sensors" : "Debug"}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ padding: 16 }}>
+              {/* History Tab */}
+              {tab === "live" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {hist.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: 24, color: "#A6A8AB", fontSize: 12 }}>No readings yet</div>
+                  ) : [...hist].reverse().slice(0, 20).map((h, i) => (
+                    <div key={i} style={{
+                      display: "grid", gridTemplateColumns: "60px 1fr 1fr 1fr",
+                      padding: "8px 0", borderBottom: "1px solid #F0F1F3",
+                      fontSize: 12, color: "#6B7280", alignItems: "center",
+                    }}>
+                      <span style={{ fontSize: 10, color: "#A6A8AB", fontFamily: "monospace" }}>
+                        {new Date(h.ts).toLocaleTimeString()}
+                      </span>
+                      <span>TDS: <b style={{ color: tdsColor(h.sensors?.tds?.raw) }}>{h.sensors?.tds?.val ?? "\u2014"}</b></span>
+                      <span>pH: <b style={{ color: "#51B0E6" }}>{h.sensors?.ph?.val ?? "\u2014"}</b></span>
+                      <span>T: <b style={{ color: "#FF9500" }}>{h.sensors?.waterTemp?.val ?? "\u2014"}{"\u00B0"}</b></span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Sensors Tab */}
+              {tab === "sensors" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {Object.values(s).length === 0 ? (
+                    <div style={{ textAlign: "center", padding: 24, color: "#A6A8AB", fontSize: 12 }}>
+                      No sensor data yet
+                    </div>
+                  ) : Object.values(s).map((sensor, i) => (
+                    <div key={i} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      background: "#F8F9FB", borderRadius: 14, padding: "12px 16px",
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#0A1A2E", marginBottom: 2 }}>
+                          {sensor.label}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#A6A8AB", fontFamily: "monospace" }}>
+                          Type 0x{sensor.type?.toString(16).toUpperCase().padStart(2,"0")} {"\u00B7"} Raw {sensor.raw}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <span style={{ fontSize: 22, fontWeight: 800, color: "#0A1A2E", fontVariantNumeric: "tabular-nums" }}>
+                          {sensor.val}
+                        </span>
+                        <span style={{ fontSize: 11, fontWeight: 500, color: "#A6A8AB", marginLeft: 3 }}>{sensor.unit}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Debug Tab */}
+              {tab === "debug" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                    {[
+                      { label: "Poll", fn: () => send(CMD_INFO), color: "#51B0E6" },
+                      { label: "Activate", fn: () => send(CMD_ACTIVATE), color: "#2A8FCA" },
+                      { label: "Reset", fn: resetIntake, color: "#FF9500" },
+                    ].map(({ label, fn, color }) => (
+                      <button key={label} onClick={fn} disabled={ble !== "connected"} style={{
+                        padding: "10px 4px",
+                        background: ble === "connected" ? `${color}10` : "#F8F9FB",
+                        color: ble === "connected" ? color : "#D1D5DB",
+                        border: `1px solid ${ble === "connected" ? color + "30" : "#E8ECF0"}`,
+                        borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: ble === "connected" ? "pointer" : "not-allowed",
+                        letterSpacing: 0.5, textTransform: "uppercase",
+                      }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{
+                    background: "#F8F9FB", borderRadius: 14, padding: "12px 14px",
+                    fontFamily: "monospace", fontSize: 10.5, maxHeight: 260, overflowY: "auto",
+                    border: "1px solid #E8ECF0", lineHeight: 1.7,
+                  }}>
+                    {log.length === 0 ? (
+                      <div style={{ color: "#A6A8AB", textAlign: "center", padding: "16px 0" }}>
+                        BLE packet log appears here
+                      </div>
+                    ) : log.slice(0, 50).map((entry, i) => (
+                      <div key={i} style={{ marginBottom: 4, paddingBottom: 4, borderBottom: "1px solid #F0F1F3" }}>
+                        <span style={{ color: "#A6A8AB" }}>{entry.t} </span>
+                        <span style={{ color: entry.msg.includes("RX") || entry.msg.includes("\u2190") ? "#34C759" : "#51B0E6", fontWeight: 600 }}>
+                          {entry.msg}
+                        </span>
+                        {entry.hex && (
+                          <div style={{ color: "#6B7280", marginTop: 2, wordBreak: "break-all" }}>
+                            {entry.hex}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={() => setLog([])} data-testid="clear-log-btn" style={{
+                    background: "#F8F9FB", border: "1px solid #E8ECF0", borderRadius: 10,
+                    color: "#A6A8AB", padding: "10px 0", fontSize: 12, fontWeight: 600, cursor: "pointer",
+                  }}>
+                    Clear Log
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
       )}
     </div>
   );
