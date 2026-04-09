@@ -742,6 +742,34 @@ export default function TrustButVerify(){
   const [insightView,setInsightView]=useState("report");
   const [tbvView,setTbvView]=useState("home");
   const [showProfile,setShowProfile]=useState(false);
+  // ── Founder Demo Mode ──────────────────────────────────────────────────────
+  const [founderMode,setFounderMode]=useState(()=>{
+    try{return localStorage.getItem('wtr_founder_mode')==='true';}catch(e){return false;}
+  });
+  const [showFounderLogin,setShowFounderLogin]=useState(false);
+  const [founderPin,setFounderPin]=useState('');
+  const [founderPinError,setFounderPinError]=useState('');
+  const founderLongPressRef=useRef(null);
+  const FOUNDER_PIN='0808'; // Micah's access PIN
+  
+  function handleFounderLogin(){
+    if(founderPin===FOUNDER_PIN){
+      setFounderMode(true);
+      setShowFounderLogin(false);
+      setFounderPin('');
+      setFounderPinError('');
+      try{localStorage.setItem('wtr_founder_mode','true');}catch(e){}
+      trackEvent('founder_mode_activated');
+    } else {
+      setFounderPinError('Invalid PIN');
+      setFounderPin('');
+    }
+  }
+  function handleFounderLogout(){
+    setFounderMode(false);
+    setTab('tbv');
+    try{localStorage.removeItem('wtr_founder_mode');}catch(e){}
+  }
   const [inputError, setInputError] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -1007,9 +1035,11 @@ export default function TrustButVerify(){
   const navTabs=[
     {id:"tbv",label:"Trust but Verify\u2122"},
     {id:"wtr-intel",label:"WTR INTEL",badge:data?riskScore:null},
-    // Hidden until connected devices launch:
-    // {id:"wtr-btl",label:"WTR BTL"},
-    // {id:"wtr-hub",label:"WTR HUB"}
+    // WTR BTL + WTR HUB only visible in founder demo mode
+    ...(founderMode ? [
+      {id:"wtr-btl",label:"WTR BTL"},
+      {id:"wtr-hub",label:"WTR HUB"}
+    ] : [])
   ];
   
   return(
@@ -1042,8 +1072,13 @@ export default function TrustButVerify(){
           alt="Generosity Water Intelligence" 
           style={{height:36,width:"auto",cursor:"pointer"}}
           onClick={()=>{setPhase("landing");setTab("tbv");setData(null);setSubmitted(false);setEngagementPhase("idle");setInput("");setInputError("");window.scrollTo(0,0);}}
+          onTouchStart={()=>{founderLongPressRef.current=setTimeout(()=>setShowFounderLogin(true),3000);}}
+          onTouchEnd={()=>{clearTimeout(founderLongPressRef.current);}}
+          onMouseDown={()=>{founderLongPressRef.current=setTimeout(()=>setShowFounderLogin(true),3000);}}
+          onMouseUp={()=>{clearTimeout(founderLongPressRef.current);}}
         />
         <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {founderMode&&<div style={{background:"linear-gradient(135deg,#0A1A2E,#1a3a5c)",color:"#51B0E6",padding:"4px 8px",borderRadius:20,fontSize:8,fontWeight:800,letterSpacing:"0.5px",border:"1px solid #51B0E633",cursor:"pointer"}} onClick={handleFounderLogout} title="Tap to exit demo mode">FOUNDER</div>}
           {data&&<div style={{background:riskScore>66?"#FFF3F2":riskScore>33?"#FFF8EE":"#F0FAF4",border:`1px solid ${riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C"}33`,color:riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C",padding:"4px 10px",borderRadius:20,fontSize:10,fontWeight:800}} data-testid="header-risk-score">Score: {riskScore}</div>}
           <button 
             style={{width:36,height:36,borderRadius:"50%",background:"#F0F1F3",border:"1px solid #E4F1FA",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}
@@ -1947,6 +1982,38 @@ export default function TrustButVerify(){
           <style>{`@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
           <ProfileScreen onClose={()=>setShowProfile(false)} />
         </div>
+      )}
+
+      {/* Founder Demo Login Modal */}
+      {showFounderLogin&&(
+        <>
+          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:600,backdropFilter:"blur(4px)"}} onClick={()=>{setShowFounderLogin(false);setFounderPin('');setFounderPinError('');}} />
+          <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:601,background:"#0A1A2E",borderRadius:"20px 20px 0 0",padding:"24px",maxWidth:480,margin:"0 auto",animation:"slideUp 0.3s ease"}}>
+            <div style={{width:40,height:4,borderRadius:2,background:"#334155",margin:"0 auto 20px"}} />
+            <div style={{textAlign:"center",marginBottom:20}}>
+              <div style={{fontSize:9,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:6}}>GENEROSITY™ WATER</div>
+              <div style={{fontSize:18,fontWeight:900,color:"#FFFFFF",marginBottom:4}}>Founder Access</div>
+              <div style={{fontSize:11,color:"#64748B"}}>Enter your PIN to unlock demo mode</div>
+            </div>
+            <div style={{display:"flex",justifyContent:"center",gap:10,marginBottom:16}}>
+              {[0,1,2,3].map(i=>(
+                <div key={i} style={{width:44,height:52,borderRadius:10,border:`2px solid ${founderPin.length>i?'#51B0E6':'#334155'}`,background:founderPin.length>i?'#51B0E611':'#0D1B2A',display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,color:"#FFFFFF",fontWeight:900}}>
+                  {founderPin[i]?'•':''}
+                </div>
+              ))}
+            </div>
+            {founderPinError&&<div style={{textAlign:"center",fontSize:11,color:"#D93025",marginBottom:12,fontWeight:600}}>{founderPinError}</div>}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,maxWidth:260,margin:"0 auto 16px"}}>
+              {['1','2','3','4','5','6','7','8','9','','0','⌫'].map(d=>(
+                <button key={d||'blank'} disabled={!d} onClick={()=>{
+                  if(d==='⌫'){setFounderPin(p=>p.slice(0,-1));setFounderPinError('');}
+                  else if(founderPin.length<4){const newPin=founderPin+d;setFounderPin(newPin);setFounderPinError('');if(newPin.length===4)setTimeout(()=>{if(newPin===FOUNDER_PIN){handleFounderLogin();}else{setFounderPinError('Invalid PIN');setFounderPin('');}},200);}
+                }} style={{height:48,borderRadius:10,border:"none",background:d?"#1a2744":"transparent",color:"#FFFFFF",fontSize:18,fontWeight:700,cursor:d?"pointer":"default",opacity:d?1:0}}>{d}</button>
+              ))}
+            </div>
+            <button onClick={()=>{setShowFounderLogin(false);setFounderPin('');setFounderPinError('');}} style={{width:"100%",padding:"12px",background:"transparent",border:"1px solid #334155",borderRadius:10,color:"#64748B",fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancel</button>
+          </div>
+        </>
       )}
     </div>
   );
