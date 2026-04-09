@@ -1071,7 +1071,7 @@ export default function TrustButVerify(){
         <img 
           src="/generosity-logo.png" 
           alt="Generosity Water Intelligence" 
-          style={{height:36,width:"auto",cursor:"pointer"}}
+          style={{height:40,width:"auto",cursor:"pointer"}}
           onClick={()=>{setPhase("landing");setTab("tbv");setData(null);setSubmitted(false);setEngagementPhase("idle");setInput("");setInputError("");window.scrollTo(0,0);}}
           onTouchStart={()=>{founderLongPressRef.current=setTimeout(()=>setShowFounderLogin(true),3000);}}
           onTouchEnd={()=>{clearTimeout(founderLongPressRef.current);}}
@@ -1116,8 +1116,8 @@ export default function TrustButVerify(){
 
             {/* ── Home Water sub-view ── */}
             {tbvView==="home"&&phase==="landing"&&(
-              <div style={{padding:"28px 20px 20px"}} data-testid="home-landing">
-                <div style={{textAlign:"center",marginBottom:24}}>
+              <div style={{padding:"44px 20px 20px"}} data-testid="home-landing">
+                <div style={{textAlign:"center",marginBottom:32}}>
                   <h1 style={{fontSize:24,fontWeight:900,color:"#0A1A2E",lineHeight:1.1,marginBottom:10,letterSpacing:"-1px",whiteSpace:"nowrap"}}>
                     What's <span style={{color:"#51B0E6"}}>actually</span> in your water?
                   </h1>
@@ -1140,7 +1140,7 @@ export default function TrustButVerify(){
                       flex:1,
                       background:inputMode===m.id?"#FFFFFF":"transparent",
                       border:inputMode===m.id?"1px solid #C8E2F4":"1px solid transparent",
-                      borderRadius:8,padding:"7px 4px",fontSize:10,
+                      borderRadius:8,padding:"6px 4px",fontSize:9,
                       fontWeight:inputMode===m.id?800:500,
                       color:inputMode===m.id?"#51B0E6":"#A6A8AB",
                       cursor:"pointer",
@@ -1149,16 +1149,13 @@ export default function TrustButVerify(){
                       display:"flex",alignItems:"center",justifyContent:"center",gap:4
                     }}
                   >
-                    <Icon name={m.iconName} size={14} color={inputMode===m.id?"#51B0E6":"#A6A8AB"}/>{m.label}
+                    <Icon name={m.iconName} size={12} color={inputMode===m.id?"#51B0E6":"#A6A8AB"}/>{m.label}
                   </button>
                 ))}
               </div>
               
               {/* Privacy Notice */}
-              <div style={{display:"flex",alignItems:"center",gap:6,background:"#F0FAF4",border:"1px solid #1E8A4C33",borderRadius:8,padding:"6px 12px",maxWidth:320,margin:"0 auto 9px",fontSize:10,color:"#276749"}}>
-                <Icon name="lock" size={14} color="#1E8A4C"/>
-                {inputMode==="address"?"Your address is never stored. Used only to match your water utility.":"Your data is never stored. Used only to match your water utility."}
-              </div>
+
               
               {/* Search Input */}
               <div style={{display:"flex",gap:0,borderRadius:12,overflow:"hidden",border:"2px solid #51B0E6",boxShadow:"0 4px 18px rgba(81,176,230,0.14)",maxWidth:380,margin:"0 auto"}}>
@@ -1184,34 +1181,34 @@ export default function TrustButVerify(){
                 </button>
               </div>
               {inputError&&<div style={{fontSize:10,color:"#D93025",marginTop:6,fontWeight:600}} data-testid="input-error">{inputError}</div>}
-              <div style={{fontSize:9,color:"#C5C6C8",marginTop:7}}>Address · ZIP · City · EPA SDWIS + UCMR 5 Report</div>
+              <div style={{fontSize:8,color:"#D0D2D6",marginTop:8}}>EPA SDWIS + UCMR 5 Report</div>
             </div>
             
             {/* Stats Row - Light gray cards */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:18}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:14}}>
               {[
                 ["200M+","Americans exposed to PFAS","USGS 2023"],
                 ["94%","tap water has microplastics","ORB Media / Columbia"],
                 ["$0","to get your report",""]
               ].map(([n,t,src])=>(
-                <div key={n} style={{background:"#F0F1F3",border:"1px solid #C8E2F4",borderRadius:10,padding:"13px 8px",textAlign:"center",boxShadow:"0 2px 8px rgba(166,168,171,0.08)"}}>
-                  <div style={{fontSize:19,fontWeight:900,color:"#51B0E6",lineHeight:1}}>{n}</div>
-                  <div style={{fontSize:9,color:"#A6A8AB",marginTop:4,lineHeight:1.3}}>{t}</div>
-                  {src&&<div style={{fontSize:7,color:"#C5C6C8",marginTop:3,fontStyle:"italic"}}>{src}</div>}
+                <div key={n} style={{background:"#F8F9FB",border:"1px solid #ECEEF1",borderRadius:8,padding:"10px 6px",textAlign:"center"}}>
+                  <div style={{fontSize:15,fontWeight:800,color:"#51B0E6",lineHeight:1}}>{n}</div>
+                  <div style={{fontSize:8,color:"#B0B3B8",marginTop:3,lineHeight:1.3}}>{t}</div>
+                  {src&&<div style={{fontSize:6,color:"#D0D2D6",marginTop:2,fontStyle:"italic"}}>{src}</div>}
                 </div>
               ))}
             </div>
             
             {/* Popular Cities */}
             <div style={{textAlign:"center"}}>
-              <div style={{fontSize:9,color:"#A6A8AB",marginBottom:8}}>POPULAR CITIES</div>
+              <div style={{fontSize:8,color:"#C5C6C8",marginBottom:6,letterSpacing:"1px"}}>POPULAR CITIES</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center"}} data-testid="popular-cities">
                 {Object.keys(CITY_DATA).map(city=>(
                   <button 
                     key={city} 
                     onClick={()=>{setInput(city);setInputMode("city");startScan(city);}}
                     data-testid={`city-btn-${city.toLowerCase().replace(/[,\s]+/g,'-')}`}
-                    style={{background:"#FFFFFF",border:"1px solid #C8E2F4",color:"#2A8FCA",padding:"6px 12px",borderRadius:20,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
+                    style={{background:"#FFFFFF",border:"1px solid #E0E7EE",color:"#2A8FCA",padding:"4px 10px",borderRadius:16,fontSize:9,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
                   >
                     {city}
                   </button>
@@ -1309,7 +1306,7 @@ export default function TrustButVerify(){
           <button
             key={city}
             onClick={()=>{setInput(city);setInputMode("city");setPhase("landing");setTimeout(()=>startScan(city),100);}}
-            style={{background:"#FFFFFF",border:"1px solid #C8E2F4",color:"#2A8FCA",padding:"6px 12px",borderRadius:20,fontSize:11,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
+            style={{background:"#FFFFFF",border:"1px solid #E0E7EE",color:"#2A8FCA",padding:"4px 10px",borderRadius:16,fontSize:9,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}
           >
             {city}
           </button>
