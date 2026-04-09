@@ -188,25 +188,40 @@ const MOCK_USAGE = {
   water_quality_label: "Pure", water_quality_color: "#1E8A4C",
 };
 
-// ─── BRAND COLORS (light mode) ──────────────────────────────────────────────
+// ─── BRAND COLORS (Apple Health light mode) ─────────────────────────────────
 const C = {
-  navy: "#0A1A2E",
-  bg: "#F8F9FB",
+  navy: "#1A1A1A",
+  bg: "#F7F8F9",
   card: "#FFFFFF",
-  border: "#F0F1F3",
+  border: "#F0F0F5",
   borderMed: "#E8ECF0",
   blue: "#51B0E6",
   blueDark: "#2A8FCA",
-  gray: "#A6A8AB",
-  textPrimary: "#0A1A2E",
-  textSecondary: "#6B7280",
-  muted: "#A6A8AB",
-  green: "#34C759",
+  gray: "#8E8E93",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#8E8E93",
+  muted: "#8E8E93",
+  green: "#2ECC71",
   yellow: "#FF9500",
   orange: "#E07020",
   red: "#FF3B30",
   deepRed: "#D93025",
 };
+
+// ─── NUMBER FORMATTING UTILITIES ────────────────────────────────────────────
+function fmt(val, decimals = 0) {
+  const n = Number(val);
+  if (!Number.isFinite(n)) return "0";
+  const fixed = n.toFixed(decimals);
+  if (decimals > 0) return parseFloat(fixed).toString();
+  return Math.round(n).toLocaleString();
+}
+
+function safeDivide(a, b, fallback = 0) {
+  const na = Number(a), nb = Number(b);
+  if (!Number.isFinite(na) || !Number.isFinite(nb) || nb === 0) return fallback;
+  return na / nb;
+}
 
 // ─── TDS UTILITIES ──────────────────────────────────────────────────────────
 function tdsColor(p) {
@@ -922,9 +937,28 @@ export default function WTRHubScreen() {
     );
   }
 
+  // Carbon impact data
+  const carbon = CARBON.fromUsage(usage);
+  const animBottles = useCountUp(carbon.bottles, 1500, carbon.hasData);
+  const animCo2 = useCountUp(carbon.co2Kg, 1500, carbon.hasData);
+  const animTrees = useCountUp(carbon.trees * 10, 1500, carbon.hasData);
+
+  // Today's liters
+  const todayMl = safeNum(usage?.session_ml);
+  const todayL = safeDivide(todayMl, 1000);
+  const todayBottles = safeDivide(todayMl, 500);
+
+  // Ring dimensions
+  const RING_SIZE = 180;
+  const RING_R = (RING_SIZE - 20) / 2;
+  const RING_CX = RING_SIZE / 2;
+  const RING_CY = RING_SIZE / 2;
+  const ringCirc = 2 * Math.PI * RING_R;
+  const ringFill = (Math.min(100, Math.max(0, score)) / 100) * ringCirc;
+
   return (
     <div data-testid="wtr-hub-screen" style={{
-      fontFamily: "DM Sans,-apple-system,BlinkMacSystemFont,sans-serif",
+      fontFamily: "-apple-system, SF Pro Display, Inter, sans-serif",
       background: C.bg,
       color: C.navy,
       display: "flex",
@@ -932,314 +966,269 @@ export default function WTRHubScreen() {
       WebkitFontSmoothing: "antialiased",
       minHeight: "100vh",
     }}>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
       <style>{`
-        @keyframes fadeInUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes spin      { to { transform: rotate(360deg); } }
+        @keyframes fadeInUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
         @keyframes hubShimmer { 0%,100%{opacity:.4} 50%{opacity:.7} }
         @keyframes blinkDot  { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        @keyframes pulseGlow { 0%,100%{opacity:0.3;transform:scale(1)} 50%{opacity:0.1;transform:scale(1.06)} }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
       `}</style>
 
-      {/* ═══════════════════════════════════════════════════════════
-          SECTION 1: HERO
-          ═══════════════════════════════════════════════════════════ */}
+      {/* ── SECTION 1: HERO ── */}
       <div style={{
         position: "relative",
         width: "100%",
-        height: 300,
+        height: 220,
         overflow: "hidden",
       }}>
         <img
           src="/hwh-system-full.jpg"
-          alt="Generosity Home WTR Hub System"
+          alt="Generosity Home WTR Hub"
           style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
         />
-        {/* Gradient overlay to white */}
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(248,249,251,0) 20%, rgba(248,249,251,0.6) 65%, #F8F9FB 100%)",
+          background: "linear-gradient(180deg, rgba(247,248,249,0) 20%, rgba(247,248,249,0.5) 60%, #F7F8F9 100%)",
         }} />
-        {/* Dark overlay for title readability */}
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(10,26,46,0.45) 0%, rgba(10,26,46,0.1) 50%, transparent 100%)",
+          background: "linear-gradient(180deg, rgba(10,26,46,0.4) 0%, rgba(10,26,46,0.05) 60%, transparent 100%)",
         }} />
 
-        {/* Title overlay */}
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0,
           padding: "20px 20px 0", zIndex: 2,
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
-                Generosity{"\u2122"} Water Intelligence
-              </div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>
                 Home WTR Hub
               </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 4, fontFamily: "DM Mono,monospace" }}>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 4, letterSpacing: 0.5 }}>
                 Gen-2 {"\u00B7"} 1,200 GPD {"\u00B7"} 11-Stage RO
               </div>
             </div>
 
-            {/* Status pill */}
             <div style={{
-              display: "flex", alignItems: "center", gap: 6,
-              background: isMock ? "rgba(81,176,230,0.2)" : connected ? "rgba(52,199,89,0.2)" : "rgba(255,255,255,0.15)",
+              display: "flex", alignItems: "center", gap: 5,
+              background: "rgba(255,255,255,0.15)",
               backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-              borderRadius: 20, padding: "6px 12px",
-              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 20, padding: "5px 11px",
+              border: "1px solid rgba(255,255,255,0.12)",
             }}>
               <div style={{
                 width: 6, height: 6, borderRadius: "50%",
                 background: isMock ? C.blue : connected ? C.green : C.muted,
                 animation: isMock ? "blinkDot 1s ease-in-out infinite" : "none",
               }} />
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#FFFFFF", letterSpacing: 0.5, textTransform: "uppercase" }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#FFFFFF", letterSpacing: 0.5, textTransform: "uppercase" }}>
                 {isMock ? "DEMO MODE" : connected ? "CONNECTED" : "OFFLINE"}
               </span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom buttons */}
+      {/* ── CARDS ── */}
+      <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 12, animation: "fadeInUp 0.3s ease" }}>
+
+        {/* ── CARD 1: WATER QUALITY ── */}
         <div style={{
-          position: "absolute", bottom: 16, left: 20, right: 20,
-          display: "flex", gap: 8, zIndex: 2,
+          background: C.card, borderRadius: 20, padding: 20,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
+          textAlign: "center",
         }}>
-          {connected && !isMock ? (
-            <button onClick={forceWash} disabled={flushing} data-testid="hub-force-wash-btn" style={{
-              flex: 1, padding: "12px 0",
-              background: flushing ? "#E8ECF0" : C.blue,
-              color: flushing ? C.muted : "#FFFFFF",
-              border: "none", borderRadius: 14, fontSize: 13, fontWeight: 700,
-              cursor: flushing ? "not-allowed" : "pointer",
-              boxShadow: flushing ? "none" : `0 4px 16px ${C.blue}40`,
-            }}>
-              {flushing ? "Flushing\u2026" : "Force Wash"}
-            </button>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 20 }}>
+            Water Quality
+          </div>
+
+          {tds != null ? (
+            <>
+              <div style={{ position: "relative", width: RING_SIZE, height: RING_SIZE, margin: "0 auto" }}>
+                <svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
+                  <circle cx={RING_CX} cy={RING_CY} r={RING_R} fill="none" stroke="#F0F0F5" strokeWidth="8" />
+                  <circle
+                    cx={RING_CX} cy={RING_CY} r={RING_R}
+                    fill="none" stroke={scoreCol} strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${ringFill} ${ringCirc}`}
+                    transform={`rotate(-90 ${RING_CX} ${RING_CY})`}
+                    style={{ transition: "stroke-dasharray 1.5s cubic-bezier(0.34,1.56,0.64,1), stroke 0.8s ease" }}
+                  />
+                </svg>
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center",
+                  pointerEvents: "none",
+                }}>
+                  <div style={{ fontSize: 48, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -2, lineHeight: 1 }}>
+                    {fmt(score)}
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 8 }}>
+                {tdsLabel(tds)}
+              </div>
+            </>
           ) : (
-            <div style={{
-              flex: 1, padding: "12px 0", textAlign: "center",
-              background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)",
-              borderRadius: 14, fontSize: 12, fontWeight: 700, color: C.textSecondary,
-              border: "1px solid rgba(255,255,255,0.5)",
-            }}>
-              {isMock ? "Running in Demo Mode" : "Connect your Hub via Wi-Fi"}
+            <>
+              <div style={{ position: "relative", width: RING_SIZE, height: RING_SIZE, margin: "0 auto" }}>
+                <svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
+                  <circle cx={RING_CX} cy={RING_CY} r={RING_R} fill="none" stroke="#F0F0F5" strokeWidth="8" />
+                </svg>
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center",
+                  pointerEvents: "none",
+                }}>
+                  <div style={{ fontSize: 48, fontWeight: 700, color: "#D1D5DB", letterSpacing: -2, lineHeight: 1 }}>
+                    {"\u2014"}
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 8 }}>
+                Connecting{"\u2026"}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ── CARD 2: TODAY ── */}
+        <div style={{
+          background: C.card, borderRadius: 20, padding: 20,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>
+            Today
+          </div>
+
+          {todayMl > 0 ? (
+            <>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                <span style={{ fontSize: 40, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>
+                  {fmt(todayL, 1)}
+                </span>
+                <span style={{ fontSize: 18, fontWeight: 500, color: C.gray }}>L</span>
+              </div>
+              <div style={{ fontSize: 13, color: C.gray, marginTop: 6 }}>
+                ~{fmt(todayBottles)} bottles
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                <span style={{ fontSize: 40, fontWeight: 700, color: "#D1D5DB", fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>
+                  0
+                </span>
+                <span style={{ fontSize: 18, fontWeight: 500, color: "#D1D5DB" }}>L</span>
+              </div>
+              <div style={{ fontSize: 13, color: C.gray, marginTop: 6 }}>
+                Start dispensing to track
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ── CARD 3: YOUR IMPACT ── */}
+        <div style={{
+          background: C.card, borderRadius: 20, padding: 20,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
+        }}>
+          {/* Header with mini ring */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase" }}>
+              Your Impact
+            </div>
+            <div style={{ position: "relative", width: 40, height: 40 }}>
+              <CarbonRing pct={carbon.goalPct} size={40} strokeWidth={4} />
+              <div style={{
+                position: "absolute", inset: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 9, fontWeight: 700, color: "#2E7D32",
+              }}>
+                {fmt(carbon.goalPct)}%
+              </div>
+            </div>
+          </div>
+
+          {carbon.hasData ? (
+            <>
+              {/* Hero number */}
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{ fontSize: 48, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>
+                  {fmt(animBottles)}
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 6 }}>
+                  Bottles Saved
+                </div>
+              </div>
+
+              {/* Secondary stats */}
+              <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14, display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ fontSize: 13, color: C.textSecondary }}>
+                  {fmt(safeNum(animCo2), 1)} kg CO{"\u2082"} avoided
+                </div>
+                <div style={{ fontSize: 13, color: C.textSecondary }}>
+                  {"\u2248"} {fmt(safeNum(animTrees) / 10, 1)} trees this year
+                </div>
+              </div>
+            </>
+          ) : (
+            <div style={{ textAlign: "center", padding: "8px 0" }}>
+              <div style={{ fontSize: 48, fontWeight: 700, color: "#D1D5DB", letterSpacing: -1, lineHeight: 1 }}>
+                0
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 6 }}>
+                Bottles Saved
+              </div>
+              <div style={{ fontSize: 12, color: C.gray, marginTop: 12, lineHeight: 1.6 }}>
+                Every 500 mL of filtered water you dispense eliminates one single-use plastic bottle.
+              </div>
             </div>
           )}
         </div>
-      </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          SCROLLABLE CONTENT
-          ═══════════════════════════════════════════════════════════ */}
-      <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 14, animation: "fadeInUp 0.3s ease" }}>
-
-        {/* ── SECTION 2: Water Quality Score Ring ── */}
-        <div style={{
-          background: C.card, borderRadius: 24, padding: "28px 20px 24px",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
-          textAlign: "center",
+        {/* ── CARD 4: FILTER HEALTH ── */}
+        <div data-testid="hub-filter-section" style={{
+          background: C.card, borderRadius: 20, padding: 20,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
         }}>
-          <ScoreRing
-            score={score}
-            label="OUTPUT QUALITY"
-            size={200}
-            color={scoreCol}
-            subtitle={tdsLabel(tds)}
-          />
-
-          {/* Quick stats row */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 28, marginTop: 20, paddingTop: 16, borderTop: `1px solid ${C.border}` }}>
-            {[
-              { label: "TDS", value: tds != null ? `${tds}` : "\u2014", unit: "ppm", color: tdsColor(tds) },
-              { label: "LITERS", value: usage ? (usage.todayGal * 3.785).toFixed(1) : "0.0", unit: "L", color: C.blue },
-              { label: "TEMP", value: "72", unit: "\u00B0F", color: C.yellow },
-            ].map(stat => (
-              <div key={stat.label} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>{stat.label}</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: stat.color, fontVariantNumeric: "tabular-nums", letterSpacing: -0.5 }}>
-                  {stat.value}<span style={{ fontSize: 12, fontWeight: 600, color: C.muted, marginLeft: 2 }}>{stat.unit}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── SECTION 3: Telemetry Cards (3-up) ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-          <MetricCard
-            icon="droplet"
-            label="TDS Out"
-            value={tds != null ? `${tds}` : "\u2014"}
-            sub={usage?.tds_avg_1h != null ? `Avg ${usage.tds_avg_1h} \u00B7 1h` : ""}
-            color={tdsColor(tds)}
-            sparkData={tdsSparkData}
-          />
-          <MetricCard
-            icon="flask"
-            label="Liters Dispensed"
-            value={usage ? (usage.todayGal * 3.785).toFixed(1) : "0.0"}
-            sub="Today"
-            color={C.blue}
-          />
-          <MetricCard
-            icon="gauge"
-            label="Daily Output"
-            value={usage?.session_ml != null ? `${(usage.session_ml / 1000).toFixed(1)}L` : "\u2014"}
-            sub={usage?.session_bottles != null ? `${usage.session_bottles} bottles` : ""}
-            color={C.green}
-          />
-        </div>
-
-        {/* ── SECTION 4: Filter Lifecycle Cards ── */}
-        <div data-testid="hub-filter-section">
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10, paddingLeft: 4 }}>
-            Filter Lifecycle
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {FILTERS.map(f => (
-              <FilterCard key={f.key} filter={f} life={tele?.[f.key] ?? 0}
-                expanded={expandedFilter === f.key}
-                onToggle={() => setExpandedFilter(expandedFilter === f.key ? null : f.key)}
-                onReset={resetFilter} />
-            ))}
-          </div>
-        </div>
-
-        {/* ── SECTION 5: Recent Readings Timeline ── */}
-        <ChartSection hist={hist} chartWin={chartWin} setChartWin={setChartWin} />
-
-        {/* ── SECTION 6: System Info Card ── */}
-        <div data-testid="hub-device-info" style={{ background: C.card, borderRadius: 24, padding: "20px 18px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>Your System</div>
-
-          {/* Faucet image */}
-          <div style={{ borderRadius: 16, overflow: "hidden", marginBottom: 16, border: `1px solid ${C.border}` }}>
-            <img src="/hwh-faucet-display.jpg" alt="Intelligent Faucet with TDS display" style={{ width: "100%", display: "block" }} />
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>
+            Filter Health
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {[
-              ["Model",        "Gen-2 Home WTR Hub"],
-              ["Flow Rate",    "1,200 GPD \u00B7 0.83 GPM"],
-              ["Filtration",   "11-Stage Deep Filtration"],
-              ["Daily Output", usage?.session_ml != null ? `${(usage.session_ml / 1000).toFixed(2)}L` : "\u2014"],
-              ["Total Filtered", usage?.total_liters_lifetime != null ? `${usage.total_liters_lifetime.toFixed(1)}L (${usage.total_bottles_lifetime.toLocaleString()} bottles)` : "\u2014"],
-              ["Device ID",    tele?.device_id ?? "\u2014"],
-              ["Backend",      isMock ? "Simulator (Demo)" : wsStatus],
-              ["Certified",    "NSF \u00B7 ANSI \u00B7 RoHS \u00B7 CE"],
-            ].map(([label, value], i, arr) => (
-              <div key={label} style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "10px 0",
-                borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : "none",
-              }}>
-                <span style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>{label}</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: C.navy, maxWidth: "60%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── SECTION 7: Maintenance Alerts ── */}
-        {filterAlerts.length > 0 && (
-          <div style={{
-            background: "#FFF8F0",
-            borderRadius: 20,
-            padding: "18px 16px",
-            border: "1px solid #FFE5CC",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <HubIcon name="alertCircle" size={18} color={C.yellow} />
-              <span style={{ fontSize: 14, fontWeight: 800, color: C.navy }}>Maintenance Required</span>
-            </div>
-            {filterAlerts.map(f => {
-              const life = tele?.[f.key] ?? 0;
-              const isUrgent = life < 20;
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {FILTERS.map(f => {
+              const life = safeNum(tele?.[f.key], 0);
+              const pct = Math.min(100, life);
+              const col = filterColor(life);
               return (
-                <div key={f.key} style={{
-                  display: "flex", alignItems: "center", gap: 12,
-                  padding: "10px 14px", marginBottom: 8,
-                  background: isUrgent ? "#FFF0F0" : "#FFFFFF",
-                  borderRadius: 14,
-                  border: `1px solid ${isUrgent ? "#FECACA" : C.border}`,
-                }}>
-                  <HubIcon name={isUrgent ? "hazard" : "alertCircle"} size={16} color={isUrgent ? C.red : C.yellow} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>{f.name}</div>
-                    <div style={{ fontSize: 11, color: C.muted }}>{f.model} {"\u00B7"} {life}% remaining</div>
+                <div key={f.key}>
+                  {/* Name + percentage + dot */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: C.navy }}>{f.name}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: C.navy, fontVariantNumeric: "tabular-nums" }}>
+                        {fmt(life)}%
+                      </span>
+                      <div style={{
+                        width: 8, height: 8, borderRadius: "50%", background: col,
+                        transition: "background 0.5s",
+                      }} />
+                    </div>
                   </div>
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 10,
-                    background: isUrgent ? `${C.red}12` : `${C.yellow}12`,
-                    color: isUrgent ? C.red : C.yellow,
-                    textTransform: "uppercase", letterSpacing: 0.8,
-                  }}>
-                    {isUrgent ? "Replace Now" : "Replace Soon"}
-                  </span>
+                  {/* Progress bar */}
+                  <div style={{ height: 6, borderRadius: 3, background: "#F0F0F5", overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%", width: `${pct}%`, borderRadius: 3,
+                      background: col,
+                      transition: "width 1s ease, background 0.5s",
+                    }} />
+                  </div>
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {/* ── Carbon Impact Module (production-ready) ── */}
-        <CarbonImpactCard usage={usage} C={C} />
-
-        {/* ── Contaminant Removal Grid ── */}
-        <div data-testid="hub-contaminant-grid" style={{ background: C.card, borderRadius: 24, padding: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Contaminant Removal</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {[["biohazard","PFOS / PFOA",">99%"],["hazard","Lead",">99%"],["skull","Arsenic",">99%"],["testTube","Chromium-6",">99%"],["thermometer","Mercury",">99%"],["dna","Microplastics",">99%"],["bacteria","Bacteria/Cysts",">99%"],["flask","TDS",">97%"]].map(([iconName,label,rate]) => (
-              <div key={label} style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "10px 12px", background: "#FAFBFC", borderRadius: 14,
-                border: `1px solid ${C.border}`,
-              }}>
-                <HubIcon name={iconName} size={16} color={C.blue} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: C.navy, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: C.green }}>{rate}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Force Wash Button (secondary) */}
-        <button onClick={forceWash} disabled={flushing} data-testid="hub-force-wash-btn-bottom" style={{
-          width: "100%", padding: "16px 0",
-          background: flushing ? "#E8ECF0" : C.blue,
-          color: flushing ? C.muted : "#FFFFFF",
-          border: "none", borderRadius: 16, fontSize: 15, fontWeight: 800,
-          cursor: flushing ? "not-allowed" : "pointer",
-          letterSpacing: 0.3,
-          boxShadow: flushing ? "none" : `0 4px 20px ${C.blue}35`,
-          transition: "all 0.3s",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-        }}>
-          <HubIcon name={flushing ? "refresh" : "bolt"} size={16} color={flushing ? C.muted : "#FFFFFF"} />
-          {flushing ? "Flushing in progress\u2026" : "Force Wash / Purge Cycle"}
-        </button>
-
-        {/* Mission Footer */}
-        <div style={{
-          background: C.card, borderRadius: 20, padding: 20,
-          boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-          border: `1px solid ${C.border}`, textAlign: "center",
-        }}>
-          <div style={{ marginBottom: 8 }}><HubIcon name="wave" size={24} color={C.blue} /></div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.blue, marginBottom: 6 }}>Every Hub Sold = Lives Changed</div>
-          <div style={{ fontSize: 12, color: C.textSecondary, lineHeight: 1.7 }}>
-            For every Home WTR Hub purchased, Generosity{"\u2122"} keeps safe water flowing to those affected by the global clean water crisis. 850+ projects worldwide.
           </div>
         </div>
 
