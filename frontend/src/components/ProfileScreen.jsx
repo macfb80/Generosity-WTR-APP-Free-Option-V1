@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 // ── Colors ────────────────────────────────────────────────────────────
 const C = {
@@ -7,6 +7,8 @@ const C = {
   body:"#1A2535", muted:"#6B7A8D",
   green:"#1E8A4C", warning:"#F29423", danger:"#D93025", orange:"#E07020",
 };
+
+const API_BASE = 'https://generosity-dashboard.vercel.app';
 
 // ── Stroke-based SVG icons (matching nav bar / app style) ─────────────
 function PIcon({ name, size = 16, color = "#6B7A8D" }) {
@@ -30,6 +32,9 @@ function PIcon({ name, size = 16, color = "#6B7A8D" }) {
     shield: <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V11C4 16.5 7.5 21.25 12 22.5C16.5 21.25 20 16.5 20 11V6L12 2Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round"/><path d="M9 12L11 14L15 10" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     sunCloud: <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="10" cy="8" r="3" stroke={ic} strokeWidth="1.5"/><path d="M10 3V4M4 8H5M15 8H16M6 4L7 5M14 4L13 5" stroke={ic} strokeWidth="1.3" strokeLinecap="round"/><path d="M6 18H17C19.21 18 21 16.21 21 14C21 12.14 19.72 10.57 18 10.13C17.94 7.83 16.07 6 13.75 6C12.46 6 11.32 6.6 10.58 7.54" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>,
     loader: <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    check: <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={ic} strokeWidth="1.5"/><path d="M8 12L11 15L16 9" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    chevronDown: <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke={ic} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    chevronUp: <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M6 15L12 9L18 15" stroke={ic} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   };
   return <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",verticalAlign:"middle"}}>{icons[name]||null}</span>;
 }
@@ -58,7 +63,7 @@ async function connectOura() {
 
   try {
     // Use backend proxy to avoid CORS
-    const proxyRes = await fetch('https://generosity-dashboard.vercel.app/api/wtr/oura-proxy', {
+    const proxyRes = await fetch(`${API_BASE}/api/wtr/oura-proxy`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ oura_token: token }),
@@ -229,51 +234,81 @@ function Label({children}) {
   return <div style={{fontSize:13,fontWeight:700,color:C.body,marginBottom:7,letterSpacing:0.1}}>{children}</div>;
 }
 
-function TextInput({value,onChange,placeholder,type="text",unit}) {
+function TextInput({value,onChange,placeholder,type="text",unit,disabled}) {
   const [focused,setFocused]=useState(false);
   return (
     <div style={{position:"relative"}}>
       <input type={type} value={value} onChange={e=>onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder} disabled={disabled}
         onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)}
         style={{
           width:"100%", padding: unit?"12px 44px 12px 14px":"12px 14px",
           fontSize:15, fontWeight:600, color:C.body,
-          background:C.white, border:`1.5px solid ${focused?C.blue:C.border}`,
+          background: disabled ? C.bg : C.white, border:`1.5px solid ${focused?C.blue:C.border}`,
           borderRadius:12, outline:"none", fontFamily:"Nunito Sans,sans-serif",
           boxShadow: focused?`0 0 0 3px ${C.blue}18`:"none",
           transition:"border-color 0.2s, box-shadow 0.2s", WebkitAppearance:"none",
+          opacity: disabled ? 0.7 : 1,
         }}/>
       {unit && <span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:12,fontWeight:700,color:C.muted,pointerEvents:"none"}}>{unit}</span>}
     </div>
   );
 }
 
-function Chips({value,onChange,options}) {
+function Chips({value,onChange,options,disabled}) {
   return (
     <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
       {options.map(([v,l])=>(
-        <button key={v} onClick={()=>onChange(v)} style={{
+        <button key={v} onClick={()=>!disabled&&onChange(v)} style={{
           padding:"8px 16px", borderRadius:20,
           border:`1.5px solid ${value===v?C.blue:C.border}`,
           background: value===v?C.blueLight:C.white,
           color: value===v?C.blue:C.muted,
           fontSize:13, fontWeight: value===v?700:500,
-          cursor:"pointer", transition:"all 0.18s",
+          cursor: disabled?"default":"pointer", transition:"all 0.18s",
           boxShadow: value===v?`0 2px 8px ${C.blue}25`:"none",
+          opacity: disabled ? 0.7 : 1,
         }}>{l}</button>
       ))}
     </div>
   );
 }
 
-function SectionTitle({icon,text}) {
+function SectionTitle({icon,text,children}) {
   return (
     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
       <div style={{width:36,height:36,borderRadius:10,background:C.blueLight,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
         <PIcon name={icon} size={18} color={C.blue}/>
       </div>
-      <div style={{fontSize:16,fontWeight:800,color:C.body,letterSpacing:-0.2}}>{text}</div>
+      <div style={{flex:1,fontSize:16,fontWeight:800,color:C.body,letterSpacing:-0.2}}>{text}</div>
+      {children}
+    </div>
+  );
+}
+
+// ── Collapsible Section ───────────────────────────────────────────────
+function CollapsibleSection({ icon, text, defaultOpen, children, badge }) {
+  const [open, setOpen] = useState(defaultOpen !== false);
+  return (
+    <div style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,overflow:"hidden",transition:"all 0.3s"}}>
+      <button onClick={()=>setOpen(v=>!v)} style={{
+        width:"100%",display:"flex",alignItems:"center",gap:10,padding:"16px 20px",
+        background:"transparent",border:"none",cursor:"pointer",textAlign:"left",
+      }}>
+        <div style={{width:36,height:36,borderRadius:10,background:C.blueLight,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <PIcon name={icon} size={18} color={C.blue}/>
+        </div>
+        <div style={{flex:1}}>
+          <div style={{fontSize:16,fontWeight:800,color:C.body,letterSpacing:-0.2}}>{text}</div>
+          {badge && <div style={{fontSize:11,color:C.muted,marginTop:1}}>{badge}</div>}
+        </div>
+        <PIcon name={open?"chevronUp":"chevronDown"} size={18} color={C.muted}/>
+      </button>
+      {open && (
+        <div style={{padding:"0 20px 20px",animation:"fadeIn 0.2s ease"}}>
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -399,6 +434,14 @@ function WearableCard({w, status, onToggle}) {
 
 // ── MAIN EXPORT ───────────────────────────────────────────────────────
 export default function ProfileScreen({ onClose }) {
+  // Profile saved state — tracks whether user has a stored tenant
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [justCreated, setJustCreated] = useState(false);
+  const nhsDebounceRef = useRef(null);
+
   // Persist profile to localStorage
   const [profile, setProfile] = useState(() => {
     try {
@@ -456,6 +499,48 @@ export default function ProfileScreen({ onClose }) {
     try { localStorage.setItem('wtr_intake', JSON.stringify(intake)); } catch(e) {}
   }, [intake]);
 
+  // ── Auto-fetch existing profile on mount ─────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    const fetchProfile = async () => {
+      const email = profile.email?.trim();
+      if (!email) { setLoadingProfile(false); return; }
+      try {
+        const res = await fetch(`${API_BASE}/api/wtr/profile?email=${encodeURIComponent(email)}`);
+        if (!res.ok) { setLoadingProfile(false); return; }
+        const data = await res.json();
+        if (!cancelled && data.ok && data.profile) {
+          const p = data.profile;
+          setProfile(prev => ({
+            ...prev,
+            firstName: p.first_name || prev.firstName,
+            lastName: p.last_name || prev.lastName,
+            email: p.email || prev.email,
+            age: p.age ? String(p.age) : prev.age,
+            gender: p.gender || prev.gender,
+            height: p.height || prev.height,
+            heightUnit: p.height_unit || prev.heightUnit,
+            weight: p.weight || prev.weight,
+            weightUnit: p.weight_unit || prev.weightUnit,
+            activity: p.activity || prev.activity,
+            exercise: p.exercise || prev.exercise,
+            exerciseMins: p.exercise_mins || prev.exerciseMins,
+            climate: p.climate || prev.climate,
+          }));
+          if (p.intake && typeof p.intake === 'object') {
+            setIntake(prev => ({ ...prev, ...p.intake }));
+          }
+          setProfileSaved(true);
+        }
+      } catch(err) {
+        console.error('[Profile] Fetch error:', err.message);
+      }
+      if (!cancelled) setLoadingProfile(false);
+    };
+    fetchProfile();
+    return () => { cancelled = true; };
+  }, []); // profile.email read once on mount
+
   // Auto-connect Oura on mount if token exists (fetches fresh data every time)
   useEffect(() => {
     let cancelled = false;
@@ -506,20 +591,149 @@ export default function ProfileScreen({ onClose }) {
   // Live NHS with biometrics
   useEffect(()=>{ setNhs(calcNHS(profile,intake,biometrics)); },[profile,intake,biometrics]);
 
+  // ── Debounced NHS auto-save (only when profile already saved) ────
+  const debouncedNhsSave = useCallback((nhsData, intakeData, email) => {
+    if (!email || !profileSaved) return;
+    if (nhsDebounceRef.current) clearTimeout(nhsDebounceRef.current);
+    nhsDebounceRef.current = setTimeout(async () => {
+      try {
+        await fetch(`${API_BASE}/api/wtr/profile/nhs`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            nhs_score: nhsData.score,
+            nhs_target: nhsData.target,
+            nhs_effective: nhsData.effective,
+            nhs_bio_bonus: nhsData.bioBonus,
+            intake: intakeData,
+          }),
+        });
+      } catch(err) {
+        console.error('[Profile] NHS auto-save failed:', err.message);
+      }
+    }, 2000);
+  }, [profileSaved]);
+
+  useEffect(() => {
+    if (profileSaved && profile.email) {
+      debouncedNhsSave(nhs, intake, profile.email);
+    }
+  }, [nhs, intake, profileSaved, profile.email, debouncedNhsSave]);
+
   const connectedCount = Object.values(wearables).filter(w=>w?.connected).length;
   const hasBiometrics = Object.keys(biometrics).length > 0;
+
+  // ── Save Profile handler (creates tenant) ────────────────────────
+  const handleSaveProfile = async () => {
+    // Validate required fields
+    if (!profile.firstName?.trim()) { setSaveError('First name is required'); return; }
+    if (!profile.lastName?.trim()) { setSaveError('Last name is required'); return; }
+    if (!profile.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) {
+      setSaveError('Valid email is required'); return;
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/wtr/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: profile.email.trim().toLowerCase(),
+          first_name: profile.firstName.trim(),
+          last_name: profile.lastName.trim(),
+          age: profile.age || null,
+          gender: profile.gender || null,
+          height: profile.height || null,
+          height_unit: profile.heightUnit,
+          weight: profile.weight || null,
+          weight_unit: profile.weightUnit,
+          activity: profile.activity,
+          exercise: profile.exercise,
+          exercise_mins: profile.exerciseMins,
+          climate: profile.climate,
+          intake,
+          nhs_score: nhs.score,
+          nhs_target: nhs.target,
+          nhs_effective: nhs.effective,
+          nhs_bio_bonus: nhs.bioBonus,
+          wearables: Object.fromEntries(
+            Object.entries(wearables)
+              .filter(([,v]) => v?.connected)
+              .map(([k,v]) => [k, { connected: true, source: v.source, ts: v.ts }])
+          ),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setSaveError(data.error || 'Save failed');
+        setSaving(false);
+        return;
+      }
+
+      setProfileSaved(true);
+      if (data.isNew) setJustCreated(true);
+      setSaving(false);
+
+      // Clear justCreated after 5 seconds
+      if (data.isNew) {
+        setTimeout(() => setJustCreated(false), 5000);
+      }
+
+    } catch (err) {
+      console.error('[Profile] Save error:', err.message);
+      setSaveError('Network error. Please try again.');
+      setSaving(false);
+    }
+  };
+
+  // ── Profile summary badge for collapsed sections ─────────────────
+  const personalInfoBadge = profileSaved
+    ? `${profile.firstName} ${profile.lastName} \u00B7 ${profile.email}`
+    : null;
+  const bodyMetricsBadge = profileSaved && profile.height && profile.weight
+    ? `${profile.height}${profile.heightUnit} \u00B7 ${profile.weight}${profile.weightUnit}${bmi ? ` \u00B7 BMI ${bmi}` : ''}`
+    : null;
+  const activityBadge = profileSaved
+    ? `${profile.activity} \u00B7 ${profile.climate}`
+    : null;
+
+  // Show loading state
+  if (loadingProfile) {
+    return (
+      <div style={{fontFamily:"Nunito Sans,-apple-system,sans-serif",background:C.white,minHeight:"100%",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{width:40,height:40,border:`3px solid ${C.border}`,borderTopColor:C.blue,borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 12px"}}/>
+          <div style={{fontSize:14,color:C.muted,fontWeight:600}}>Loading profile...</div>
+          <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="profile-screen" style={{fontFamily:"Nunito Sans,-apple-system,sans-serif",background:C.white,minHeight:"100%",color:C.body,display:"flex",flexDirection:"column",maxWidth:480,margin:"0 auto",WebkitFontSmoothing:"antialiased"}}>
       <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
-      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}} *{box-sizing:border-box;-webkit-tap-highlight-color:transparent} input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none} ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-thumb{background:#E8EEF2;border-radius:2px}`}</style>
+      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}} @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} *{box-sizing:border-box;-webkit-tap-highlight-color:transparent} input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none} ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-thumb{background:#E8EEF2;border-radius:2px}`}</style>
 
       {/* Header */}
       <div style={{background:C.white,borderBottom:`1px solid ${C.border}`,padding:"16px 20px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(16px)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <img src="/generosity-logo.png" alt="Generosity" style={{height:32,width:"auto"}}/>
-            <div style={{fontSize:20,fontWeight:900,color:C.body,letterSpacing:-0.5}}>My Profile</div>
+            <div>
+              <div style={{fontSize:20,fontWeight:900,color:C.body,letterSpacing:-0.5}}>
+                {profileSaved ? `Hi, ${profile.firstName}` : 'My Profile'}
+              </div>
+              {profileSaved && (
+                <div style={{fontSize:11,color:C.green,fontWeight:700,display:"flex",alignItems:"center",gap:4,marginTop:1}}>
+                  <PIcon name="check" size={12} color={C.green}/> Profile Active
+                </div>
+              )}
+            </div>
           </div>
           <button onClick={onClose} data-testid="profile-close-btn" style={{width:36,height:36,borderRadius:"50%",background:C.bg,border:`1px solid ${C.border}`,fontSize:20,cursor:"pointer",color:C.muted,display:"flex",alignItems:"center",justifyContent:"center"}}>{"\u00D7"}</button>
         </div>
@@ -527,10 +741,31 @@ export default function ProfileScreen({ onClose }) {
 
       <div style={{flex:1,overflowY:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:24,paddingBottom:40,animation:"fadeIn 0.3s ease"}}>
 
+        {/* Welcome banner for newly created profiles */}
+        {justCreated && (
+          <div style={{
+            background:`linear-gradient(135deg,${C.green}15,${C.green}08)`,
+            border:`1.5px solid ${C.green}30`,
+            borderRadius:16,padding:"16px 20px",
+            display:"flex",alignItems:"center",gap:12,
+            animation:"fadeIn 0.3s ease",
+          }}>
+            <div style={{width:40,height:40,borderRadius:12,background:`${C.green}18`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <PIcon name="shield" size={20} color={C.green}/>
+            </div>
+            <div>
+              <div style={{fontSize:14,fontWeight:800,color:C.green}}>Profile Created</div>
+              <div style={{fontSize:12,color:C.body,marginTop:2}}>Confirmation email sent to {profile.email}</div>
+            </div>
+          </div>
+        )}
+
         {/* NHS SCORE RING */}
         <div data-testid="nhs-score-section" style={{background:`linear-gradient(160deg,${C.blueLight} 0%,${C.white} 100%)`,borderRadius:24,padding:"28px 20px 22px",border:`1px solid ${C.border}`,textAlign:"center"}}>
           <div style={{fontSize:12,fontWeight:700,color:C.blue,letterSpacing:0.5,marginBottom:2}}>Net Hydration Score{"\u2122"}</div>
-          <div style={{fontSize:12,color:C.muted,marginBottom:20}}>Updates live as you fill in your profile</div>
+          <div style={{fontSize:12,color:C.muted,marginBottom:20}}>
+            {profileSaved ? 'Auto-saves as you update intake and biometrics' : 'Updates live as you fill in your profile'}
+          </div>
           <NHSRing score={nhs.score} target={nhs.target} effective={nhs.effective} bioBonus={nhs.bioBonus}/>
 
           {/* Biometric adjustments */}
@@ -585,95 +820,7 @@ export default function ProfileScreen({ onClose }) {
           </div>
         )}
 
-        {/* PERSONAL INFO */}
-        <div data-testid="personal-info-section" style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,padding:"20px"}}>
-          <SectionTitle icon="user" text="Personal Info"/>
-          <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <div><Label>First Name</Label><TextInput value={profile.firstName} onChange={v=>setP("firstName",v)} placeholder="First"/></div>
-              <div><Label>Last Name</Label><TextInput value={profile.lastName} onChange={v=>setP("lastName",v)} placeholder="Last"/></div>
-            </div>
-            <div><Label>Email</Label><TextInput value={profile.email} onChange={v=>setP("email",v)} placeholder="you@email.com" type="email"/></div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <div><Label>Age</Label><TextInput value={profile.age} onChange={v=>setP("age",v)} placeholder="30" type="number" unit="yrs"/></div>
-              <div>
-                <Label>Biological Sex</Label>
-                <Chips value={profile.gender} onChange={v=>setP("gender",v)} options={[["male","Male"],["female","Female"],["other","Other"]]}/>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* BODY METRICS */}
-        <div data-testid="body-metrics-section" style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,padding:"20px"}}>
-          <SectionTitle icon="ruler" text="Body Metrics"/>
-          <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            <div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
-                <span style={{fontSize:13,fontWeight:700,color:C.body}}>Height</span>
-                <div style={{display:"flex",gap:4}}>
-                  {[["ft","ft \u00B7 in"],["cm","cm"]].map(([v,l])=>(
-                    <button key={v} onClick={()=>setP("heightUnit",v)} data-testid={`height-unit-${v}`} style={{padding:"4px 10px",borderRadius:10,border:`1px solid ${profile.heightUnit===v?C.blue:C.border}`,background:profile.heightUnit===v?C.blueLight:C.white,color:profile.heightUnit===v?C.blue:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{l}</button>
-                  ))}
-                </div>
-              </div>
-              <TextInput value={profile.height} onChange={v=>setP("height",v)} placeholder={profile.heightUnit==="ft"?"5.11 (5ft 11in)":"180"} type="number" unit={profile.heightUnit==="ft"?"ft.in":"cm"}/>
-            </div>
-            <div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
-                <span style={{fontSize:13,fontWeight:700,color:C.body}}>Weight</span>
-                <div style={{display:"flex",gap:4}}>
-                  {[["lbs","lbs"],["kg","kg"]].map(([v,l])=>(
-                    <button key={v} onClick={()=>setP("weightUnit",v)} data-testid={`weight-unit-${v}`} style={{padding:"4px 10px",borderRadius:10,border:`1px solid ${profile.weightUnit===v?C.blue:C.border}`,background:profile.weightUnit===v?C.blueLight:C.white,color:profile.weightUnit===v?C.blue:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{l}</button>
-                  ))}
-                </div>
-              </div>
-              <TextInput value={profile.weight} onChange={v=>setP("weight",v)} placeholder={profile.weightUnit==="lbs"?"170":"77"} type="number" unit={profile.weightUnit}/>
-            </div>
-            {bmi&&(
-              <div data-testid="bmi-card" style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",background:`${bmiColor}10`,borderRadius:14,border:`1px solid ${bmiColor}25`}}>
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase"}}>BMI</div>
-                  <div style={{fontSize:11,color:C.muted}}>Auto-calculated</div>
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:26,fontWeight:900,color:bmiColor,fontFamily:"Nunito,sans-serif",lineHeight:1}}>{bmi}</div>
-                  <div style={{fontSize:11,fontWeight:700,color:bmiColor}}>{bmiLabel}</div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ACTIVITY & CLIMATE */}
-        <div data-testid="activity-section" style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,padding:"20px"}}>
-          <SectionTitle icon="activity" text="Activity & Climate"/>
-          <div style={{display:"flex",flexDirection:"column",gap:16}}>
-            <div>
-              <Label>Daily Activity Level</Label>
-              <Chips value={profile.activity} onChange={v=>setP("activity",v)} options={[
-                ["sedentary","Sedentary"],["light","Light"],
-                ["moderate","Moderate"],["active","Active"],["athlete","Athlete"],
-              ]}/>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <div>
-                <Label>Today's Exercise</Label>
-                <Chips value={profile.exercise} onChange={v=>setP("exercise",v)} options={[["none","None"],["light","Light"],["moderate","Moderate"],["intense","Intense"]]}/>
-              </div>
-              <div><Label>Duration</Label><TextInput value={profile.exerciseMins} onChange={v=>setP("exerciseMins",v)} type="number" placeholder="45" unit="min"/></div>
-            </div>
-            <div>
-              <Label>Climate / Region Temp</Label>
-              <Chips value={profile.climate} onChange={v=>setP("climate",v)} options={[
-                ["cool","Cool"],["mild","Mild"],
-                ["warm","Warm"],["hot","Hot"],["extreme","Extreme"],
-              ]}/>
-            </div>
-          </div>
-        </div>
-
-        {/* DAILY FLUID INTAKE */}
+        {/* DAILY FLUID INTAKE — always visible */}
         <div data-testid="fluid-intake-section" style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,padding:"20px"}}>
           <SectionTitle icon="droplet" text="Today's Fluid Intake"/>
           <div style={{fontSize:12,color:C.muted,marginBottom:16,marginTop:-10}}>Absorption factor adjusts your effective hydration</div>
@@ -708,6 +855,182 @@ export default function ProfileScreen({ onClose }) {
           </div>
         </div>
 
+        {/* PERSONAL INFO — collapsible when profile saved */}
+        {profileSaved ? (
+          <CollapsibleSection icon="user" text="Personal Info" defaultOpen={false} badge={personalInfoBadge}>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div><Label>First Name</Label><TextInput value={profile.firstName} onChange={v=>setP("firstName",v)} placeholder="First"/></div>
+                <div><Label>Last Name</Label><TextInput value={profile.lastName} onChange={v=>setP("lastName",v)} placeholder="Last"/></div>
+              </div>
+              <div><Label>Email</Label><TextInput value={profile.email} onChange={v=>setP("email",v)} placeholder="you@email.com" type="email"/></div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div><Label>Age</Label><TextInput value={profile.age} onChange={v=>setP("age",v)} placeholder="30" type="number" unit="yrs"/></div>
+                <div>
+                  <Label>Biological Sex</Label>
+                  <Chips value={profile.gender} onChange={v=>setP("gender",v)} options={[["male","Male"],["female","Female"],["other","Other"]]}/>
+                </div>
+              </div>
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div data-testid="personal-info-section" style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,padding:"20px"}}>
+            <SectionTitle icon="user" text="Personal Info"/>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div><Label>First Name</Label><TextInput value={profile.firstName} onChange={v=>setP("firstName",v)} placeholder="First"/></div>
+                <div><Label>Last Name</Label><TextInput value={profile.lastName} onChange={v=>setP("lastName",v)} placeholder="Last"/></div>
+              </div>
+              <div><Label>Email</Label><TextInput value={profile.email} onChange={v=>setP("email",v)} placeholder="you@email.com" type="email"/></div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div><Label>Age</Label><TextInput value={profile.age} onChange={v=>setP("age",v)} placeholder="30" type="number" unit="yrs"/></div>
+                <div>
+                  <Label>Biological Sex</Label>
+                  <Chips value={profile.gender} onChange={v=>setP("gender",v)} options={[["male","Male"],["female","Female"],["other","Other"]]}/>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* BODY METRICS — collapsible when profile saved */}
+        {profileSaved ? (
+          <CollapsibleSection icon="ruler" text="Body Metrics" defaultOpen={false} badge={bodyMetricsBadge}>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
+                  <span style={{fontSize:13,fontWeight:700,color:C.body}}>Height</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[["ft","ft \u00B7 in"],["cm","cm"]].map(([v,l])=>(
+                      <button key={v} onClick={()=>setP("heightUnit",v)} style={{padding:"4px 10px",borderRadius:10,border:`1px solid ${profile.heightUnit===v?C.blue:C.border}`,background:profile.heightUnit===v?C.blueLight:C.white,color:profile.heightUnit===v?C.blue:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <TextInput value={profile.height} onChange={v=>setP("height",v)} placeholder={profile.heightUnit==="ft"?"5.11 (5ft 11in)":"180"} type="number" unit={profile.heightUnit==="ft"?"ft.in":"cm"}/>
+              </div>
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
+                  <span style={{fontSize:13,fontWeight:700,color:C.body}}>Weight</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[["lbs","lbs"],["kg","kg"]].map(([v,l])=>(
+                      <button key={v} onClick={()=>setP("weightUnit",v)} style={{padding:"4px 10px",borderRadius:10,border:`1px solid ${profile.weightUnit===v?C.blue:C.border}`,background:profile.weightUnit===v?C.blueLight:C.white,color:profile.weightUnit===v?C.blue:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <TextInput value={profile.weight} onChange={v=>setP("weight",v)} placeholder={profile.weightUnit==="lbs"?"170":"77"} type="number" unit={profile.weightUnit}/>
+              </div>
+              {bmi&&(
+                <div data-testid="bmi-card" style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",background:`${bmiColor}10`,borderRadius:14,border:`1px solid ${bmiColor}25`}}>
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase"}}>BMI</div>
+                    <div style={{fontSize:11,color:C.muted}}>Auto-calculated</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:26,fontWeight:900,color:bmiColor,fontFamily:"Nunito,sans-serif",lineHeight:1}}>{bmi}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:bmiColor}}>{bmiLabel}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div data-testid="body-metrics-section" style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,padding:"20px"}}>
+            <SectionTitle icon="ruler" text="Body Metrics"/>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
+                  <span style={{fontSize:13,fontWeight:700,color:C.body}}>Height</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[["ft","ft \u00B7 in"],["cm","cm"]].map(([v,l])=>(
+                      <button key={v} onClick={()=>setP("heightUnit",v)} data-testid={`height-unit-${v}`} style={{padding:"4px 10px",borderRadius:10,border:`1px solid ${profile.heightUnit===v?C.blue:C.border}`,background:profile.heightUnit===v?C.blueLight:C.white,color:profile.heightUnit===v?C.blue:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <TextInput value={profile.height} onChange={v=>setP("height",v)} placeholder={profile.heightUnit==="ft"?"5.11 (5ft 11in)":"180"} type="number" unit={profile.heightUnit==="ft"?"ft.in":"cm"}/>
+              </div>
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
+                  <span style={{fontSize:13,fontWeight:700,color:C.body}}>Weight</span>
+                  <div style={{display:"flex",gap:4}}>
+                    {[["lbs","lbs"],["kg","kg"]].map(([v,l])=>(
+                      <button key={v} onClick={()=>setP("weightUnit",v)} data-testid={`weight-unit-${v}`} style={{padding:"4px 10px",borderRadius:10,border:`1px solid ${profile.weightUnit===v?C.blue:C.border}`,background:profile.weightUnit===v?C.blueLight:C.white,color:profile.weightUnit===v?C.blue:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <TextInput value={profile.weight} onChange={v=>setP("weight",v)} placeholder={profile.weightUnit==="lbs"?"170":"77"} type="number" unit={profile.weightUnit}/>
+              </div>
+              {bmi&&(
+                <div data-testid="bmi-card" style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",background:`${bmiColor}10`,borderRadius:14,border:`1px solid ${bmiColor}25`}}>
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,color:C.muted,letterSpacing:0.8,textTransform:"uppercase"}}>BMI</div>
+                    <div style={{fontSize:11,color:C.muted}}>Auto-calculated</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:26,fontWeight:900,color:bmiColor,fontFamily:"Nunito,sans-serif",lineHeight:1}}>{bmi}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:bmiColor}}>{bmiLabel}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ACTIVITY & CLIMATE — collapsible when profile saved */}
+        {profileSaved ? (
+          <CollapsibleSection icon="activity" text="Activity & Climate" defaultOpen={false} badge={activityBadge}>
+            <div style={{display:"flex",flexDirection:"column",gap:16}}>
+              <div>
+                <Label>Daily Activity Level</Label>
+                <Chips value={profile.activity} onChange={v=>setP("activity",v)} options={[
+                  ["sedentary","Sedentary"],["light","Light"],
+                  ["moderate","Moderate"],["active","Active"],["athlete","Athlete"],
+                ]}/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <Label>Today's Exercise</Label>
+                  <Chips value={profile.exercise} onChange={v=>setP("exercise",v)} options={[["none","None"],["light","Light"],["moderate","Moderate"],["intense","Intense"]]}/>
+                </div>
+                <div><Label>Duration</Label><TextInput value={profile.exerciseMins} onChange={v=>setP("exerciseMins",v)} type="number" placeholder="45" unit="min"/></div>
+              </div>
+              <div>
+                <Label>Climate / Region Temp</Label>
+                <Chips value={profile.climate} onChange={v=>setP("climate",v)} options={[
+                  ["cool","Cool"],["mild","Mild"],
+                  ["warm","Warm"],["hot","Hot"],["extreme","Extreme"],
+                ]}/>
+              </div>
+            </div>
+          </CollapsibleSection>
+        ) : (
+          <div data-testid="activity-section" style={{background:C.white,borderRadius:20,border:`1px solid ${C.border}`,padding:"20px"}}>
+            <SectionTitle icon="activity" text="Activity & Climate"/>
+            <div style={{display:"flex",flexDirection:"column",gap:16}}>
+              <div>
+                <Label>Daily Activity Level</Label>
+                <Chips value={profile.activity} onChange={v=>setP("activity",v)} options={[
+                  ["sedentary","Sedentary"],["light","Light"],
+                  ["moderate","Moderate"],["active","Active"],["athlete","Athlete"],
+                ]}/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <Label>Today's Exercise</Label>
+                  <Chips value={profile.exercise} onChange={v=>setP("exercise",v)} options={[["none","None"],["light","Light"],["moderate","Moderate"],["intense","Intense"]]}/>
+                </div>
+                <div><Label>Duration</Label><TextInput value={profile.exerciseMins} onChange={v=>setP("exerciseMins",v)} type="number" placeholder="45" unit="min"/></div>
+              </div>
+              <div>
+                <Label>Climate / Region Temp</Label>
+                <Chips value={profile.climate} onChange={v=>setP("climate",v)} options={[
+                  ["cool","Cool"],["mild","Mild"],
+                  ["warm","Warm"],["hot","Hot"],["extreme","Extreme"],
+                ]}/>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* WEARABLES */}
         <div data-testid="wearables-section">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
@@ -735,20 +1058,39 @@ export default function ProfileScreen({ onClose }) {
           </div>
         </div>
 
-        {/* Save */}
-        <button onClick={onClose} data-testid="profile-save-btn" style={{
+        {/* Error message */}
+        {saveError && (
+          <div style={{padding:"12px 16px",background:`${C.danger}10`,border:`1.5px solid ${C.danger}25`,borderRadius:12,fontSize:13,fontWeight:600,color:C.danger,textAlign:"center"}}>
+            {saveError}
+          </div>
+        )}
+
+        {/* Save / Update button */}
+        <button onClick={handleSaveProfile} disabled={saving} data-testid="profile-save-btn" style={{
           width:"100%", padding:"17px 0",
-          background:`linear-gradient(135deg,${C.blue},${C.blueDark})`,
-          color:"#fff", border:"none", borderRadius:16,
-          fontSize:16, fontWeight:800, cursor:"pointer",
-          boxShadow:`0 6px 24px ${C.blue}45`,
-          letterSpacing:0.2,
+          background: saving ? C.bg : `linear-gradient(135deg,${C.blue},${C.blueDark})`,
+          color: saving ? C.muted : "#fff", border:"none", borderRadius:16,
+          fontSize:16, fontWeight:800, cursor: saving ? "not-allowed" : "pointer",
+          boxShadow: saving ? "none" : `0 6px 24px ${C.blue}45`,
+          letterSpacing:0.2, transition:"all 0.2s",
+          display:"flex", alignItems:"center", justifyContent:"center", gap:8,
         }}>
-          Save Profile
+          {saving ? (
+            <>
+              <div style={{width:18,height:18,border:`2px solid ${C.muted}`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+              Saving...
+            </>
+          ) : profileSaved ? (
+            'Update Profile'
+          ) : (
+            'Save Profile'
+          )}
         </button>
 
         <div style={{textAlign:"center",fontSize:11,color:C.muted}}>
-          Your data stays on this device and is only used to calculate your NHS Score
+          {profileSaved
+            ? 'Your NHS score auto-saves as you check in. Expand sections above to edit profile details.'
+            : 'Your data is securely stored and used to calculate your personalized NHS Score'}
         </div>
 
       </div>
