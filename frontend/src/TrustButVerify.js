@@ -752,8 +752,9 @@ export default function TrustButVerify(){
   const founderLongPressRef=useRef(null);
   const FOUNDER_PIN='0808'; // Micah's access PIN
   
-  function handleFounderLogin(){
-    if(founderPin===FOUNDER_PIN){
+  function handleFounderLogin(pin){
+    const checkPin = pin || founderPin;
+    if(checkPin===FOUNDER_PIN){
       setFounderMode(true);
       setShowFounderLogin(false);
       setFounderPin('');
@@ -2007,7 +2008,7 @@ export default function TrustButVerify(){
               {['1','2','3','4','5','6','7','8','9','','0','⌫'].map(d=>(
                 <button key={d||'blank'} disabled={!d} onClick={()=>{
                   if(d==='⌫'){setFounderPin(p=>p.slice(0,-1));setFounderPinError('');}
-                  else if(founderPin.length<4){const newPin=founderPin+d;setFounderPin(newPin);setFounderPinError('');if(newPin.length===4)setTimeout(()=>{if(newPin===FOUNDER_PIN){handleFounderLogin();}else{setFounderPinError('Invalid PIN');setFounderPin('');}},200);}
+                  else if(founderPin.length<4){const newPin=founderPin+d;setFounderPin(newPin);setFounderPinError('');if(newPin.length===4)setTimeout(()=>{handleFounderLogin(newPin);},200);}
                 }} style={{height:48,borderRadius:10,border:"none",background:d?"#1a2744":"transparent",color:"#FFFFFF",fontSize:18,fontWeight:700,cursor:d?"pointer":"default",opacity:d?1:0}}>{d}</button>
               ))}
             </div>
