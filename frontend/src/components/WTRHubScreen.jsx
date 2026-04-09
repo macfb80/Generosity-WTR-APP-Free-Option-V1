@@ -924,6 +924,12 @@ export default function WTRHubScreen() {
   // Sparkline data from history
   const tdsSparkData = (hist?.tds || []).slice(-20).map(p => p.value);
 
+  // Carbon impact (hooks MUST be called before any early return)
+  const carbon = CARBON.fromUsage(usage);
+  const animBottles = useCountUp(carbon.bottles, 1500, carbon.hasData);
+  const animCo2 = useCountUp(carbon.co2Kg, 1500, carbon.hasData);
+  const animTrees = useCountUp(carbon.trees * 10, 1500, carbon.hasData);
+
   // Loading skeleton
   if (loading) {
     return (
@@ -936,12 +942,6 @@ export default function WTRHubScreen() {
       </div>
     );
   }
-
-  // Carbon impact data
-  const carbon = CARBON.fromUsage(usage);
-  const animBottles = useCountUp(carbon.bottles, 1500, carbon.hasData);
-  const animCo2 = useCountUp(carbon.co2Kg, 1500, carbon.hasData);
-  const animTrees = useCountUp(carbon.trees * 10, 1500, carbon.hasData);
 
   // Today's liters
   const todayMl = safeNum(usage?.session_ml);
