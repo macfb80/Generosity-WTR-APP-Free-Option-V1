@@ -244,7 +244,7 @@ const FILTERS = [
   { key: "pp_filtertime",   slot: "pp",   model: "HWH100",       name: "CP Filter",       stage: "Stage 1", tag: "CP Composite",   desc: "Blocks sand, silt, rust & chlorine. Conditions water and extends RO membrane life.", life: "12\u201315 mo \u00B7 900\u20131,000 gal",   chartKey: "pp",   chartColor: C.blue  },
   { key: "ro_filtertime",   slot: "ro",   model: "HWH101-1200G", name: "RO Membrane",     stage: "Stage 2", tag: "0.0001 Micron",  desc: "Removes 99.99% of 1,000+ contaminants: PFAS, Lead, Fluoride, Arsenic, Chromium-6.",  life: "24\u201348 mo \u00B7 1,800\u20132,000 gal", chartKey: "ro",   chartColor: C.green },
   { key: "cto_filtertime",  slot: "cto",  model: "HWH102",       name: "TC Filter",       stage: "Stage 3", tag: "TC Post-Carbon", desc: "NSF-certified, Japan & Switzerland sourced. Removes residual taste, odor and VOCs.",  life: "6 mo \u00B7 450\u2013900 gal",         chartKey: "cto",  chartColor: C.yellow},
-  { key: "cbpa_filtertime", slot: "cbpa", model: "GAF-100",      name: "Alkaline Filter", stage: "Stage 4", tag: "Ionic Alkaline", desc: "Ocean bioceramic beads add Ca, Mg, K, Na. Elevates pH to 10 for bioavailable water.", life: "12\u201318 mo \u00B7 900\u20131,000 gal",   chartKey: "cbpa", chartColor: C.gray  },
+  { key: "cbpa_filtertime", slot: "cbpa", model: "GAF-100",      name: "Alkaline Filter", stage: "Stage 4", tag: "Ionic Alkaline", desc: "Ocean bioceramic beads add Ca, Mg, K, Na. Adds Ca, Mg, K, Na for optimal mineral balance.", life: "12\u201318 mo \u00B7 900\u20131,000 gal",   chartKey: "cbpa", chartColor: C.gray  },
 ];
 
 // ─── CHART TOOLTIP (light mode) ─────────────────────────────────────────────
@@ -846,7 +846,7 @@ export default function WTRHubScreen() {
           <div style={{ display: "flex", justifyContent: "center", gap: 28, marginTop: 20, paddingTop: 16, borderTop: `1px solid ${C.border}` }}>
             {[
               { label: "TDS", value: tds != null ? `${tds}` : "\u2014", unit: "ppm", color: tdsColor(tds) },
-              { label: "pH", value: "10.0", unit: "", color: C.blue },
+              { label: "LITERS", value: usage ? (usage.todayGal * 3.785).toFixed(1) : "0.0", unit: "L", color: C.blue },
               { label: "TEMP", value: "72", unit: "\u00B0F", color: C.yellow },
             ].map(stat => (
               <div key={stat.label} style={{ textAlign: "center" }}>
@@ -871,9 +871,9 @@ export default function WTRHubScreen() {
           />
           <MetricCard
             icon="flask"
-            label="pH Level"
-            value="10.0"
-            sub="Alkaline"
+            label="Liters Dispensed"
+            value={usage ? (usage.todayGal * 3.785).toFixed(1) : "0.0"}
+            sub="Today"
             color={C.blue}
           />
           <MetricCard
@@ -976,6 +976,85 @@ export default function WTRHubScreen() {
             })}
           </div>
         )}
+
+        {/* ── Carbon Emissions Tracker ── */}
+        {(() => {
+          const totalLiters = usage ? usage.totalGal * 3.785 : 0;
+          const bottlesEliminated = Math.floor(totalLiters / 0.5); // 500mL per bottle
+          const co2PerBottle = 0.082; // kg CO2 per 500mL plastic bottle (production + transport)
+          const co2Saved = (bottlesEliminated * co2PerBottle).toFixed(1);
+          const carbonCredits = (parseFloat(co2Saved) / 1000).toFixed(4); // 1 credit = 1 metric ton
+          const treeEquiv = (parseFloat(co2Saved) / 21.77).toFixed(1); // avg tree absorbs 21.77 kg/yr
+          const annualGoal = 500; // kg CO2 annual reduction goal
+          const progressPct = Math.min(100, (parseFloat(co2Saved) / annualGoal) * 100);
+          return (
+            <div style={{ background: C.card, borderRadius: 24, padding: 20, marginBottom: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>Carbon Impact</div>
+                <div style={{ background: "#E8F5E9", color: "#2E7D32", padding: "3px 10px", borderRadius: 12, fontSize: 9, fontWeight: 700 }}>
+                  {carbonCredits} Credits Accrued
+                </div>
+              </div>
+
+              {/* Main CO2 saved display */}
+              <div style={{ textAlign: "center", marginBottom: 16 }}>
+                <div style={{ fontSize: 36, fontWeight: 900, color: "#2E7D32", lineHeight: 1 }}>{co2Saved}</div>
+                <div style={{ fontSize: 10, color: C.muted, marginTop: 4 }}>kg CO\u2082 saved</div>
+              </div>
+
+              {/* Progress bar to annual goal */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{ fontSize: 9, color: C.muted }}>Annual Goal: {annualGoal} kg</span>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "#2E7D32" }}>{progressPct.toFixed(0)}%</span>
+                </div>
+                <div style={{ height: 8, background: "#F0F1F3", borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${progressPct}%`, background: "linear-gradient(90deg, #66BB6A, #2E7D32)", borderRadius: 4, transition: "width 1s ease" }} />
+                </div>
+              </div>
+
+              {/* 3-up impact cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                <div style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
+                  <div style={{ fontSize: 8, marginBottom: 4 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.5">
+                      <path d="M12 22V8" strokeLinecap="round"/>
+                      <path d="M5 12C5 8 8 4 12 4C16 4 19 8 19 12" stroke="#2E7D32" strokeWidth="1.5" fill="#2E7D3220"/>
+                      <path d="M8 22H16" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{bottlesEliminated}</div>
+                  <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>Bottles Eliminated</div>
+                </div>
+                <div style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
+                  <div style={{ fontSize: 8, marginBottom: 4 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.5">
+                      <path d="M12 3L20 7V17L12 21L4 17V7L12 3Z" fill="#2E7D3220"/>
+                      <path d="M12 12L20 7M12 12V21M12 12L4 7" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{co2Saved}</div>
+                  <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>kg CO\u2082 Offset</div>
+                </div>
+                <div style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
+                  <div style={{ fontSize: 8, marginBottom: 4 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.5">
+                      <circle cx="12" cy="12" r="9" fill="#2E7D3220"/>
+                      <path d="M8 12L11 15L16 9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                    </svg>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{carbonCredits}</div>
+                  <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>Carbon Credits</div>
+                </div>
+              </div>
+
+              {/* Tree equivalence */}
+              <div style={{ marginTop: 12, textAlign: "center", fontSize: 9, color: C.muted }}>
+                Equivalent to <span style={{ fontWeight: 800, color: "#2E7D32" }}>{treeEquiv} trees</span> planted for one year
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Contaminant Removal Grid ── */}
         <div data-testid="hub-contaminant-grid" style={{ background: C.card, borderRadius: 24, padding: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
