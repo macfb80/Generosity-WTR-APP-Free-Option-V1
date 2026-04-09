@@ -202,7 +202,7 @@ const C = {
   textPrimary: "#1A1A1A",
   textSecondary: "#8E8E93",
   muted: "#8E8E93",
-  green: "#2ECC71",
+  green: "#51B0E6",
   yellow: "#FF9500",
   orange: "#E07020",
   red: "#FF3B30",
@@ -252,7 +252,7 @@ function tdsScore(p) {
   if (p <= 500) return 25;
   return 10;
 }
-function filterColor(p) { return p >= 76 ? C.green : p >= 40 ? C.yellow : C.red; }
+function filterColor(p) { return p >= 76 ? "#51B0E6" : p >= 40 ? "#F29423" : "#D93025"; }
 function filterStatus(p) { return p >= 76 ? "Healthy" : p >= 40 ? "Monitor" : "Replace Soon"; }
 
 // ─── FILTER METADATA (from MCU SDK — Product Key: btu00aae5ktjhacq) ─────────
@@ -1090,10 +1090,10 @@ export default function WTRHubScreen() {
                   <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: "rotate(-90deg)" }}>
                     <defs>
                       <linearGradient id="outerG" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#51B0E6"/><stop offset="50%" stopColor="#1E8A4C"/><stop offset="100%" stopColor="#166938"/>
+                        <stop offset="0%" stopColor="#51B0E6"/><stop offset="50%" stopColor="#2A8FCA"/><stop offset="100%" stopColor="#0A1A2E"/>
                       </linearGradient>
                       <linearGradient id="innerG" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#FF9500"/><stop offset="100%" stopColor="#FFCC00"/>
+                        <stop offset="0%" stopColor="#A6A8AB"/><stop offset="100%" stopColor="#C5C6C8"/>
                       </linearGradient>
                     </defs>
                     <circle cx="120" cy="120" r={OR} fill="none" stroke="#F0F1F3" strokeWidth="18"/>
@@ -1134,8 +1134,8 @@ export default function WTRHubScreen() {
         })()}
 
         {/* Bottom Sheets */}
-        <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" />
-        <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" />
+        <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={()=>window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
+        <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={()=>window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
 
         {/* ── CARD 2: TODAY ── */}
         <div style={{
@@ -1155,7 +1155,7 @@ export default function WTRHubScreen() {
                 <span style={{ fontSize: 18, fontWeight: 500, color: C.gray }}>L</span>
               </div>
               <div style={{ fontSize: 13, color: C.gray, marginTop: 6 }}>
-                ~{fmt(todayBottles)} bottles
+                {fmt(todayBottles)} bottles
               </div>
             </>
           ) : (
@@ -1213,7 +1213,7 @@ export default function WTRHubScreen() {
                   {fmt(safeNum(animCo2), 1)} kg CO{"\u2082"} avoided
                 </div>
                 <div style={{ fontSize: 13, color: C.textSecondary }}>
-                  {"\u2248"} {fmt(safeNum(animTrees) / 10, 1)} trees this year
+                  {fmt(safeNum(animTrees) / 10, 1)} trees this year
                 </div>
               </div>
             </>
@@ -1305,7 +1305,7 @@ export default function WTRHubScreen() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: "#FF6B6B" }}>{c.level}</span>
                   <span style={{
-                    fontSize: 10, fontWeight: 700, color: "#2ECC71",
+                    fontSize: 10, fontWeight: 700, color: "#51B0E6",
                     background: "#F0FFF4", padding: "3px 8px", borderRadius: 6,
                   }}>✓ {c.removal}</span>
                 </div>
@@ -1319,7 +1319,7 @@ export default function WTRHubScreen() {
               {[
                 { label: "TAP", color: "#E8ECF0", text: "#8E8E93" },
                 { label: "CP", color: "#51B0E6", text: "#FFF" },
-                { label: "RO", color: "#2ECC71", text: "#FFF" },
+                { label: "RO", color: "#2A8FCA", text: "#FFF" },
                 { label: "TC", color: "#FF9500", text: "#FFF" },
                 { label: "ALK", color: "#8B6FC0", text: "#FFF" },
                 { label: "PURE", color: "#51B0E6", text: "#FFF" },
