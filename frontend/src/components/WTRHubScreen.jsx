@@ -977,7 +977,7 @@ export default function WTRHubScreen() {
       <div style={{
         position: "relative",
         width: "100%",
-        height: 220,
+        height: 280,
         overflow: "hidden",
       }}>
         <img
@@ -1005,6 +1005,16 @@ export default function WTRHubScreen() {
               </div>
               <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 4, letterSpacing: 0.5 }}>
                 Gen-2 {"\u00B7"} 1,200 GPD {"\u00B7"} 11-Stage RO
+              </div>
+              {/* TDS Hero Display */}
+              <div style={{ marginTop: 12, display: "flex", alignItems: "baseline", gap: 4 }}>
+                <span style={{ fontSize: 42, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>
+                  {fmt(tds ?? 3)}
+                </span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>TDS ppm</span>
+              </div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>
+                Output Quality: <span style={{ color: "#FFFFFF", fontWeight: 700 }}>{tdsLabel(tds)}</span>
               </div>
             </div>
 
@@ -1229,6 +1239,84 @@ export default function WTRHubScreen() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* ── CARD 5: WHAT GETS REMOVED (contaminant removal by ZIP) ── */}
+        <div style={{ background: "#FFFFFF", borderRadius: 20, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: "1px solid #F0F0F5" }}>
+          {/* Header */}
+          <div style={{ background: "#0A1A2E", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF" }}>What Gets Removed</div>
+            <div style={{ fontSize: 9, fontWeight: 600, color: "#51B0E6", letterSpacing: 0.5 }}>YOUR HOME WATER</div>
+          </div>
+
+          {/* Contaminant rows */}
+          <div style={{ padding: "0 18px" }}>
+            {[
+              { name: "PFAS (Total)", category: "Forever Chemicals", level: "2.1 ppt", removal: "99%+" },
+              { name: "Chromium-6", category: "Heavy Metal", level: "0.15 ppb", removal: "99%+" },
+              { name: "Haloacetic Acids", category: "Disinfection Byproduct", level: "38 ppb", removal: "99%+" },
+              { name: "Lead", category: "Heavy Metal", level: "3.8 ppb", removal: "99%+" },
+              { name: "Arsenic", category: "Heavy Metal", level: "2.8 ppb", removal: "99%+" },
+              { name: "Microplastics", category: "Emerging Contaminant", level: "Detected", removal: "99%+" },
+            ].map((c, i, arr) => (
+              <div key={c.name} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "14px 0",
+                borderBottom: i < arr.length - 1 ? "1px solid #F0F0F5" : "none",
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A1A" }}>{c.name}</div>
+                  <div style={{ fontSize: 10, color: "#8E8E93", marginTop: 2 }}>{c.category}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#FF6B6B" }}>{c.level}</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, color: "#2ECC71",
+                    background: "#F0FFF4", padding: "3px 8px", borderRadius: 6,
+                  }}>✓ {c.removal}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Filtration stage diagram */}
+          <div style={{ padding: "16px 18px", borderTop: "1px solid #F0F0F5", background: "#FAFBFC" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginBottom: 10 }}>
+              {[
+                { label: "TAP", color: "#E8ECF0", text: "#8E8E93" },
+                { label: "CP", color: "#51B0E6", text: "#FFF" },
+                { label: "RO", color: "#2ECC71", text: "#FFF" },
+                { label: "TC", color: "#FF9500", text: "#FFF" },
+                { label: "ALK", color: "#8B6FC0", text: "#FFF" },
+                { label: "PURE", color: "#51B0E6", text: "#FFF" },
+              ].map((s, i, arr) => (
+                <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: "50%",
+                    background: s.color, display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 8, fontWeight: 800, color: s.text, letterSpacing: 0.3,
+                  }}>{s.label}</div>
+                  {i < arr.length - 1 && <span style={{ color: "#D0D4DA", fontSize: 10 }}>→</span>}
+                </div>
+              ))}
+            </div>
+            {/* Stats row */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6 }}>
+              {[
+                ["1,000+", "Contaminants"],
+                ["99%+", "PFAS"],
+                ["99%+", "Heavy Metals"],
+                ["9+ pH", "Alkaline"],
+              ].map(([val, label]) => (
+                <div key={label} style={{
+                  textAlign: "center", background: "#EFF8FF", borderRadius: 8, padding: "8px 4px",
+                }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#51B0E6" }}>{val}</div>
+                  <div style={{ fontSize: 7, color: "#8E8E93", marginTop: 2 }}>{label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
