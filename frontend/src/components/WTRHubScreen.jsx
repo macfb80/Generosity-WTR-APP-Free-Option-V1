@@ -674,6 +674,220 @@ function OfflineModal({ onDismiss }) {
 }
 
 // ─── MAIN EXPORT ────────────────────────────────────────────────────────────
+// ─── CARBON IMPACT MODULE (production-ready, NaN-safe) ───────────────────
+
+// Safe number: never returns NaN/null/undefined — always a finite number
+function safeNum(val, fallback = 0) {
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+// Core carbon calculation utilities
+const CARBON = {
+  ML_PER_BOTTLE: 500,
+  KG_CO2_PER_BOTTLE: 0.082,  // IFEU 2022: production 0.042 + transport 0.028 + disposal 0.012
+  KG_CO2_PER_CREDIT: 1000,   // 1 Verified Carbon Credit = 1 metric ton CO2
+  KG_CO2_PER_TREE_YEAR: 21.77, // US Forest Service: avg urban tree sequesters 21.77 kg/yr
+  ANNUAL_GOAL_KG: 500,
+  
+  fromUsage(usage) {
+    // Extract total mL from multiple possible fields, NaN-safe
+    const totalMl = safeNum(usage?.total_ml_lifetime) 
+      || safeNum(usage?.total_liters_lifetime, 0) * 1000
+      || safeNum(usage?.totalGal, 0) * 3785.41;
+    
+    const bottles = Math.floor(totalMl / this.ML_PER_BOTTLE);
+    const co2Kg = parseFloat((bottles * this.KG_CO2_PER_BOTTLE).toFixed(1));
+    const credits = parseFloat((co2Kg / this.KG_CO2_PER_CREDIT).toFixed(4));
+    const trees = parseFloat((co2Kg / this.KG_CO2_PER_TREE_YEAR).toFixed(1));
+    const goalPct = Math.min(100, Math.round((co2Kg / this.ANNUAL_GOAL_KG) * 100));
+    
+    return { totalMl, bottles, co2Kg, credits, trees, goalPct, hasData: totalMl > 0 };
+  }
+};
+
+// Animated count-up hook
+function useCountUp(target, duration = 1200, enabled = true) {
+  const [value, setValue] = useState(0);
+  const prevRef = useRef(0);
+  
+  useEffect(() => {
+    if (!enabled || target === prevRef.current) return;
+    const start = prevRef.current;
+    const diff = safeNum(target) - start;
+    if (diff === 0) return;
+    
+    const startTime = performance.now();
+    let raf;
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = start + diff * eased;
+      setValue(Math.round(current * 10) / 10);
+      if (progress < 1) raf = requestAnimationFrame(animate);
+      else prevRef.current = safeNum(target);
+    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, enabled]);
+  
+  return value;
+}
+
+// Animated SVG ring for carbon progress
+function CarbonRing({ pct = 0, size = 100, strokeWidth = 6 }) {
+  const r = (size - strokeWidth) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (safeNum(pct) / 100) * circ;
+  const green = pct >= 50 ? "#2E7D32" : pct >= 20 ? "#66BB6A" : "#A5D6A7";
+  
+  return (
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F0F1F3" strokeWidth={strokeWidth} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={green} strokeWidth={strokeWidth}
+        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+        style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)" }} />
+    </svg>
+  );
+}
+
+// Bottle elimination animation (shows bottles fading as count increases)
+function BottleViz({ eliminated = 0 }) {
+  const maxShow = 8;
+  const filled = Math.min(maxShow, eliminated);
+  return (
+    <div style={{ display: "flex", justifyContent: "center", gap: 3, marginBottom: 12 }}>
+      {Array.from({ length: maxShow }).map((_, i) => (
+        <div key={i} style={{
+          width: 12, height: 28, borderRadius: "3px 3px 6px 6px",
+          background: i < filled ? "#2E7D32" : "#E8ECF0",
+          opacity: i < filled ? 1 : 0.3,
+          transition: `all 0.4s ease ${i * 0.08}s`,
+          transform: i < filled ? "scale(1)" : "scale(0.85)",
+          position: "relative",
+        }}>
+          {/* Cap */}
+          <div style={{
+            position: "absolute", top: -3, left: 2, right: 2, height: 4,
+            borderRadius: "2px 2px 0 0",
+            background: i < filled ? "#1B5E20" : "#D0D4DA",
+            transition: `all 0.4s ease ${i * 0.08}s`,
+          }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CarbonImpactCard({ usage, C: colors }) {
+  const data = CARBON.fromUsage(usage);
+  const animBottles = useCountUp(data.bottles, 1500, data.hasData);
+  const animCo2 = useCountUp(data.co2Kg, 1500, data.hasData);
+  const animCredits = useCountUp(data.credits * 10000, 1500, data.hasData); // animate in 10000ths
+  const animTrees = useCountUp(data.trees * 10, 1500, data.hasData); // animate in 10ths
+  
+  // Format helpers — never return NaN
+  const fmtInt = (v) => String(Math.round(safeNum(v)));
+  const fmtDec1 = (v) => safeNum(v).toFixed(1);
+  const fmtDec4 = (v) => (safeNum(v) / 10000).toFixed(4);
+  const fmtTree = (v) => (safeNum(v) / 10).toFixed(1);
+  
+  return (
+    <div style={{ background: colors.card, borderRadius: 24, padding: 20, marginBottom: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${colors.border}` }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="2">
+            <path d="M12 22V8" strokeLinecap="round"/>
+            <path d="M5 12C5 8 8 4 12 4C16 4 19 8 19 12" fill="#2E7D3220"/>
+            <path d="M8 22H16" strokeLinecap="round"/>
+          </svg>
+          <span style={{ fontSize: 10, fontWeight: 700, color: colors.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>Carbon Impact</span>
+        </div>
+        <div style={{ background: "#E8F5E9", color: "#2E7D32", padding: "3px 10px", borderRadius: 12, fontSize: 9, fontWeight: 700 }}>
+          {fmtDec4(animCredits)} Credits
+        </div>
+      </div>
+
+      {!data.hasData ? (
+        /* ── Zero State ── */
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <BottleViz eliminated={0} />
+          <div style={{ fontSize: 15, fontWeight: 800, color: colors.navy, marginBottom: 6 }}>Your impact starts with your first refill</div>
+          <div style={{ fontSize: 11, color: colors.muted, lineHeight: 1.6, marginBottom: 16 }}>
+            Every 500mL of filtered water you dispense eliminates one single-use plastic bottle and offsets 82g of CO\u2082.
+          </div>
+          <div style={{ background: "#F0FFF4", borderRadius: 14, padding: "14px 16px", textAlign: "left" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: "#2E7D32", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Projected Impact</div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569", marginBottom: 4 }}>
+              <span>3 refills/day for 1 year</span><span style={{ fontWeight: 800, color: "#2E7D32" }}>1,095 bottles saved</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569", marginBottom: 4 }}>
+              <span>CO\u2082 offset</span><span style={{ fontWeight: 800, color: "#2E7D32" }}>89.8 kg</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569" }}>
+              <span>Tree equivalent</span><span style={{ fontWeight: 800, color: "#2E7D32" }}>4.1 trees/year</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ── Active State ── */
+        <>
+          {/* Bottle viz */}
+          <BottleViz eliminated={data.bottles} />
+          
+          {/* Ring + CO2 display */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: 16 }}>
+            <div style={{ position: "relative" }}>
+              <CarbonRing pct={data.goalPct} size={100} />
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ fontSize: 20, fontWeight: 900, color: "#2E7D32", lineHeight: 1 }}>{safeNum(data.goalPct)}%</div>
+                <div style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>of goal</div>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 32, fontWeight: 900, color: "#2E7D32", lineHeight: 1 }}>{fmtDec1(animCo2)}</div>
+              <div style={{ fontSize: 10, color: colors.muted, marginTop: 2 }}>kg CO\u2082 saved</div>
+              <div style={{ fontSize: 9, color: "#66BB6A", marginTop: 4 }}>Annual goal: {CARBON.ANNUAL_GOAL_KG} kg</div>
+            </div>
+          </div>
+
+          {/* 3-up impact cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+            {[
+              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="8" y="2" width="8" height="20" rx="3" fill="#2E7D3220" stroke="#2E7D32" strokeWidth="1.5"/><rect x="10" y="0" width="4" height="3" rx="1" fill="#1B5E20"/></svg>,
+                value: fmtInt(animBottles), label: "Bottles Eliminated" },
+              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3L20 7V17L12 21L4 17V7L12 3Z" fill="#2E7D3220" stroke="#2E7D32" strokeWidth="1.5"/><path d="M12 12L20 7M12 12V21M12 12L4 7" stroke="#2E7D32" strokeWidth="1" strokeLinecap="round"/></svg>,
+                value: fmtDec1(animCo2), label: "kg CO\u2082 Offset" },
+              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#2E7D3220" stroke="#2E7D32" strokeWidth="1.5"/><path d="M8 12L11 15L16 9" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+                value: fmtDec4(animCredits), label: "Carbon Credits" },
+            ].map(card => (
+              <div key={card.label} style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
+                <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>{card.icon}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{card.value}</div>
+                <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>{card.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tree equivalence */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 0", borderTop: `1px solid ${colors.border}` }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M12 22V14" stroke="#8B6914" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M7 14C7 10 9 6 12 4C15 6 17 10 17 14H7Z" fill="#2E7D3240" stroke="#2E7D32" strokeWidth="1.5"/>
+            </svg>
+            <span style={{ fontSize: 10, color: colors.muted }}>
+              Equivalent to <span style={{ fontWeight: 800, color: "#2E7D32" }}>{fmtTree(animTrees)} trees</span> planted for one year
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function WTRHubScreen() {
   const { tele, usage, hist, loading, isMock, wsStatus, flushing, chartWin, setChartWin, forceWash, resetFilter } = useWtrHub();
   const [expandedFilter, setExpandedFilter] = useState(null);
@@ -977,84 +1191,8 @@ export default function WTRHubScreen() {
           </div>
         )}
 
-        {/* ── Carbon Emissions Tracker ── */}
-        {(() => {
-          const totalLiters = usage ? usage.totalGal * 3.785 : 0;
-          const bottlesEliminated = Math.floor(totalLiters / 0.5); // 500mL per bottle
-          const co2PerBottle = 0.082; // kg CO2 per 500mL plastic bottle (production + transport)
-          const co2Saved = (bottlesEliminated * co2PerBottle).toFixed(1);
-          const carbonCredits = (parseFloat(co2Saved) / 1000).toFixed(4); // 1 credit = 1 metric ton
-          const treeEquiv = (parseFloat(co2Saved) / 21.77).toFixed(1); // avg tree absorbs 21.77 kg/yr
-          const annualGoal = 500; // kg CO2 annual reduction goal
-          const progressPct = Math.min(100, (parseFloat(co2Saved) / annualGoal) * 100);
-          return (
-            <div style={{ background: C.card, borderRadius: 24, padding: 20, marginBottom: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>Carbon Impact</div>
-                <div style={{ background: "#E8F5E9", color: "#2E7D32", padding: "3px 10px", borderRadius: 12, fontSize: 9, fontWeight: 700 }}>
-                  {carbonCredits} Credits Accrued
-                </div>
-              </div>
-
-              {/* Main CO2 saved display */}
-              <div style={{ textAlign: "center", marginBottom: 16 }}>
-                <div style={{ fontSize: 36, fontWeight: 900, color: "#2E7D32", lineHeight: 1 }}>{co2Saved}</div>
-                <div style={{ fontSize: 10, color: C.muted, marginTop: 4 }}>kg CO\u2082 saved</div>
-              </div>
-
-              {/* Progress bar to annual goal */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 9, color: C.muted }}>Annual Goal: {annualGoal} kg</span>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: "#2E7D32" }}>{progressPct.toFixed(0)}%</span>
-                </div>
-                <div style={{ height: 8, background: "#F0F1F3", borderRadius: 4, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${progressPct}%`, background: "linear-gradient(90deg, #66BB6A, #2E7D32)", borderRadius: 4, transition: "width 1s ease" }} />
-                </div>
-              </div>
-
-              {/* 3-up impact cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                <div style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
-                  <div style={{ fontSize: 8, marginBottom: 4 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.5">
-                      <path d="M12 22V8" strokeLinecap="round"/>
-                      <path d="M5 12C5 8 8 4 12 4C16 4 19 8 19 12" stroke="#2E7D32" strokeWidth="1.5" fill="#2E7D3220"/>
-                      <path d="M8 22H16" strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{bottlesEliminated}</div>
-                  <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>Bottles Eliminated</div>
-                </div>
-                <div style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
-                  <div style={{ fontSize: 8, marginBottom: 4 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.5">
-                      <path d="M12 3L20 7V17L12 21L4 17V7L12 3Z" fill="#2E7D3220"/>
-                      <path d="M12 12L20 7M12 12V21M12 12L4 7" strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{co2Saved}</div>
-                  <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>kg CO\u2082 Offset</div>
-                </div>
-                <div style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
-                  <div style={{ fontSize: 8, marginBottom: 4 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="1.5">
-                      <circle cx="12" cy="12" r="9" fill="#2E7D3220"/>
-                      <path d="M8 12L11 15L16 9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
-                    </svg>
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{carbonCredits}</div>
-                  <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>Carbon Credits</div>
-                </div>
-              </div>
-
-              {/* Tree equivalence */}
-              <div style={{ marginTop: 12, textAlign: "center", fontSize: 9, color: C.muted }}>
-                Equivalent to <span style={{ fontWeight: 800, color: "#2E7D32" }}>{treeEquiv} trees</span> planted for one year
-              </div>
-            </div>
-          );
-        })()}
+        {/* ── Carbon Impact Module (production-ready) ── */}
+        <CarbonImpactCard usage={usage} C={C} />
 
         {/* ── Contaminant Removal Grid ── */}
         <div data-testid="hub-contaminant-grid" style={{ background: C.card, borderRadius: 24, padding: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
