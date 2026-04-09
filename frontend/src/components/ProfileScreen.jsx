@@ -356,9 +356,7 @@ function WearableCard({w, status, onToggle}) {
             {on&&<span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:10,background:`${w.color}18`,color:w.color,border:`1px solid ${w.color}30`,letterSpacing:0.8,textTransform:"uppercase"}}>{status?.source === 'oura_api_v2' ? 'Live' : status?.source === 'demo_fallback' ? 'Demo' : 'Live'}</span>}
           </div>
           <div style={{fontSize:12,color:C.muted,marginTop:1}}>{w.desc}</div>
-          {on && status?.source === 'demo_fallback' && (
-            <div style={{fontSize:10,color:C.warning,marginTop:2}}>Reconnect for live data</div>
-          )}
+
         </div>
 
         <div style={{display:"flex",flexDirection:"column",gap:5,alignItems:"flex-end"}}>
