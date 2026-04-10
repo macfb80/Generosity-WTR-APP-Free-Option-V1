@@ -197,20 +197,11 @@ const CITY_DATA = {
   ]},
 };
 
-// ─── GENERIC DATA FOR UNKNOWN CITIES ─────────────────────────────────────────
-const GENERIC_DATA = (city) => ({ 
-  utility:`${city} Municipal Water`, 
-  source:"Municipal Supply", 
-  tds:280, 
-  ph:7.6, 
-  hardness:"Moderate", 
-  contaminants:[
-    {name:"PFAS (Forever Chemicals)",level:2.4,limit:0.004,unit:"ppt",risk:"high",category:"Forever Chemicals",detail:"Found in 45% of US tap water.",removed:true},
-    {name:"Chromium-6",level:0.19,limit:0.10,unit:"ppb",risk:"high",category:"Heavy Metal",detail:"Found in 75% of US drinking water.",removed:true},
-    {name:"Lead",level:4.2,limit:15,unit:"ppb",risk:"medium",category:"Heavy Metal",detail:"No safe level. Aging infrastructure.",removed:true},
-    {name:"Microplastics",level:"Detected",limit:"None set",unit:"",risk:"medium",category:"Emerging Contaminant",detail:"94% of US tap water.",removed:true},
-  ]
-});
+// ─── GENERIC DATA REMOVED IN V6 ──────────────────────────────────────────────
+// GENERIC_DATA removed in V6 — was generating fake water quality reports.
+// All reports now come from real EPA/SDWIS/UCMR5 data via WTR-ORACLE endpoint.
+// Unknown locations show the not_found state which captures email instead.
+const GENERIC_DATA = null; // intentionally null — will throw if accidentally called
 
 // ─── ZIP CODE MAPPING ────────────────────────────────────────────────────────
 const ZIP_MAP = {
@@ -1021,9 +1012,12 @@ export default function TrustButVerify(){
         scan_phase: scanPhase
       };
 
-      const resp = await fetch('https://generosity-dashboard.vercel.app/api/wtr/capture', {
+      const resp = await fetch('https://generosity-sales-engine-mvp-api.onrender.com/api/wtr/capture', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102',
+        },
         body: JSON.stringify(payload)
       });
 
@@ -1482,7 +1476,7 @@ export default function TrustButVerify(){
                   <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>
                     The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.
                   </p>
-                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}`} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('shopify_cta_clicked',{city:data?.city,risk_score:riskScore,discount_code:'WELCOME100'})} style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
+                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}&discount=WELCOME100`} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('shopify_cta_clicked',{city:data?.city,risk_score:riskScore,discount_code:'WELCOME100'})} style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>
                     GET THE HOME WTR HUB →
                   </a>
                   <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
@@ -1648,9 +1642,12 @@ export default function TrustButVerify(){
                               onClick={async()=>{
                                 trackEvent('household_profile_submitted',{...householdProfile, city:data?.city});
                                 try {
-                                  await fetch('https://generosity-dashboard.vercel.app/api/wtr/capture', {
+                                  await fetch('https://generosity-sales-engine-mvp-api.onrender.com/api/wtr/capture', {
                                     method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                      'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102',
+                                    },
                                     body: JSON.stringify({
                                       email: email,
                                       zip: data?.zip,
