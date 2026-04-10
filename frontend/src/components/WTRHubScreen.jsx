@@ -355,7 +355,7 @@ function useWtrHub() {
   useEffect(() => {
     loadAll(chartWin).then(connectWs);
     return () => wsRef.current?.close();
-  }, []); // eslint-disable-line
+  }, []); // run once on mount
 
   useEffect(() => {
     if (!loading) {
@@ -363,7 +363,7 @@ function useWtrHub() {
       else apiFetch(`/api/device/${DEVICE}/history?minutes=${chartWin}&bucket_secs=30`)
         .then(setHist).catch(() => setHist(buildMockHist(chartWin)));
     }
-  }, [chartWin]); // eslint-disable-line
+  }, [chartWin]); // re-fetch when window changes
 
   const forceWash = useCallback(async () => {
     setFlushing(true);
@@ -389,7 +389,7 @@ function useWtrHub() {
 }
 
 // ─── OURA-STYLE SCORE RING ─────────────────────────────────────────────────
-function ScoreRing({ score = 0, label = "WATER QUALITY", size = 200, color = "#51B0E6", subtitle = "" }) {
+function ScoreRing({ score = 0, label = "WATER RETENTION", size = 200, color = "#51B0E6", subtitle = "" }) {
   const R = (size - 24) / 2;
   const CX = size / 2;
   const CY = size / 2;
@@ -597,7 +597,7 @@ function ChartSection({ hist, chartWin, setChartWin }) {
   );
 }
 
-// ─── FILTER CARD (light mode, horizontal) ──────────────────────────────────
+// ─── FILTER CARD ─────────────────────────────────────────────────────────────
 function FilterCard({ filter, life, expanded, onToggle, onReset }) {
   const col  = filterColor(life);
   const stat = filterStatus(life);
@@ -667,7 +667,7 @@ function FilterCard({ filter, life, expanded, onToggle, onReset }) {
   );
 }
 
-// ─── OFFLINE MODAL (light mode) ─────────────────────────────────────────────
+// ─── OFFLINE MODAL (light mode) ──────────────────────────────────────────────
 function OfflineModal({ onDismiss }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 0 20px", zIndex: 200, backdropFilter: "blur(10px)" }}>
@@ -689,8 +689,7 @@ function OfflineModal({ onDismiss }) {
   );
 }
 
-// ─── MAIN EXPORT ────────────────────────────────────────────────────────────
-// ─── CARBON IMPACT MODULE (production-ready, NaN-safe) ───────────────────
+// ─── CARBON IMPACT MODULE (production-ready, NaN-safe) ───────────────────────
 
 // Safe number: never returns NaN/null/undefined — always a finite number
 function safeNum(val, fallback = 0) {
@@ -705,19 +704,19 @@ const CARBON = {
   KG_CO2_PER_CREDIT: 1000,   // 1 Verified Carbon Credit = 1 metric ton CO2
   KG_CO2_PER_TREE_YEAR: 21.77, // US Forest Service: avg urban tree sequesters 21.77 kg/yr
   ANNUAL_GOAL_KG: 500,
-  
+
   fromUsage(usage) {
     // Extract total mL from multiple possible fields, NaN-safe
-    const totalMl = safeNum(usage?.total_ml_lifetime) 
+    const totalMl = safeNum(usage?.total_ml_lifetime)
       || safeNum(usage?.total_liters_lifetime, 0) * 1000
       || safeNum(usage?.totalGal, 0) * 3785.41;
-    
+
     const bottles = Math.floor(totalMl / this.ML_PER_BOTTLE);
     const co2Kg = parseFloat((bottles * this.KG_CO2_PER_BOTTLE).toFixed(1));
     const credits = parseFloat((co2Kg / this.KG_CO2_PER_CREDIT).toFixed(4));
     const trees = parseFloat((co2Kg / this.KG_CO2_PER_TREE_YEAR).toFixed(1));
     const goalPct = Math.min(100, Math.round((co2Kg / this.ANNUAL_GOAL_KG) * 100));
-    
+
     return { totalMl, bottles, co2Kg, credits, trees, goalPct, hasData: totalMl > 0 };
   }
 };
@@ -726,13 +725,13 @@ const CARBON = {
 function useCountUp(target, duration = 1200, enabled = true) {
   const [value, setValue] = useState(0);
   const prevRef = useRef(0);
-  
+
   useEffect(() => {
     if (!enabled || target === prevRef.current) return;
     const start = prevRef.current;
     const diff = safeNum(target) - start;
     if (diff === 0) return;
-    
+
     const startTime = performance.now();
     let raf;
     const animate = (now) => {
@@ -748,7 +747,7 @@ function useCountUp(target, duration = 1200, enabled = true) {
     raf = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(raf);
   }, [target, duration, enabled]);
-  
+
   return value;
 }
 
@@ -758,7 +757,7 @@ function CarbonRing({ pct = 0, size = 100, strokeWidth = 6 }) {
   const circ = 2 * Math.PI * r;
   const offset = circ - (safeNum(pct) / 100) * circ;
   const green = pct >= 50 ? "#2E7D32" : pct >= 20 ? "#66BB6A" : "#A5D6A7";
-  
+
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F0F1F3" strokeWidth={strokeWidth} />
@@ -803,13 +802,13 @@ function CarbonImpactCard({ usage, C: colors }) {
   const animCo2 = useCountUp(data.co2Kg, 1500, data.hasData);
   const animCredits = useCountUp(data.credits * 10000, 1500, data.hasData); // animate in 10000ths
   const animTrees = useCountUp(data.trees * 10, 1500, data.hasData); // animate in 10ths
-  
+
   // Format helpers — never return NaN
   const fmtInt = (v) => String(Math.round(safeNum(v)));
   const fmtDec1 = (v) => safeNum(v).toFixed(1);
   const fmtDec4 = (v) => (safeNum(v) / 10000).toFixed(4);
   const fmtTree = (v) => (safeNum(v) / 10).toFixed(1);
-  
+
   return (
     <div style={{ background: colors.card, borderRadius: 24, padding: 20, marginBottom: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${colors.border}` }}>
       {/* Header */}
@@ -828,7 +827,7 @@ function CarbonImpactCard({ usage, C: colors }) {
       </div>
 
       {!data.hasData ? (
-        /* ── Zero State ── */
+        /* Zero State */
         <div style={{ textAlign: "center", padding: "20px 0" }}>
           <BottleViz eliminated={0} />
           <div style={{ fontSize: 15, fontWeight: 800, color: colors.navy, marginBottom: 6 }}>Your impact starts with your first refill</div>
@@ -849,11 +848,11 @@ function CarbonImpactCard({ usage, C: colors }) {
           </div>
         </div>
       ) : (
-        /* ── Active State ── */
+        /* Active State */
         <>
           {/* Bottle viz */}
           <BottleViz eliminated={data.bottles} />
-          
+
           {/* Ring + CO2 display */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: 16 }}>
             <div style={{ position: "relative" }}>
@@ -904,11 +903,38 @@ function CarbonImpactCard({ usage, C: colors }) {
   );
 }
 
+// ─── WATER RETENTION STATE ENGINE ────────────────────────────────────────────
+function retentionState(score, filteredTds) {
+  if (score >= 85 && filteredTds < 20) {
+    return {
+      label: "Optimal",
+      color: "#34C759",
+      colorDark: "#1A8C3A",
+      nudge: "Your filtered water is at peak purity for cellular absorption.",
+    };
+  }
+  if (score >= 60 && filteredTds < 80) {
+    return {
+      label: "Efficient",
+      color: "#51B0E6",
+      colorDark: "#1A6FA0",
+      nudge: "Your filtered water supports efficient cellular absorption.",
+    };
+  }
+  return {
+    label: "Inefficient",
+    color: "#FF9F0A",
+    colorDark: "#A36000",
+    nudge: "Improve filter output for better cellular absorption support.",
+  };
+}
+
+// ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
 export default function WTRHubScreen() {
   const { tele, usage, hist, loading, isMock, wsStatus, flushing, chartWin, setChartWin, forceWash, resetFilter } = useWtrHub();
   const [expandedFilter, setExpandedFilter] = useState(null);
   const [showOffline,    setShowOffline]    = useState(false);
-  const [openSheet,      setOpenSheet]      = useState(null); // 'incoming' | 'filtered' | null
+  const [openSheet,      setOpenSheet]      = useState(null); // 'incoming' | 'filtered' | 'protection' | null
 
   useEffect(() => {
     if (tele && !tele.online) setShowOffline(true);
@@ -950,13 +976,45 @@ export default function WTRHubScreen() {
   const todayL = safeDivide(todayMl, 1000);
   const todayBottles = safeDivide(todayMl, 500);
 
-  // Ring dimensions
-  const RING_SIZE = 180;
-  const RING_R = (RING_SIZE - 20) / 2;
-  const RING_CX = RING_SIZE / 2;
-  const RING_CY = RING_SIZE / 2;
-  const ringCirc = 2 * Math.PI * RING_R;
-  const ringFill = (Math.min(100, Math.max(0, score)) / 100) * ringCirc;
+  // Dual ring shared values
+  const inTds = 342; // Demo incoming TDS — in production from WTR-ORACLE by ZIP
+  const outTds = tds ?? 3;
+  const outScore = score;
+  const outLabel = tdsLabel(outTds);
+  const inQuality = Math.max(10, Math.min(100, 100 - (inTds / 5)));
+  const outPct = outScore / 100;
+  const inPct = inQuality / 100;
+  const OR = 105, IR = 75;
+  const OC = 2 * Math.PI * OR, IC = 2 * Math.PI * IR;
+  const outerOff = OC * (1 - outPct);
+  const innerOff = IC * (1 - inPct);
+  const reductionPct = inTds > 0 ? Math.round(((inTds - outTds) / inTds) * 1000) / 10 : 0;
+
+  // Water Retention state
+  const retState = retentionState(outScore, outTds);
+
+  // Today's goal data
+  const goalL = 20;
+  const currentL = todayL > 0 ? Math.min(todayL, goalL) : 15.2; // fallback demo
+  const remainingL = Math.max(0, goalL - currentL);
+  const goalPct = Math.round((currentL / goalL) * 100);
+
+  // Hourly TDS chart data (12 bars: 6AM through Now)
+  const hourlyBars = [
+    { hour: "6AM", tds: 4 },
+    { hour: "7AM", tds: 3 },
+    { hour: "8AM", tds: 5 },
+    { hour: "9AM", tds: 4 },
+    { hour: "10AM", tds: 3 },
+    { hour: "11AM", tds: 4 },
+    { hour: "12PM", tds: 3 },
+    { hour: "1PM", tds: 5 },
+    { hour: "2PM", tds: 4 },
+    { hour: "3PM", tds: 3 },
+    { hour: "4PM", tds: 4 },
+    { hour: "Now", tds: outTds > 0 ? outTds : 3 },
+  ];
+  const maxBarTds = Math.max(...hourlyBars.map(b => b.tds), 1);
 
   return (
     <div data-testid="wtr-hub-screen" style={{
@@ -1017,8 +1075,8 @@ export default function WTRHubScreen() {
               <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
                 {[
                   { val: `${fmt(tds ?? 3)} ppm`, lbl: "Output TDS" },
-                  { val: `${fmt(score)}`, lbl: "Quality" },
-                  { val: `${usage ? fmt(usage.todayGal * 3.785, 1) : '0'} L`, lbl: "Today" },
+                  { val: `${fmt(score)}`, lbl: "Retention" },
+                  { val: `${currentL.toFixed(1)} L`, lbl: "Today" },
                 ].map(s => (
                   <div key={s.lbl} style={{ background: "rgba(255,255,255,0.10)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "10px 14px" }}>
                     <div style={{ fontSize: 18, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: -0.5 }}>{s.val}</div>
@@ -1058,86 +1116,309 @@ export default function WTRHubScreen() {
       {/* ── CARDS ── */}
       <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 12, animation: "fadeInUp 0.3s ease" }}>
 
-        {/* ── CARD 1: DUAL-RING WATER QUALITY ── */}
-        {(() => {
-          const inTds = 342; // Demo incoming TDS — in production from WTR-ORACLE by ZIP
-          const outTds = tds ?? 3;
-          const outScore = score;
-          const outLabel = tdsLabel(outTds);
-          const inQuality = Math.max(10, Math.min(100, 100 - (inTds / 5)));
-          const outPct = outScore / 100;
-          const inPct = inQuality / 100;
-          const OR = 105, IR = 75;
-          const OC = 2 * Math.PI * OR, IC = 2 * Math.PI * IR;
-          const outerOff = OC * (1 - outPct);
-          const innerOff = IC * (1 - inPct);
-          const reductionPct = inTds > 0 ? Math.round(((inTds - outTds) / inTds) * 1000) / 10 : 0;
+        {/* ── CARD 1: WATER RETENTION DUAL-RING ── */}
+        <div style={{ background: C.card, borderRadius: 24, overflow: "hidden", boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 0" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.2, textTransform: "uppercase" }}>Water Retention</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(30,138,76,0.12)", borderRadius: 20, padding: "4px 10px" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1E8A4C", animation: "blinkDot 1.4s ease-in-out infinite" }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#166938" }}>Live</span>
+            </div>
+          </div>
 
-          return (
-            <div style={{ background: C.card, borderRadius: 24, overflow: "hidden", boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
-              {/* Header */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 0" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.2, textTransform: "uppercase" }}>Water Quality</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(30,138,76,0.12)", borderRadius: 20, padding: "4px 10px" }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1E8A4C" }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#166938" }}>Live</span>
-                </div>
+          {/* Dual ring SVG */}
+          <div style={{ display: "flex", justifyContent: "center", padding: "24px 20px 8px" }}>
+            <div style={{ position: "relative", width: 240, height: 240 }}>
+              {/* Glow layer behind rings */}
+              <div style={{
+                position: "absolute", inset: 0,
+                background: `radial-gradient(circle at center, ${retState.color}18 0%, transparent 70%)`,
+                borderRadius: "50%",
+                pointerEvents: "none",
+              }} />
+              <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: "rotate(-90deg)" }}>
+                <defs>
+                  <linearGradient id="outerRetG" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#51B0E6"/>
+                    <stop offset="50%" stopColor="#34C759"/>
+                    <stop offset="100%" stopColor="#1A8C3A"/>
+                  </linearGradient>
+                  <linearGradient id="innerRetG" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FF9F0A"/>
+                    <stop offset="100%" stopColor="#FFD60A"/>
+                  </linearGradient>
+                  <filter id="ringGlow">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+                {/* Outer track */}
+                <circle cx="120" cy="120" r={OR} fill="none" stroke="#F0F1F3" strokeWidth="18"/>
+                {/* Outer ring (filtered output) — blue to green */}
+                <circle cx="120" cy="120" r={OR} fill="none" stroke="url(#outerRetG)" strokeWidth="18" strokeLinecap="round" strokeDasharray={OC} strokeDashoffset={outerOff} style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(0.34,1.56,0.64,1)" }} filter="url(#ringGlow)"/>
+                {/* Inner track */}
+                <circle cx="120" cy="120" r={IR} fill="none" stroke="#F0F1F3" strokeWidth="16"/>
+                {/* Inner ring (incoming source) — amber to gold */}
+                <circle cx="120" cy="120" r={IR} fill="none" stroke="url(#innerRetG)" strokeWidth="16" strokeLinecap="round" strokeDasharray={IC} strokeDashoffset={innerOff} style={{ transition: "stroke-dashoffset 1.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s" }}/>
+              </svg>
+              {/* Center content */}
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ fontSize: 52, fontWeight: 800, color: "#0A1A2E", letterSpacing: -2, lineHeight: 1, fontFamily: "inherit" }}>{fmt(outScore)}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: retState.color, marginTop: 4, letterSpacing: 0.5 }}>{retState.label}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Behavioral nudge */}
+          <div style={{ textAlign: "center", padding: "0 24px 4px" }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: C.textSecondary, lineHeight: 1.5 }}>
+              {retState.label === "Efficient"
+                ? <span>Your filtered water supports <strong style={{ color: retState.colorDark, fontWeight: 700 }}>efficient cellular absorption</strong>.</span>
+                : retState.label === "Optimal"
+                  ? <span>Your filtered water is at peak purity for <strong style={{ color: retState.colorDark, fontWeight: 700 }}>cellular absorption</strong>.</span>
+                  : <span>Improve filter output for better <strong style={{ color: retState.colorDark, fontWeight: 700 }}>cellular absorption</strong> support.</span>
+              }
+            </span>
+          </div>
+
+          {/* Tappable label cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "12px 20px 20px" }}>
+            <button onClick={() => setOpenSheet('incoming')} style={{ backgroundColor: "rgba(174,174,178,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Incoming Water</span>
+                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(166,168,171,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#A6A8AB" }}>i</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#0A1A2E", letterSpacing: -1, lineHeight: 1 }}>{inTds}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
+              <div style={{ marginTop: 6 }}><span style={{ fontSize: 10, fontWeight: 700, color: "#FF9500", background: "rgba(255,149,0,0.10)", padding: "3px 8px", borderRadius: 20 }}>Moderate</span></div>
+            </button>
+            <button onClick={() => setOpenSheet('filtered')} style={{ backgroundColor: "rgba(30,138,76,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Filtered Output</span>
+                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(30,138,76,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#166938" }}>i</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#166938", letterSpacing: -1, lineHeight: 1 }}>{fmt(outTds)}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#166938", display: "flex", alignItems: "center", gap: 3, marginTop: 6 }}><span>&#x2193;</span> {reductionPct}% reduction</div>
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Sheets — Incoming + Filtered */}
+        <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={() => setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={() => window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
+        <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={() => setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={() => window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
+
+        {/* ── CARD 2: DAILY PROTECTION ── */}
+        <button
+          data-testid="hub-protection-card"
+          onClick={() => setOpenSheet('protection')}
+          style={{
+            background: C.card, borderRadius: 20, padding: "18px 20px",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.06)", border: `1px solid ${C.border}`,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            cursor: "pointer", width: "100%", fontFamily: "inherit", textAlign: "left",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 14,
+              background: "linear-gradient(135deg, #51B0E6 0%, #1A6FA0 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+            }}>
+              <HubIcon name="shield" size={22} color="#FFFFFF" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.navy, lineHeight: 1.2 }}>Home Protected</div>
+              <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>14 contaminants removed today</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* Small protection ring — 94% */}
+            <div style={{ position: "relative", width: 44, height: 44 }}>
+              <svg width="44" height="44" viewBox="0 0 44 44" style={{ transform: "rotate(-90deg)" }}>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#F0F1F3" strokeWidth="5"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#34C759" strokeWidth="5"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(94 / 100) * (2 * Math.PI * 18)} ${2 * Math.PI * 18}`}
+                  style={{ transition: "stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)" }}
+                />
+              </svg>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: "#1A8C3A" }}>94%</div>
+            </div>
+            <div style={{ fontSize: 18, color: C.muted }}>{"\u203A"}</div>
+          </div>
+        </button>
+
+        {/* Protection Bottom Sheet */}
+        {openSheet === 'protection' && (
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+            onClick={(e) => { if (e.target === e.currentTarget) setOpenSheet(null); }}
+          >
+            <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)" }} onClick={() => setOpenSheet(null)} />
+            <div style={{
+              position: "relative", zIndex: 1,
+              width: "100%", maxWidth: 480,
+              background: C.card,
+              borderRadius: "28px 28px 0 0",
+              padding: "0 0 40px",
+              boxShadow: "0 -16px 60px rgba(0,0,0,0.18)",
+              animation: "fadeInUp 0.28s cubic-bezier(0.34,1.56,0.64,1)",
+            }}>
+              {/* Pull handle */}
+              <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 0" }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: "#E0E0E0" }} />
               </div>
 
-              {/* Dual ring SVG */}
-              <div style={{ display: "flex", justifyContent: "center", padding: "24px 20px 8px" }}>
-                <div style={{ position: "relative", width: 240, height: 240 }}>
-                  <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: "rotate(-90deg)" }}>
-                    <defs>
-                      <linearGradient id="outerG" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#51B0E6"/><stop offset="50%" stopColor="#2A8FCA"/><stop offset="100%" stopColor="#0A1A2E"/>
-                      </linearGradient>
-                      <linearGradient id="innerG" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#A6A8AB"/><stop offset="100%" stopColor="#C5C6C8"/>
-                      </linearGradient>
-                    </defs>
-                    <circle cx="120" cy="120" r={OR} fill="none" stroke="#F0F1F3" strokeWidth="18"/>
-                    <circle cx="120" cy="120" r={OR} fill="none" stroke="url(#outerG)" strokeWidth="18" strokeLinecap="round" strokeDasharray={OC} strokeDashoffset={outerOff} style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(0.34,1.56,0.64,1)" }}/>
-                    <circle cx="120" cy="120" r={IR} fill="none" stroke="#F0F1F3" strokeWidth="16"/>
-                    <circle cx="120" cy="120" r={IR} fill="none" stroke="url(#innerG)" strokeWidth="16" strokeLinecap="round" strokeDasharray={IC} strokeDashoffset={innerOff} style={{ transition: "stroke-dashoffset 1.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s" }}/>
+              {/* Sheet header */}
+              <div style={{ padding: "20px 24px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Daily Protection Score</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: C.navy }}>Home Protected</div>
+                </div>
+                <button onClick={() => setOpenSheet(null)} style={{ background: "#F0F1F3", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, color: C.muted, fontWeight: 700 }}>
+                  &#x2715;
+                </button>
+              </div>
+
+              {/* Big score ring */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 24px 12px" }}>
+                <div style={{ position: "relative", width: 120, height: 120 }}>
+                  <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#F0F1F3" strokeWidth="12"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#34C759" strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeDasharray={`${(94 / 100) * (2 * Math.PI * 50)} ${2 * Math.PI * 50}`}
+                      style={{ transition: "stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)" }}
+                    />
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#34C75930" strokeWidth="20"
+                      strokeLinecap="round"
+                      strokeDasharray={`${(94 / 100) * (2 * Math.PI * 50)} ${2 * Math.PI * 50}`}
+                      style={{ filter: "blur(6px)" }}
+                    />
                   </svg>
                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ fontSize: 56, fontWeight: 800, color: "#0A1A2E", letterSpacing: -2, lineHeight: 1, fontFamily: "inherit" }}>{fmt(outScore)}</div>
-                    <div style={{ fontSize: 16, fontWeight: 500, color: "#A6A8AB", marginTop: 4 }}>{outLabel}</div>
+                    <div style={{ fontSize: 34, fontWeight: 800, color: "#1A8C3A", lineHeight: 1 }}>94%</div>
+                    <div style={{ fontSize: 9, fontWeight: 600, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginTop: 3 }}>Protected</div>
                   </div>
                 </div>
               </div>
 
-              {/* Tappable label cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "8px 20px 20px" }}>
-                <button onClick={()=>setOpenSheet('incoming')} style={{ backgroundColor: "rgba(174,174,178,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Incoming Water</span>
-                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(166,168,171,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#A6A8AB" }}>i</span>
+              {/* Score breakdown */}
+              <div style={{ padding: "0 24px" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 12 }}>Score Breakdown</div>
+                {[
+                  { label: "System Uptime", value: "100%", color: "#34C759" },
+                  { label: "Filter Capacity", value: "94%", color: "#51B0E6" },
+                  { label: "Output Consistency", value: "Stable", color: "#34C759" },
+                  { label: "Contaminants Blocked", value: "14", color: "#34C759" },
+                ].map(item => (
+                  <div key={item.label} style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "13px 0", borderBottom: `1px solid ${C.border}`,
+                  }}>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: C.navy }}>{item.label}</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: item.color }}>{item.value}</span>
                   </div>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: "#0A1A2E", letterSpacing: -1, lineHeight: 1 }}>{inTds}</div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
-                  <div style={{ marginTop: 6 }}><span style={{ fontSize: 10, fontWeight: 700, color: "#FF9500", background: "rgba(255,149,0,0.10)", padding: "3px 8px", borderRadius: 20 }}>Moderate</span></div>
-                </button>
-                <button onClick={()=>setOpenSheet('filtered')} style={{ backgroundColor: "rgba(30,138,76,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Filtered Output</span>
-                    <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(30,138,76,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#166938" }}>i</span>
-                  </div>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: "#166938", letterSpacing: -1, lineHeight: 1 }}>{fmt(outTds)}</div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#166938", display: "flex", alignItems: "center", gap: 3, marginTop: 6 }}><span>↓</span> {reductionPct}% reduction</div>
+                ))}
+              </div>
+
+              {/* CTA */}
+              <div style={{ padding: "20px 24px 0" }}>
+                <button style={{
+                  width: "100%", padding: "15px 0",
+                  background: "linear-gradient(135deg, #51B0E6 0%, #1A6FA0 100%)",
+                  color: "#FFFFFF", border: "none", borderRadius: 14,
+                  fontSize: 15, fontWeight: 800, cursor: "pointer",
+                  boxShadow: "0 4px 16px rgba(81,176,230,0.35)",
+                }}>
+                  View Protection History
                 </button>
               </div>
             </div>
-          );
-        })()}
+          </div>
+        )}
 
-        {/* Bottom Sheets */}
-        <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={()=>window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
-        <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={()=>setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={()=>window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
+        {/* ── CARD 3: OUTPUT QUALITY CHART (simple div bars) ── */}
+        <div style={{ background: C.card, borderRadius: 20, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 3 }}>Output Quality Today</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.navy }}>Hourly TDS consistently retained</div>
+            </div>
+            <div style={{
+              background: `${C.blue}12`, border: `1px solid ${C.blue}30`,
+              borderRadius: 20, padding: "5px 12px",
+              fontSize: 10, fontWeight: 700, color: C.blue,
+            }}>24h</div>
+          </div>
+          <div style={{ marginTop: 18, display: "flex", alignItems: "flex-end", gap: 5, height: 72 }}>
+            {hourlyBars.map((bar, i) => {
+              const isNow = bar.hour === "Now";
+              const barHeight = Math.max(20, Math.round((bar.tds / (maxBarTds + 2)) * 64));
+              return (
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                  <div style={{
+                    width: "100%", height: barHeight, borderRadius: 4,
+                    background: isNow
+                      ? "linear-gradient(180deg, #34C759 0%, #1A8C3A 100%)"
+                      : `${C.blue}60`,
+                    transition: "height 0.8s cubic-bezier(0.34,1.56,0.64,1)",
+                    boxShadow: isNow ? "0 2px 8px rgba(52,199,89,0.4)" : "none",
+                  }} />
+                  <div style={{ fontSize: 7, fontWeight: isNow ? 800 : 500, color: isNow ? "#1A8C3A" : C.muted, letterSpacing: 0, whiteSpace: "nowrap" }}>{bar.hour}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 10, display: "flex", gap: 14, alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 8, height: 8, borderRadius: 2, background: "#34C759" }} />
+              <span style={{ fontSize: 10, color: C.muted }}>Now ({outTds > 0 ? outTds : 3} ppm)</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 8, height: 8, borderRadius: 2, background: `${C.blue}60` }} />
+              <span style={{ fontSize: 10, color: C.muted }}>Previous hours</span>
+            </div>
+          </div>
+        </div>
 
-        {/* ── CARD 2: TODAY ── */}
+        {/* ── CARD 4: TODAY'S FILTERED WATER GOAL ── */}
+        <div style={{ background: C.card, borderRadius: 20, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 12 }}>Today's Filtered Water</div>
+
+          {/* Large number */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
+            <span style={{ fontSize: 44, fontWeight: 800, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1.5, lineHeight: 1 }}>
+              {currentL.toFixed(1)}
+            </span>
+            <span style={{ fontSize: 20, fontWeight: 600, color: C.muted }}>/ {goalL} L</span>
+          </div>
+          <div style={{ fontSize: 13, color: C.muted, marginBottom: 16 }}>
+            {remainingL > 0 ? `${remainingL.toFixed(1)} L to reach your daily goal` : "Daily goal reached!"}
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ height: 10, borderRadius: 5, background: "#F0F1F3", overflow: "hidden", marginBottom: 10 }}>
+            <div style={{
+              height: "100%", borderRadius: 5,
+              width: `${Math.min(100, goalPct)}%`,
+              background: "linear-gradient(90deg, #51B0E6 0%, #34C759 100%)",
+              transition: "width 1.2s cubic-bezier(0.34,1.56,0.64,1)",
+            }} />
+          </div>
+
+          {/* Footer scale */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, color: C.muted, fontWeight: 600 }}>
+            <span>0 L</span>
+            <span style={{ color: "#34C759", fontWeight: 700 }}>{currentL.toFixed(1)} L now</span>
+            <span>{goalL} L goal</span>
+          </div>
+        </div>
+
+        {/* ── CARD 5: TODAY ── */}
         <div style={{
           background: C.card, borderRadius: 20, padding: 20,
           boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
@@ -1173,7 +1454,7 @@ export default function WTRHubScreen() {
           )}
         </div>
 
-        {/* ── CARD 3: YOUR IMPACT ── */}
+        {/* ── CARD 6: YOUR IMPACT ── */}
         <div style={{
           background: C.card, borderRadius: 20, padding: 20,
           boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
@@ -1232,7 +1513,7 @@ export default function WTRHubScreen() {
           )}
         </div>
 
-        {/* ── CARD 4: FILTER HEALTH ── */}
+        {/* ── CARD 7: FILTER HEALTH ── */}
         <div data-testid="hub-filter-section" style={{
           background: C.card, borderRadius: 20, padding: 20,
           boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
@@ -1275,7 +1556,7 @@ export default function WTRHubScreen() {
           </div>
         </div>
 
-        {/* ── CARD 5: WHAT GETS REMOVED (contaminant removal by ZIP) ── */}
+        {/* ── CARD 8: WHAT GETS REMOVED ── */}
         <div style={{ background: "#FFFFFF", borderRadius: 20, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: "1px solid #F0F0F5" }}>
           {/* Header */}
           <div style={{ background: "#0A1A2E", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1307,7 +1588,7 @@ export default function WTRHubScreen() {
                   <span style={{
                     fontSize: 10, fontWeight: 700, color: "#51B0E6",
                     background: "#F0FFF4", padding: "3px 8px", borderRadius: 6,
-                  }}>✓ {c.removal}</span>
+                  }}>&#x2713; {c.removal}</span>
                 </div>
               </div>
             ))}
@@ -1330,7 +1611,7 @@ export default function WTRHubScreen() {
                     background: s.color, display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 8, fontWeight: 800, color: s.text, letterSpacing: 0.3,
                   }}>{s.label}</div>
-                  {i < arr.length - 1 && <span style={{ color: "#D0D4DA", fontSize: 10 }}>→</span>}
+                  {i < arr.length - 1 && <span style={{ color: "#D0D4DA", fontSize: 10 }}>&#x2192;</span>}
                 </div>
               ))}
             </div>
@@ -1340,7 +1621,7 @@ export default function WTRHubScreen() {
                 ["1,000+", "Contaminants"],
                 ["99%+", "PFAS"],
                 ["99%+", "Heavy Metals"],
-                ["9+ pH", "Alkaline"],
+                ["Ca+Mg", "Remineralized"],
               ].map(([val, label]) => (
                 <div key={label} style={{
                   textAlign: "center", background: "#EFF8FF", borderRadius: 8, padding: "8px 4px",
