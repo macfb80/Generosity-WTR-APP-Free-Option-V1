@@ -1112,6 +1112,11 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
   );
 }
 
+// ─── API CONFIG ───────────────────────────────────────────────────────────────
+const API_BASE = 'https://generosity-sales-engine-mvp-api.onrender.com';
+const SERVICE_TOKEN = '3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102';
+const AUTH_HEADER = { 'Authorization': 'Bearer ' + SERVICE_TOKEN };
+
 // ─── MAIN BOTTLE SCAN VIEW COMPONENT ──────────────────────────────────────────
 export default function BottleScanView({ onBridge }) {
   const [mode, setMode] = useState("intro");
@@ -1122,6 +1127,9 @@ export default function BottleScanView({ onBridge }) {
   const [scanError, setScanError] = useState(null);
   const [scannedCode, setScannedCode] = useState(null);
   const [permissionState, setPermissionState] = useState("prompt");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef(null);
   const scannerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
   const notFoundInputRef = useRef(null);
@@ -1138,19 +1146,40 @@ export default function BottleScanView({ onBridge }) {
   // Quick select brands for not found screen
   const QUICK_SELECT_BRANDS = ["Dasani", "Aquafina", "FIJI Water", "Poland Spring", "Topo Chico", "Essentia", "smartwater", "Crystal Geyser", "Icelandic Glacial", "VOSS"];
 
-  // Filter brands by search
-  const filteredBrands = Object.keys(BOTTLE_BRANDS).filter(name =>
-    name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    BOTTLE_BRANDS[name].parent?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // API-powered search with debounce
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 2) { setSearchResults([]); return; }
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/wtr/bottle/search?q=${encodeURIComponent(searchQuery)}&limit=12`, { headers: AUTH_HEADER });
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data.results || []);
+        }
+      } catch (e) { console.error('[BottleScan] Search error:', e.message); }
+      setIsSearching(false);
+    }, 300);
+    return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
+  }, [searchQuery]);
 
-  // Filter brands for not found search
-  const notFoundFilteredBrands = notFoundSearch.length > 0 
-    ? Object.keys(BOTTLE_BRANDS).filter(name =>
-        name.toLowerCase().includes(notFoundSearch.toLowerCase()) ||
-        BOTTLE_BRANDS[name].parent?.toLowerCase().includes(notFoundSearch.toLowerCase())
-      )
-    : [];
+  // For backwards compat with the existing UI
+  const filteredBrands = searchResults.map(r => r.brand_name);
+
+  // Not-found search also uses API
+  const [notFoundResults, setNotFoundResults] = useState([]);
+  useEffect(() => {
+    if (!notFoundSearch || notFoundSearch.length < 2) { setNotFoundResults([]); return; }
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/wtr/bottle/search?q=${encodeURIComponent(notFoundSearch)}&limit=8`, { headers: AUTH_HEADER });
+        if (res.ok) { const data = await res.json(); setNotFoundResults(data.results || []); }
+      } catch (_) {}
+    }, 300);
+    return () => clearTimeout(t);
+  }, [notFoundSearch]);
+  const notFoundFilteredBrands = notFoundResults.map(r => r.brand_name);
 
   // Camera permission handling
   useEffect(() => {
@@ -1229,40 +1258,163 @@ export default function BottleScanView({ onBridge }) {
   function processBarcode(code) {
     setMode("processing");
     setScanStep(0);
+    const cleanCode = code.replace(/\D/g, '');
+
+    // Start the animation steps while API call runs in parallel
     let step = 0;
+    let apiDone = false;
+    let apiResult = null;
+
+    // Fire API call immediately
+    fetch(`${API_BASE}/api/wtr/bottle/${cleanCode}`, { headers: AUTH_HEADER })
+      .then(res => res.json())
+      .then(data => { apiResult = data; apiDone = true; })
+      .catch(() => { apiResult = null; apiDone = true; });
+
     const interval = setInterval(() => {
       step++;
       setScanStep(step);
       if (step >= SCAN_STEPS.length) {
         clearInterval(interval);
-        // Use new lookup function with prefix matching
-        const brandName = lookupBrandFromScan(code);
-        setTimeout(() => {
-          if (brandName && BOTTLE_BRANDS[brandName]) {
-            setBrand({ name: brandName, ...BOTTLE_BRANDS[brandName] });
+        // Wait for API if it hasn't finished yet
+        const checkApi = () => {
+          if (!apiDone) { setTimeout(checkApi, 100); return; }
+          if (apiResult && apiResult.found) {
+            // Convert API response to the brand format the UI expects
+            const b = apiResult;
+            setBrand({
+              name: b.brand_name,
+              parent: b.parent_company,
+              sourceType: b.source_type,
+              sourceName: b.source_location || b.source_description || '',
+              ph: b.ph_level,
+              tds_ppm: b.tds_ppm,
+              reportYear: b.last_verified || '2026',
+              generosity_score: b.generosity_score,
+              generosity_grade: b.generosity_grade,
+              pfas_result_category: b.pfas_result_category,
+              pfas_notes: b.pfas_notes,
+              pfas_max_detected_ppt: b.pfas_max_detected_ppt,
+              primary_material: b.primary_material,
+              is_bpa_free: b.is_bpa_free,
+              has_antimony_risk: b.has_antimony_risk,
+              microplastic_risk_level: b.microplastic_risk_level,
+              microplastics_particles_per_liter: b.microplastics_particles_per_liter,
+              vs_hub_headline: b.vs_hub_headline,
+              hub_removes_concerns: b.hub_removes_concerns,
+              price_per_liter_usd: b.price_per_liter_usd,
+              brand_website: b.brand_website,
+              test_results: b.test_results || [],
+              contaminants: buildContaminantsFromApi(b),
+              _fromApi: true,
+            });
             setMode("result");
           } else {
-            setMode("not_found");
+            // Also try local fallback
+            const brandName = lookupBrandFromScan(code);
+            if (brandName && BOTTLE_BRANDS[brandName]) {
+              setBrand({ name: brandName, ...BOTTLE_BRANDS[brandName] });
+              setMode("result");
+            } else {
+              setMode("not_found");
+            }
           }
-        }, 300);
+        };
+        setTimeout(checkApi, 300);
       }
     }, 400);
+  }
+
+  // Convert API brand data to the contaminants array format the existing UI expects
+  function buildContaminantsFromApi(b) {
+    const contaminants = [];
+    if (b.pfas_result_category === 'not_disclosed' || b.pfas_result_category === 'not_tested') {
+      contaminants.push({ name: 'PFAS (Forever Chemicals)', risk: 'high', value: 'Not tested or disclosed', unit: '', note: 'No federal PFAS standard for bottled water' });
+    } else if (b.pfas_result_category === 'detected_below_mcl' || b.pfas_result_category === 'above_mcl') {
+      contaminants.push({ name: 'PFAS (Forever Chemicals)', risk: 'high', value: b.pfas_max_detected_ppt ? `${b.pfas_max_detected_ppt} ppt` : 'Detected', unit: 'ppt', note: b.pfas_notes || '' });
+    } else if (b.pfas_result_category === 'not_detected') {
+      contaminants.push({ name: 'PFAS (Forever Chemicals)', risk: 'none', value: 'Not detected', unit: '', note: 'Tested and verified' });
+    }
+    if (b.has_antimony_risk) {
+      contaminants.push({ name: 'Antimony (PET Leaching)', risk: 'medium', value: 'Risk present', unit: '', note: b.antimony_note || 'PET bottles leach antimony at elevated temperatures' });
+    }
+    if (b.microplastic_risk_level === 'high' || b.microplastic_risk_level === 'medium') {
+      contaminants.push({ name: 'Microplastics', risk: b.microplastic_risk_level === 'high' ? 'high' : 'medium', value: b.microplastics_particles_per_liter ? `${b.microplastics_particles_per_liter}/L` : b.microplastic_risk_level, unit: 'particles/L', note: 'From PET bottle degradation' });
+    }
+    return contaminants;
   }
 
   function selectBrand(brandName) {
     setMode("processing");
     setScanStep(0);
-    setScannedCode("DEMO-" + brandName.toUpperCase().replace(/\s+/g, '-'));
+    setScannedCode("SELECT-" + brandName.toUpperCase().replace(/\s+/g, '-'));
+
     let step = 0;
+    let apiDone = false;
+    let apiResult = null;
+
+    // Search API for this brand name
+    fetch(`${API_BASE}/api/wtr/bottle/search?q=${encodeURIComponent(brandName)}&limit=1`, { headers: AUTH_HEADER })
+      .then(res => res.json())
+      .then(data => {
+        if (data.results && data.results.length > 0) {
+          const r = data.results[0];
+          // If the search result has a barcode, fetch full details
+          if (r.barcode_primary) {
+            return fetch(`${API_BASE}/api/wtr/bottle/${r.barcode_primary}`, { headers: AUTH_HEADER }).then(res2 => res2.json());
+          }
+          return { found: true, ...r };
+        }
+        return null;
+      })
+      .then(data => { apiResult = data; apiDone = true; })
+      .catch(() => { apiResult = null; apiDone = true; });
+
     const interval = setInterval(() => {
       step++;
       setScanStep(step);
       if (step >= SCAN_STEPS.length) {
         clearInterval(interval);
-        setTimeout(() => {
-          setBrand({ name: brandName, ...BOTTLE_BRANDS[brandName] });
-          setMode("result");
-        }, 300);
+        const checkApi = () => {
+          if (!apiDone) { setTimeout(checkApi, 100); return; }
+          if (apiResult && (apiResult.found || apiResult.brand_name)) {
+            const b = apiResult;
+            setBrand({
+              name: b.brand_name || brandName,
+              parent: b.parent_company,
+              sourceType: b.source_type,
+              sourceName: b.source_location || b.source_description || '',
+              ph: b.ph_level,
+              tds_ppm: b.tds_ppm,
+              reportYear: b.last_verified || '2026',
+              generosity_score: b.generosity_score,
+              generosity_grade: b.generosity_grade,
+              pfas_result_category: b.pfas_result_category,
+              pfas_notes: b.pfas_notes,
+              pfas_max_detected_ppt: b.pfas_max_detected_ppt,
+              primary_material: b.primary_material,
+              is_bpa_free: b.is_bpa_free,
+              has_antimony_risk: b.has_antimony_risk,
+              microplastic_risk_level: b.microplastic_risk_level,
+              microplastics_particles_per_liter: b.microplastics_particles_per_liter,
+              vs_hub_headline: b.vs_hub_headline,
+              hub_removes_concerns: b.hub_removes_concerns,
+              price_per_liter_usd: b.price_per_liter_usd,
+              brand_website: b.brand_website,
+              test_results: b.test_results || [],
+              contaminants: buildContaminantsFromApi(b),
+              _fromApi: true,
+            });
+            setMode("result");
+          } else if (BOTTLE_BRANDS[brandName]) {
+            // Local fallback
+            setBrand({ name: brandName, ...BOTTLE_BRANDS[brandName] });
+            setMode("result");
+          } else {
+            setMode("not_found");
+          }
+        };
+        setTimeout(checkApi, 300);
       }
     }, 350);
   }
