@@ -62,7 +62,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
       </div>
 
       {/* ── Material Safety ───────────────────────────────────── */}
-      <Section title="Material Safety" icon="🧪">
+      <Section title="Material Safety" icon=<><span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 3h6M10 3v12l-4 6h12l-4-6V3"/></svg></span></>>
         <Row
           label="Material"
           value={data.material?.type || '—'}
@@ -80,7 +80,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
         />
         {data.material?.antimony_risk && (
           <div style={styles.alertBox}>
-            <span style={styles.alertIcon}>⚠️</span>
+            <span style={{...styles.alertIcon, display:"inline-flex", verticalAlign:"middle"}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="15"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg></span>
             <span style={styles.alertText}>{data.material?.antimony_note || 'Antimony leaching risk'}</span>
           </div>
         )}
@@ -92,7 +92,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
       </Section>
 
       {/* ── Source Water ──────────────────────────────────────── */}
-      <Section title="Source Water" icon="🌊">
+      <Section title="Source Water" icon=<><span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg></span></>>
         <Row label="Source Type" value={data.source_water?.type || 'Not disclosed'} />
         {data.source_water?.location && (
           <Row label="Location" value={data.source_water.location} />
@@ -114,7 +114,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
       </Section>
 
       {/* ── PFAS Testing ─────────────────────────────────────── */}
-      <Section title="PFAS Testing" icon="🔬">
+      <Section title="PFAS Testing" icon=<><span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4"/><path d="M12 12v4M8 22h8M12 16c-4 0-7 2-7 6"/></svg></span></>>
         <Row
           label="Tested for PFAS"
           value={data.pfas?.tested ? '✓ Yes' : '✗ Not disclosed by manufacturer'}
@@ -125,7 +125,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
             label="PFAS Result"
             value={
               data.pfas.result === 'not_detected' ? '✓ Not detected' :
-              data.pfas.result === 'detected_below_mcl' ? '⚠️ Detected — below EPA MCL' :
+              data.pfas.result === 'detected_below_mcl' ? '! Detected — below EPA MCL' :
               data.pfas.result === 'detected_above_mcl' ? '✗ Detected — above EPA MCL' :
               'Not disclosed'
             }
@@ -143,7 +143,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
       </Section>
 
       {/* ── Certifications ───────────────────────────────────── */}
-      <Section title="Certifications" icon="🏅">
+      <Section title="Certifications" icon=<><span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="14" r="6"/><path d="M9 2l3 4 3-4"/><path d="M12 8v6"/></svg></span></>>
         <Row
           label="NSF 51 (Food Equipment)"
           value={data.certifications?.nsf_51 ? '✓ Certified' : '✗ Not certified'}
@@ -162,12 +162,12 @@ export default function BottleScanReport({ data, onGetProtection }) {
       </Section>
 
       {/* ── Microplastics ─────────────────────────────────────── */}
-      <Section title="Microplastics" icon="🔵">
+      <Section title="Microplastics" icon=<><span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="8"/><path d="M12 8v4M12 16h.01"/></svg></span></>>
         <Row
           label="Risk Level"
           value={{
             low: '✓ Low risk',
-            medium: '⚠️ Medium risk',
+            medium: '! Medium risk',
             high: '✗ High risk',
             unknown: '? Unknown — not tested',
           }[data.microplastics?.risk || 'unknown']}
@@ -182,7 +182,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
 
       {/* ── vs. Home WTR Hub CTA ─────────────────────────────── */}
       <div style={styles.ctaBlock}>
-        <div style={styles.ctaIcon}>🚰</div>
+        <div style={{...styles.ctaIcon, display:"flex", justifyContent:"center"}}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="1.5"><path d="M12 2v6M8 8h8M6 12a6 6 0 0012 0"/><path d="M12 18v4"/></svg></div>
         <div style={styles.ctaText}>{data.vs_home_wtr_hub}</div>
         <button style={styles.ctaButton} onClick={onGetProtection}>
           See the Home WTR Hub →
@@ -208,7 +208,7 @@ export default function BottleScanReport({ data, onGetProtection }) {
 function BottleNotFound({ data, onGetProtection }) {
   return (
     <div style={styles.notFoundWrapper}>
-      <div style={styles.notFoundIcon}>🔍</div>
+      <div style={{...styles.notFoundIcon, display:"flex", justifyContent:"center"}}><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#51B0E6" strokeWidth="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div>
       <div style={styles.notFoundTitle}>Brand not in database yet</div>
       <div style={styles.notFoundSub}>
         {data.message || "We haven't added this brand yet."}
@@ -284,7 +284,7 @@ const styles = {
     padding: '12px 20px 8px',
     background: '#FAFAFA',
   },
-  sectionIcon: { fontSize: 16 },
+  sectionIcon: { display: 'inline-flex', alignItems: 'center' },
   sectionTitle: { fontSize: 13, fontWeight: 700, color: '#1C1C1E', letterSpacing: '-0.2px' },
   sectionBody: { padding: '4px 20px 12px' },
 
@@ -319,7 +319,7 @@ const styles = {
     color: '#FFFFFF',
     textAlign: 'center',
   },
-  ctaIcon: { fontSize: 32, marginBottom: 8 },
+  ctaIcon: { marginBottom: 8 },
   ctaText: {
     fontSize: 14, lineHeight: 1.5, opacity: 0.9, marginBottom: 16,
     fontWeight: 400,
@@ -354,7 +354,7 @@ const styles = {
     borderRadius: 16,
     boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
   },
-  notFoundIcon: { fontSize: 48, marginBottom: 12 },
+  notFoundIcon: { marginBottom: 12 },
   notFoundTitle: { fontSize: 19, fontWeight: 800, color: '#1C1C1E', marginBottom: 8 },
   notFoundSub: { fontSize: 14, color: '#6E6E73', marginBottom: 16 },
   notFoundNote: {

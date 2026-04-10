@@ -59,7 +59,7 @@ export default function ContaminantTable({ contaminants = [], onContaminantClick
   if (!contaminants.length) {
     return (
       <div style={styles.emptyState}>
-        <div style={styles.emptyIcon}>💧</div>
+        <div style={styles.emptyIcon}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#51B0E6" strokeWidth="1.5"><path d="M12 2C12 2 6 10 6 14a6 6 0 0012 0c0-4-6-12-6-12z"/></svg></div>
         <div style={styles.emptyTitle}>No contaminant data yet</div>
         <div style={styles.emptySub}>Data loads with your water report</div>
       </div>
@@ -493,7 +493,7 @@ const styles = {
     background: '#FFFFFF',
     borderRadius: 16,
   },
-  emptyIcon: { fontSize: 40, marginBottom: 12 },
+  emptyIcon: { marginBottom: 12, display: 'flex', justifyContent: 'center' },
   emptyTitle: { fontSize: 17, fontWeight: 700, color: '#1C1C1E', marginBottom: 6 },
   emptySub: { fontSize: 13, color: '#6E6E73' },
 };

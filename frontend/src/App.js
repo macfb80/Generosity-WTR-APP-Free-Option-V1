@@ -39,7 +39,7 @@ class ErrorBoundary extends React.Component {
           textAlign: 'center',
           background: '#FFFFFF'
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>💧</div>
+          <div style={{ fontSize: 48, marginBottom: 16, display: 'flex', justifyContent: 'center' }}><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#51B0E6" strokeWidth="1.5"><path d="M12 2C12 2 6 10 6 14a6 6 0 0012 0c0-4-6-12-6-12z"/></svg></div>
           <h1 style={{ fontSize: 20, fontWeight: 900, color: '#0A1A2E', marginBottom: 8 }}>
             Something went wrong
           </h1>

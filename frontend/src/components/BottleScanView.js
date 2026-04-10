@@ -1062,7 +1062,7 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
         color: B.white
       }} data-testid="wtr-hub-bridge">
         <div style={{ fontSize: 11, fontWeight: 800, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 16 }}>💡</span> Home WTR Hub removes:
+          <span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg></span> Home WTR Hub removes:
         </div>
         
         <div style={{ marginBottom: 14 }}>

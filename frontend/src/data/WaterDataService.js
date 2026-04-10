@@ -181,7 +181,7 @@ export function transformReportForUI(apiReport) {
       code:           c.code,
       name:           c.name,
       group:          c.group,
-      icon:           c.icon || '⚠️',
+      icon:           c.icon || 'warn',
       riskColor:      c.risk_color || 'orange',
       riskLevel:      c.risk_color || 'orange',  // alias
       detected:       c.concentration,

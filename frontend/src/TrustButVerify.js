@@ -438,7 +438,7 @@ function HealthCalc({city,riskScore}){
       {/* Warning */}
       {cumScore>50&&(
         <div style={{background:"#FFF3F2",borderRadius:7,padding:"9px 11px",marginTop:10,fontSize:10,color:"#742A2A",lineHeight:1.6}} data-testid="risk-warning">
-          ⚠ {sel.icon} {sel.label} faces <strong>elevated long-term risk</strong> from {city?.split(",")[0]||"your city"}'s contaminants.
+          {<span style={{display:'inline-flex',verticalAlign:'middle'}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="15"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg></span>}{' '}{sel.icon} {sel.label} faces <strong>elevated long-term risk</strong> from {city?.split(",")[0]||"your city"}'s contaminants.
         </div>
       )}
     </div>
@@ -805,7 +805,7 @@ export default function TrustButVerify(){
     const storedEmail = reportOptInEmail;
     const storedZip = data?.zip || '';
     if (storedEmail && storedZip) {
-      fetch(`https://generosity-dashboard.vercel.app/api/water-report/status?email=${encodeURIComponent(storedEmail)}&zip=${encodeURIComponent(storedZip)}`)
+      fetch(`https://generosity-sales-engine-mvp-api.onrender.com/api/water-report/status?email=${encodeURIComponent(storedEmail)}&zip=${encodeURIComponent(storedZip)}`, { headers: { 'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102' } })
         .then(r => r.json())
         .then(d => {
           if (d.status && d.status !== reportOptInStatus) {
@@ -835,9 +835,9 @@ export default function TrustButVerify(){
     setReportSubmitting(true);
     setReportSubmitError('');
 
-    fetch('https://generosity-dashboard.vercel.app/api/water-report/subscribe', {
+    fetch('https://generosity-sales-engine-mvp-api.onrender.com/api/water-report/subscribe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102' },
       body: JSON.stringify({
         email: reportEmail.trim().toLowerCase(),
         zip: cleanZip,
@@ -954,7 +954,7 @@ export default function TrustButVerify(){
           const zipMatch = cleanInput.match(/\d{5}/);
           if(zipMatch){
             try {
-              const oracleRes = await fetch(`https://generosity-dashboard.vercel.app/api/wtr/report?zip=${zipMatch[0]}`);
+              const oracleRes = await fetch(`https://generosity-sales-engine-mvp-api.onrender.com/api/wtr/report?zip=${zipMatch[0]}`, { headers: { 'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102' } });
               if(oracleRes.ok){
                 const report = await oracleRes.json();
                 if(report && report.utility && report.status !== 'not_found'){
@@ -1367,7 +1367,7 @@ export default function TrustButVerify(){
                       <h2 style={{fontSize:20,fontWeight:900,margin:"0 0 2px",letterSpacing:"-0.5px"}} data-testid="report-city">{data.city}</h2>
                       {input&&inputMode!=="city"&&(
                         <div style={{fontSize:9,color:"#51B0E6",marginBottom:3,fontWeight:700}}>
-                          {inputMode==="address"?`🏠 ${input}`:`📍 ZIP ${input}`}
+                          {inputMode==="address"?(<><span style={{display:'inline-flex',verticalAlign:'middle'}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10"/></svg></span>{' '}{input}</>) : (<><span style={{display:'inline-flex',verticalAlign:'middle'}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></span>{' ZIP '}{input}</>)}
                         </div>
                       )}
                       <div style={{fontSize:10,color:"#94A3B8",marginBottom:8}}>{data.utility} · {data.source}</div>
@@ -1711,7 +1711,7 @@ export default function TrustButVerify(){
             {/* ── Report: no data ── */}
             {insightView==="report"&&!data&&(
               <div style={{padding:"60px 20px",textAlign:"center"}} data-testid="report-empty">
-                <div style={{fontSize:44,marginBottom:14}}>📊</div>
+                <div style={{display:"flex",justifyContent:"center",marginBottom:14}}><span style={{display:"inline-flex",color:"#A6A8AB"}}><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg></span></div>
                 <h3 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:7}}>No Report Yet</h3>
                 <p style={{fontSize:12,color:"#A6A8AB",marginBottom:18}}>Enter your address on the Home tab to generate your free water intelligence report.</p>
                 <button 
@@ -1860,12 +1860,12 @@ export default function TrustButVerify(){
                 {/* Value props */}
                 <div style={{background:"#F0F1F3",borderRadius:12,padding:16,marginBottom:20}}>
                   {[
-                    {icon:"\uD83D\uDCA7",text:`Local water quality data for ${data?.city?.split(",")[0] || 'your area'}`},
-                    {icon:"\u26A0\uFE0F",text:"Contaminant alerts and health guideline updates"},
-                    {icon:"\uD83D\uDCF0",text:"Recent news and advisories for your water utility"}
+                    {icon:(<span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2C12 2 6 10 6 14a6 6 0 0012 0c0-4-6-12-6-12z"/></svg></span>),text:`Local water quality data for ${data?.city?.split(",")[0] || 'your area'}`},
+                    {icon:(<span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="15"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg></span>),text:"Contaminant alerts and health guideline updates"},
+                    {icon:(<span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="6" y1="16" x2="10" y2="16"/></svg></span>),text:"Recent news and advisories for your water utility"}
                   ].map((vp,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:i<2?10:0}}>
-                      <span style={{fontSize:16,lineHeight:1,flexShrink:0,marginTop:2}}>{vp.icon}</span>
+                      <span style={{lineHeight:1,flexShrink:0,marginTop:2}}>{vp.icon}</span>
                       <span style={{fontSize:14,color:"#1a2744",lineHeight:1.4}}>{vp.text}</span>
                     </div>
                   ))}

@@ -54,46 +54,46 @@ export async function getLeaderboard(category = null, limit = 10) {
 // ══════════════════════════════════════════════════
 
 export const GRADE_CONFIG = {
-  'A+': { color: '#00B347', bg: 'rgba(0,179,71,0.08)',   label: 'Exceptional', emoji: '🏆' },
-  'A':  { color: '#34C759', bg: 'rgba(52,199,89,0.08)',  label: 'Excellent',   emoji: '⭐' },
-  'A-': { color: '#34C759', bg: 'rgba(52,199,89,0.08)',  label: 'Very Good',   emoji: '⭐' },
-  'B+': { color: '#51B0E6', bg: 'rgba(81,176,230,0.08)', label: 'Good',        emoji: '👍' },
-  'B':  { color: '#51B0E6', bg: 'rgba(81,176,230,0.08)', label: 'Good',        emoji: '👍' },
-  'B-': { color: '#51B0E6', bg: 'rgba(81,176,230,0.08)', label: 'Acceptable',  emoji: '👍' },
-  'C+': { color: '#FFCC00', bg: 'rgba(255,204,0,0.08)',  label: 'Fair',        emoji: '⚠️' },
-  'C':  { color: '#FFCC00', bg: 'rgba(255,204,0,0.08)',  label: 'Fair',        emoji: '⚠️' },
-  'C-': { color: '#FFCC00', bg: 'rgba(255,204,0,0.08)',  label: 'Marginal',    emoji: '⚠️' },
-  'D+': { color: '#FF9500', bg: 'rgba(255,149,0,0.08)',  label: 'Poor',        emoji: '⛔' },
-  'D':  { color: '#FF9500', bg: 'rgba(255,149,0,0.08)',  label: 'Poor',        emoji: '⛔' },
-  'D-': { color: '#FF9500', bg: 'rgba(255,149,0,0.08)',  label: 'Very Poor',   emoji: '⛔' },
-  'F':  { color: '#FF3B30', bg: 'rgba(255,59,48,0.08)',  label: 'Failing',     emoji: '🚫' },
+  'A+': { color: '#00B347', bg: 'rgba(0,179,71,0.08)',   label: 'Exceptional', icon: 'A+' },
+  'A':  { color: '#34C759', bg: 'rgba(52,199,89,0.08)',  label: 'Excellent',   icon: 'A' },
+  'A-': { color: '#34C759', bg: 'rgba(52,199,89,0.08)',  label: 'Very Good',   icon: 'A-' },
+  'B+': { color: '#51B0E6', bg: 'rgba(81,176,230,0.08)', label: 'Good',        icon: 'B+' },
+  'B':  { color: '#51B0E6', bg: 'rgba(81,176,230,0.08)', label: 'Good',        icon: 'B' },
+  'B-': { color: '#51B0E6', bg: 'rgba(81,176,230,0.08)', label: 'Acceptable',  icon: 'B-' },
+  'C+': { color: '#FFCC00', bg: 'rgba(255,204,0,0.08)',  label: 'Fair',        icon: 'C+' },
+  'C':  { color: '#FFCC00', bg: 'rgba(255,204,0,0.08)',  label: 'Fair',        icon: 'C' },
+  'C-': { color: '#FFCC00', bg: 'rgba(255,204,0,0.08)',  label: 'Marginal',    icon: 'C-' },
+  'D+': { color: '#FF9500', bg: 'rgba(255,149,0,0.08)',  label: 'Poor',        icon: 'D+' },
+  'D':  { color: '#FF9500', bg: 'rgba(255,149,0,0.08)',  label: 'Poor',        icon: 'D' },
+  'D-': { color: '#FF9500', bg: 'rgba(255,149,0,0.08)',  label: 'Very Poor',   icon: 'D-' },
+  'F':  { color: '#FF3B30', bg: 'rgba(255,59,48,0.08)',  label: 'Failing',     icon: 'F' },
 };
 
 export const PFAS_CONFIG = {
   'not_detected':        { label: '✓ Not Detected',           color: '#34C759', urgent: false },
   'below_0.1ppt':        { label: '✓ Below 0.1 ppt',         color: '#34C759', urgent: false },
-  'below_1ppt':          { label: '⚠️ Below 1 ppt (EWG limit)', color: '#FFCC00', urgent: false },
-  'below_mcl':           { label: '⚠️ Below EPA Limit',        color: '#FF9500', urgent: true },
-  'detected_below_mcl':  { label: '⚠️ Detected — Below EPA MCL', color: '#FF9500', urgent: true },
+  'below_1ppt':          { label: '! Below 1 ppt (EWG limit)', color: '#FFCC00', urgent: false },
+  'below_mcl':           { label: '! Below EPA Limit',        color: '#FF9500', urgent: true },
+  'detected_below_mcl':  { label: '! Detected — Below EPA MCL', color: '#FF9500', urgent: true },
   'above_mcl':           { label: '✗ Exceeds EPA Limit',       color: '#FF3B30', urgent: true },
-  'detected_undisclosed':{ label: '⚠️ Detected — Level Hidden', color: '#FF9500', urgent: true },
+  'detected_undisclosed':{ label: '! Detected — Level Hidden', color: '#FF9500', urgent: true },
   'not_disclosed':       { label: '? Not Tested or Disclosed', color: '#AEAEB2', urgent: false },
   'not_tested':          { label: '? Not Tested',              color: '#AEAEB2', urgent: false },
   'not_applicable':      { label: 'N/A',                       color: '#AEAEB2', urgent: false },
 };
 
 export const MATERIAL_CONFIG = {
-  'Glass':             { safety: 'Safest',   risk: 0, icon: '🥂', note: 'Inert — zero leaching of any chemical' },
-  'Aluminum':          { safety: 'Safe',     risk: 1, icon: '🥫', note: 'Infinitely recyclable · No antimony risk' },
-  'Stainless Steel':   { safety: 'Safe',     risk: 0, icon: '⚙️',  note: 'Inert when food-grade (18/8 or 304 stainless)' },
-  'Carton/Paperboard': { safety: 'Good',     risk: 1, icon: '📦', note: 'Renewable — verify carton is PFAS-free' },
-  'Compostable':       { safety: 'Good',     risk: 1, icon: '🌿', note: 'Compostable bioplastics — verify PFAS-free' },
-  'HDPE':              { safety: 'Decent',   risk: 2, icon: '🧴', note: 'Generally safe · Semi-rigid · Opaque' },
-  'Tritan':            { safety: 'Decent',   risk: 2, icon: '🫙', note: 'BPA-free copolyester · Limited long-term data' },
-  'PP':                { safety: 'Decent',   risk: 2, icon: '🪣', note: 'Generally safe for single use' },
-  'LDPE':              { safety: 'Caution',  risk: 3, icon: '⚗️', note: 'Flexible plastic · Some leaching concerns' },
-  'PET':               { safety: 'Caution',  risk: 3, icon: '♻️', note: 'Leaches antimony at high temps · Microplastic risk' },
-  'Polycarbonate':     { safety: 'Avoid',    risk: 4, icon: '⚠️', note: 'May contain BPA — avoid for water storage' },
+  'Glass':             { safety: 'Safest',   risk: 0, icon: 'glass', note: 'Inert — zero leaching of any chemical' },
+  'Aluminum':          { safety: 'Safe',     risk: 1, icon: 'aluminum', note: 'Infinitely recyclable · No antimony risk' },
+  'Stainless Steel':   { safety: 'Safe',     risk: 0, icon: 'steel',  note: 'Inert when food-grade (18/8 or 304 stainless)' },
+  'Carton/Paperboard': { safety: 'Good',     risk: 1, icon: 'carton', note: 'Renewable — verify carton is PFAS-free' },
+  'Compostable':       { safety: 'Good',     risk: 1, icon: 'compostable', note: 'Compostable bioplastics — verify PFAS-free' },
+  'HDPE':              { safety: 'Decent',   risk: 2, icon: 'plastic', note: 'Generally safe · Semi-rigid · Opaque' },
+  'Tritan':            { safety: 'Decent',   risk: 2, icon: 'plastic', note: 'BPA-free copolyester · Limited long-term data' },
+  'PP':                { safety: 'Decent',   risk: 2, icon: 'plastic', note: 'Generally safe for single use' },
+  'LDPE':              { safety: 'Caution',  risk: 3, icon: 'flask', note: 'Flexible plastic · Some leaching concerns' },
+  'PET':               { safety: 'Caution',  risk: 3, icon: 'plastic', note: 'Leaches antimony at high temps · Microplastic risk' },
+  'Polycarbonate':     { safety: 'Avoid',    risk: 4, icon: 'warn', note: 'May contain BPA — avoid for water storage' },
 };
 
 export function getGradeConfig(grade) {
@@ -105,7 +105,7 @@ export function getPfasConfig(result) {
 }
 
 export function getMaterialConfig(material) {
-  return MATERIAL_CONFIG[material] || { safety: 'Unknown', risk: 2, icon: '❓', note: '' };
+  return MATERIAL_CONFIG[material] || { safety: 'Unknown', risk: 2, icon: 'unknown', note: '' };
 }
 
 /**
