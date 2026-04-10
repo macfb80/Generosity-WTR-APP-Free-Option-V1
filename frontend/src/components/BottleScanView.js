@@ -1280,34 +1280,8 @@ export default function BottleScanView({ onBridge }) {
         const checkApi = () => {
           if (!apiDone) { setTimeout(checkApi, 100); return; }
           if (apiResult && apiResult.found) {
-            // Convert API response to the brand format the UI expects
-            const b = apiResult;
-            setBrand({
-              name: b.brand_name,
-              parent: b.parent_company,
-              sourceType: b.source_type,
-              sourceName: b.source_location || b.source_description || '',
-              ph: b.ph_level,
-              tds_ppm: b.tds_ppm,
-              reportYear: b.last_verified || '2026',
-              generosity_score: b.generosity_score,
-              generosity_grade: b.generosity_grade,
-              pfas_result_category: b.pfas_result_category,
-              pfas_notes: b.pfas_notes,
-              pfas_max_detected_ppt: b.pfas_max_detected_ppt,
-              primary_material: b.primary_material,
-              is_bpa_free: b.is_bpa_free,
-              has_antimony_risk: b.has_antimony_risk,
-              microplastic_risk_level: b.microplastic_risk_level,
-              microplastics_particles_per_liter: b.microplastics_particles_per_liter,
-              vs_hub_headline: b.vs_hub_headline,
-              hub_removes_concerns: b.hub_removes_concerns,
-              price_per_liter_usd: b.price_per_liter_usd,
-              brand_website: b.brand_website,
-              test_results: b.test_results || [],
-              contaminants: buildContaminantsFromApi(b),
-              _fromApi: true,
-            });
+            // Convert API response to the brand format the WaterQualityReport expects
+            setBrand(mapApiBrandToReport(apiResult));
             setMode("result");
           } else {
             // Also try local fallback
@@ -1325,23 +1299,127 @@ export default function BottleScanView({ onBridge }) {
     }, 400);
   }
 
-  // Convert API brand data to the contaminants array format the existing UI expects
-  function buildContaminantsFromApi(b) {
+  // Map API response to the exact shape WaterQualityReport expects
+  function mapApiBrandToReport(b) {
+    // Source type display name
+    const sourceTypeDisplay = {
+      spring: 'Natural Spring Water', artesian: 'Artesian Water',
+      purified_municipal: 'Purified Water', purified_well: 'Purified Well Water',
+      mineral: 'Natural Mineral Water', distilled: 'Distilled Water',
+      glacier: 'Glacier Water', sparkling_natural: 'Natural Sparkling',
+      sparkling_added: 'Sparkling Water', well: 'Well Water', unknown: 'Water',
+    };
+
+    // Hardness label from ppm
+    const hardnessLabel = (ppm) => {
+      if (ppm == null) return 'Unknown';
+      if (ppm <= 17) return 'Very soft';
+      if (ppm <= 60) return 'Soft';
+      if (ppm <= 120) return 'Moderate (' + ppm + ' mg/L)';
+      if (ppm <= 180) return 'Hard (' + ppm + ' mg/L)';
+      return 'Very hard (' + ppm + ' mg/L)';
+    };
+
+    // Build contaminants array matching the format WaterQualityReport expects:
+    // { name, detected, level, fda_limit, risk, category, health }
     const contaminants = [];
+
+    // PFAS
     if (b.pfas_result_category === 'not_disclosed' || b.pfas_result_category === 'not_tested') {
-      contaminants.push({ name: 'PFAS (Forever Chemicals)', risk: 'high', value: 'Not tested or disclosed', unit: '', note: 'No federal PFAS standard for bottled water' });
+      contaminants.push({
+        name: 'PFAS (Forever Chemicals)', detected: false, level: 'Not tested/disclosed',
+        fda_limit: 'No MCL', risk: 'high', category: 'Forever Chemicals',
+        health: b.pfas_notes || 'No PFAS testing results published. FDA has no MCL for PFAS in bottled water.',
+      });
     } else if (b.pfas_result_category === 'detected_below_mcl' || b.pfas_result_category === 'above_mcl') {
-      contaminants.push({ name: 'PFAS (Forever Chemicals)', risk: 'high', value: b.pfas_max_detected_ppt ? `${b.pfas_max_detected_ppt} ppt` : 'Detected', unit: 'ppt', note: b.pfas_notes || '' });
+      contaminants.push({
+        name: 'PFAS (Forever Chemicals)', detected: true,
+        level: b.pfas_max_detected_ppt ? b.pfas_max_detected_ppt + ' ppt' : 'Detected',
+        fda_limit: 'No MCL', risk: b.pfas_result_category === 'above_mcl' ? 'high' : 'medium',
+        category: 'Forever Chemicals',
+        health: b.pfas_notes || 'PFAS detected. These chemicals persist in the body and environment indefinitely.',
+      });
     } else if (b.pfas_result_category === 'not_detected') {
-      contaminants.push({ name: 'PFAS (Forever Chemicals)', risk: 'none', value: 'Not detected', unit: '', note: 'Tested and verified' });
+      contaminants.push({
+        name: 'PFAS (Forever Chemicals)', detected: false, level: 'Not detected',
+        fda_limit: 'No MCL', risk: 'none', category: 'Forever Chemicals',
+        health: b.pfas_notes || 'Tested and verified — no PFAS detected.',
+      });
     }
-    if (b.has_antimony_risk) {
-      contaminants.push({ name: 'Antimony (PET Leaching)', risk: 'medium', value: 'Risk present', unit: '', note: b.antimony_note || 'PET bottles leach antimony at elevated temperatures' });
+
+    // Antimony
+    if (b.has_antimony_risk || b.primary_material === 'PET') {
+      contaminants.push({
+        name: 'Antimony (PET Leaching)', detected: b.has_antimony_risk,
+        level: b.antimony_ppb_reported ? b.antimony_ppb_reported + ' ppb' : (b.has_antimony_risk ? 'Risk present' : 'PET risk'),
+        fda_limit: '6 ppb (EPA)', risk: b.has_antimony_risk ? 'medium' : 'low',
+        category: 'Packaging Contaminant',
+        health: b.antimony_note || 'PET plastic leaches antimony, a heavy metal, especially at elevated temperatures and with sun exposure.',
+      });
     }
-    if (b.microplastic_risk_level === 'high' || b.microplastic_risk_level === 'medium') {
-      contaminants.push({ name: 'Microplastics', risk: b.microplastic_risk_level === 'high' ? 'high' : 'medium', value: b.microplastics_particles_per_liter ? `${b.microplastics_particles_per_liter}/L` : b.microplastic_risk_level, unit: 'particles/L', note: 'From PET bottle degradation' });
+
+    // Microplastics
+    const mpRisk = b.microplastic_risk_level || (b.primary_material === 'PET' ? 'medium' : 'low');
+    if (mpRisk === 'high' || mpRisk === 'medium' || b.primary_material === 'PET') {
+      contaminants.push({
+        name: 'Microplastics', detected: mpRisk !== 'none',
+        level: b.microplastics_particles_per_liter ? b.microplastics_particles_per_liter + '/L' : (mpRisk === 'high' ? 'HIGH' : mpRisk === 'medium' ? 'MODERATE' : 'Unknown'),
+        fda_limit: 'No limit', risk: mpRisk === 'high' ? 'high' : 'medium',
+        category: 'Emerging Contaminant',
+        health: b.primary_material === 'PET' ? 'PET bottles shed microplastic particles. No FDA limit exists.' : 'Microplastic contamination detected.',
+      });
     }
-    return contaminants;
+
+    // Add test results as additional contaminants if available
+    if (b.test_results && b.test_results.length > 0) {
+      for (const t of b.test_results) {
+        if (t.is_health_concern) {
+          contaminants.push({
+            name: t.contaminant_name, detected: true,
+            level: t.measured_value != null ? t.measured_value + ' ' + (t.unit || '') : 'Detected',
+            fda_limit: t.fda_limit ? t.fda_limit + ' ' + (t.unit || '') : 'No limit',
+            risk: t.concern_level >= 8 ? 'high' : t.concern_level >= 5 ? 'medium' : 'low',
+            category: t.test_category || 'Contaminant',
+            health: t.finding_summary || '',
+          });
+        }
+      }
+    }
+
+    // Hub removes list
+    const hubRemoves = Array.isArray(b.hub_removes_concerns) ? b.hub_removes_concerns : [];
+
+    return {
+      name: b.brand_name,
+      parent: b.parent_company || '',
+      sourceType: sourceTypeDisplay[b.source_type] || b.source_type || 'Water',
+      sourceName: b.source_location || b.source_description || '',
+      treatment: b.treatment_process || 'Standard treatment',
+      ph: b.ph_level || 7.0,
+      tds_ppm: b.tds_ppm || 0,
+      hardness: hardnessLabel(b.hardness_ppm),
+      additives: b.additives || 'None',
+      reportYear: b.pfas_test_year || '2026',
+      reportSource: b.report_source || b.data_source_primary || 'EPA + EWG + FDA',
+      reportUrl: null,
+      contaminants: contaminants,
+      violations: [],
+      recalls: [],
+      lawsuits: [],
+      ewg_grade: b.ewg_grade || 'N/A',
+      transparency: b.transparency_note || 'Limited transparency',
+      risk_score: b.generosity_score || 50,
+      key_concern: b.key_concern || '',
+      wtr_hub_statement: b.vs_hub_headline || 'Home WTR Hub removes the contaminants found in this bottled water.',
+      generosity_score: b.generosity_score,
+      generosity_grade: b.generosity_grade,
+      pfas_result_category: b.pfas_result_category,
+      primary_material: b.primary_material,
+      price_per_liter_usd: b.price_per_liter_usd,
+      brand_website: b.brand_website,
+      hub_removes_concerns: hubRemoves,
+      _fromApi: true,
+    };
   }
 
   function selectBrand(brandName) {
@@ -1378,33 +1456,7 @@ export default function BottleScanView({ onBridge }) {
         const checkApi = () => {
           if (!apiDone) { setTimeout(checkApi, 100); return; }
           if (apiResult && (apiResult.found || apiResult.brand_name)) {
-            const b = apiResult;
-            setBrand({
-              name: b.brand_name || brandName,
-              parent: b.parent_company,
-              sourceType: b.source_type,
-              sourceName: b.source_location || b.source_description || '',
-              ph: b.ph_level,
-              tds_ppm: b.tds_ppm,
-              reportYear: b.last_verified || '2026',
-              generosity_score: b.generosity_score,
-              generosity_grade: b.generosity_grade,
-              pfas_result_category: b.pfas_result_category,
-              pfas_notes: b.pfas_notes,
-              pfas_max_detected_ppt: b.pfas_max_detected_ppt,
-              primary_material: b.primary_material,
-              is_bpa_free: b.is_bpa_free,
-              has_antimony_risk: b.has_antimony_risk,
-              microplastic_risk_level: b.microplastic_risk_level,
-              microplastics_particles_per_liter: b.microplastics_particles_per_liter,
-              vs_hub_headline: b.vs_hub_headline,
-              hub_removes_concerns: b.hub_removes_concerns,
-              price_per_liter_usd: b.price_per_liter_usd,
-              brand_website: b.brand_website,
-              test_results: b.test_results || [],
-              contaminants: buildContaminantsFromApi(b),
-              _fromApi: true,
-            });
+            setBrand(mapApiBrandToReport(apiResult));
             setMode("result");
           } else if (BOTTLE_BRANDS[brandName]) {
             // Local fallback
