@@ -30,6 +30,45 @@ const SORT_OPTIONS = [
   { key: 'name',    label: 'Name A–Z' },
 ];
 
+/**
+ * Formats a contaminant measurement value for display.
+ * Converts scientific notation to readable decimals with 2 sig figs max.
+ * Examples:
+ *   7.2e-11  → "< 0.01 ppt"  (too small to display meaningfully)
+ *   0.00024  → "0.00024"
+ *   1.234567 → "1.23"
+ *   1200000  → "1,200,000"
+ */
+function formatContaminantValue(value, unit) {
+  if (value == null || value === '' || isNaN(value)) return '—';
+
+  const num = parseFloat(value);
+  if (isNaN(num)) return '—';
+
+  let formatted;
+
+  if (num === 0) {
+    formatted = '0';
+  } else if (Math.abs(num) < 0.0001) {
+    // Values this small are effectively trace — show as < 0.0001
+    formatted = '< 0.0001';
+  } else if (Math.abs(num) < 0.01) {
+    // Show up to 4 decimal places for small values
+    formatted = num.toPrecision(2);
+  } else if (Math.abs(num) < 1) {
+    // Show up to 4 decimal places
+    formatted = parseFloat(num.toFixed(4)).toString();
+  } else if (Math.abs(num) < 1000) {
+    // Show up to 2 decimal places
+    formatted = parseFloat(num.toFixed(2)).toString();
+  } else {
+    // Large numbers — use locale formatting, no decimals
+    formatted = num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  return unit ? `${formatted} ${unit}` : formatted;
+}
+
 export default function ContaminantTable({ contaminants = [], onContaminantClick }) {
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortBy, setSortBy]             = useState('risk');
@@ -194,17 +233,17 @@ function ContaminantRow({ contaminant: c, isExpanded, onToggle, onClick }) {
           </div>
         </div>
 
-        {/* Detected level */}
+        {/* Detected level — formatted */}
         <div style={{ flex: 1.5, textAlign: 'right' }}>
           <span style={styles.valueText}>
-            {c.detected != null ? `${c.detected} ${c.unit || ''}` : '—'}
+            {formatContaminantValue(c.detected, c.unit)}
           </span>
         </div>
 
-        {/* EWG guideline */}
+        {/* EWG guideline — formatted */}
         <div style={{ flex: 1.5, textAlign: 'right' }}>
           <span style={styles.guidelineText}>
-            {c.ewgGuideline != null ? `${c.ewgGuideline} ${c.unit || ''}` : '—'}
+            {formatContaminantValue(c.ewgGuideline, c.unit)}
           </span>
         </div>
 
