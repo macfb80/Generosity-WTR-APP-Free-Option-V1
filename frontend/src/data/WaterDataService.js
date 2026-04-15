@@ -149,6 +149,40 @@ export async function getRemoteConfig() {
 
 
 // ══════════════════════════════════════════════════════════════════════
+// NUMBER FORMATTING
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Format a raw contaminant measurement for display.
+ * Eliminates scientific notation and excessive decimal places.
+ *
+ * Examples:
+ *   7.2e-11   → "< 0.0001"
+ *   0.0032    → "0.0032"
+ *   1.234567  → "1.23"
+ *   1200000   → "1,200,000"
+ *   null/NaN  → null  (preserved so components can show "—")
+ */
+export function formatMeasurement(value) {
+  if (value == null || value === '') return null;
+  const num = parseFloat(value);
+  if (isNaN(num)) return null;
+
+  if (num === 0) return '0';
+
+  const abs = Math.abs(num);
+
+  if (abs < 0.0001) return '< 0.0001';
+  if (abs < 0.001)  return parseFloat(num.toFixed(4)).toString();
+  if (abs < 0.01)   return parseFloat(num.toFixed(4)).toString();
+  if (abs < 1)      return parseFloat(num.toFixed(4)).toString();
+  if (abs < 1000)   return parseFloat(num.toFixed(2)).toString();
+
+  return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
 // TRANSFORM: API response → UI shape
 // ══════════════════════════════════════════════════════════════════════
 
@@ -163,7 +197,7 @@ export function transformReportForUI(apiReport) {
   return {
     // Identity
     pwsid,
-    city:            utility_name,    // backwards compat with existing component refs
+    city:            utility_name,
     utilityName:     utility_name,
     zip,
     primarySource:   primary_source,
@@ -183,12 +217,12 @@ export function transformReportForUI(apiReport) {
       group:          c.group,
       icon:           c.icon || 'warn',
       riskColor:      c.risk_color || 'orange',
-      riskLevel:      c.risk_color || 'orange',  // alias
-      detected:       c.concentration,
+      riskLevel:      c.risk_color || 'orange',
+      detected:       formatMeasurement(c.concentration),  // ← FORMATTED
       unit:           c.unit,
       sampleDate:     c.sample_date,
       epaMcl:         c.epa_mcl,
-      ewgGuideline:   c.ewg_guideline,
+      ewgGuideline:   formatMeasurement(c.ewg_guideline),  // ← FORMATTED
       mclExceedance:  c.mcl_exceedance,
       ewgExceedance:  c.ewg_exceedance,
       exceedsMcl:     c.exceeds_mcl,
@@ -231,7 +265,7 @@ export function transformReportForUI(apiReport) {
     lead: lead_copper ? {
       ppb90th:          lead_copper.lead_ppb_90th,
       exceedsAction:    lead_copper.lead_exceeds_action,
-      safeForChildren:  false,  // ALWAYS false
+      safeForChildren:  false,
       note:             lead_copper.lead_note,
       sampleYear:       lead_copper.lead_sample_year,
     } : null,
@@ -299,7 +333,6 @@ export function transformReportForUI(apiReport) {
 
 /**
  * Sanitize user input — strip HTML, limit length.
- * REPLACES the raw input pass-through that enabled GENERIC_DATA abuse.
  */
 export function sanitizeInput(raw, stripPattern = /[<>"'`;]/g) {
   if (!raw || typeof raw !== 'string') return '';
