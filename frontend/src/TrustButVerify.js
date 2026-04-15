@@ -16,7 +16,7 @@ function transformOracleReport(report, cityLabel, zip) {
       if (isNaN(n)) return null;
       const abs = Math.abs(n);
       if (n === 0) return '0';
-      if (abs < 0.0001) return '< 0.0001';
+      if (abs < 0.0001) return 'Trace';
       if (abs < 0.01)   return parseFloat(n.toFixed(4)).toString();
       if (abs < 1)      return parseFloat(n.toFixed(4)).toString();
       if (abs < 1000)   return parseFloat(n.toFixed(2)).toString();
