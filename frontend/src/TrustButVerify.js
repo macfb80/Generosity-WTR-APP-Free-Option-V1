@@ -5,6 +5,7 @@ import WTRBottleScreen from "./components/WTRBottleScreen";
 import WTRHubScreen from "./components/WTRHubScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import { requestPushPermission, isPushSupported, registerServiceWorker } from './push';
+import { transformReportForUI } from './data/WaterDataService';
 
 // ─── GENEROSITY™ OFFICIAL BRAND PALETTE (Updated) ────────────────────────────
 // White background (#FFFFFF) - clean, professional look
@@ -960,7 +961,8 @@ export default function TrustButVerify(){
                 if(report && report.utility && report.status !== 'not_found'){
                   // Build city label from report data
                   const cityLabel = `${report.utility} · ${zipMatch[0]}`;
-                  setData({...report, city: cityLabel, zip: zipMatch[0]});
+                  const transformed = transformReportForUI(report);
+setData({...transformed, city: cityLabel, zip: zipMatch[0]});
                   setPhase("results");
                   setTab("wtr-intel");
                   trackEvent('scan_completed', { city: cityLabel, zip: zipMatch[0], risk_score: getRiskScore(report.contaminants), contaminant_count: report.contaminants?.length, source:'wtr-oracle' });
