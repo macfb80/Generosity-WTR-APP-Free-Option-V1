@@ -5,34 +5,28 @@ import Input from '../ds/Input';
 import Icon from '../ds/Icon';
 
 /**
- * MonthlyReportModal — bottom-sheet modal for monthly water report opt-in.
+ * MonthlyReportModal - bottom-sheet modal for monthly water report opt-in.
  *
  * Two screens controlled by `screen` prop:
  *   - "form"    : email + ZIP entry, submit triggers double opt-in
  *   - "success" : confirmation that email was sent
  *
- * The parent component (TrustButVerify.js) owns:
- *   - All form state (email, zip, errors, submitting)
- *   - The submit handler (which makes the API call)
- *   - The status sync via /api/water-report/status
- *   - localStorage persistence
- *
- * This component is a controlled UI surface only.
+ * Parent owns all form state and submission logic.
  *
  * Props:
- *   open                 (bool)        Whether sheet is open
- *   onClose              (fn)          Close handler
- *   screen               (string)      "form" | "success"
- *   email                (string)      Controlled email value
- *   onEmailChange        (fn)          Email change handler
- *   emailError           (string)      Email error message
- *   zip                  (string)      Controlled ZIP value
- *   onZipChange          (fn)          ZIP change handler
- *   zipError             (string)      ZIP error message
- *   submitting           (bool)        Is submission in flight
- *   submitError          (string)      Top-level submission error
- *   onSubmit             (fn)          Submit handler
- *   cityShort            (string)      City name (without state) for copy interpolation
+ *   open                 (bool)
+ *   onClose              (fn)
+ *   screen               (string)     "form" | "success"
+ *   email                (string)
+ *   onEmailChange        (fn)
+ *   emailError           (string)
+ *   zip                  (string)
+ *   onZipChange          (fn)
+ *   zipError             (string)
+ *   submitting           (bool)
+ *   submitError          (string)
+ *   onSubmit             (fn)
+ *   cityShort            (string)
  */
 export default function MonthlyReportModal({
   open,
@@ -88,6 +82,38 @@ function FormScreen({
   onSubmit,
   cityShort,
 }) {
+  const valueProps = [
+    {
+      iconNode: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M12 2C12 2 6 10 6 14a6 6 0 0012 0c0-4-6-12-6-12z" />
+        </svg>
+      ),
+      text: `Local water quality data for ${cityShort || 'your area'}`,
+    },
+    {
+      iconNode: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M12 2L2 22h20L12 2z" />
+          <line x1="12" y1="9" x2="12" y2="15" />
+          <circle cx="12" cy="18" r="0.5" fill="currentColor" />
+        </svg>
+      ),
+      text: 'Contaminant alerts and health guideline updates',
+    },
+    {
+      iconNode: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="2" y="3" width="20" height="18" rx="2" />
+          <line x1="6" y1="8" x2="18" y2="8" />
+          <line x1="6" y1="12" x2="14" y2="12" />
+          <line x1="6" y1="16" x2="10" y2="16" />
+        </svg>
+      ),
+      text: 'Recent news and advisories for your water utility',
+    },
+  ];
+
   return (
     <div>
       {/* Header */}
@@ -115,41 +141,11 @@ function FormScreen({
 
       {/* Value props */}
       <div className="bg-surface-inset rounded-card p-4 mb-5">
-        {[
-          {
-            iconNode: (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M12 2C12 2 6 10 6 14a6 6 0 0012 0c0-4-6-12-6-12z" />
-              </svg>
-            ),
-            text: `Local water quality data for ${cityShort || 'your area'}`,
-          },
-          {
-            iconNode: (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M12 2L2 22h20L12 2z" />
-                <line x1="12" y1="9" x2="12" y2="15" />
-                <circle cx="12" cy="18" r="0.5" fill="currentColor" />
-              </svg>
-            ),
-            text: 'Contaminant alerts and health guideline updates',
-          },
-          {
-            iconNode: (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="2" y="3" width="20" height="18" rx="2" />
-                <line x1="6" y1="8" x2="18" y2="8" />
-                <line x1="6" y1="12" x2="14" y2="12" />
-                <line x1="6" y1="16" x2="10" y2="16" />
-              </svg>
-            ),
-            text: 'Recent news and advisories for your water utility',
-          },
-        ].map((vp, i) => (
+        {valueProps.map((vp, i) => (
           <div
             key={i}
             className="flex items-start gap-2.5"
-            style={{ marginBottom: i < 2 ? 10 : 0 }}
+            style={{ marginBottom: i < valueProps.length - 1 ? 10 : 0 }}
           >
             <span
               className="shrink-0 text-text-secondary"
@@ -222,15 +218,7 @@ function FormScreen({
         onClick={onSubmit}
         disabled={submitting}
         data-testid="report-submit-btn"
-        className={`
-          w-full h-14
-          bg-brand text-text-onAccent
-          font-semibold text-body
-          rounded-card border-none
-          flex items-center justify-center gap-2
-          transition-all duration-200 ease-standard
-          ${submitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-brand-hover'}
-        `}
+        className={`w-full h-14 bg-brand text-text-onAccent font-semibold text-body rounded-card border-none flex items-center justify-center gap-2 transition-all duration-200 ease-standard ${submitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-brand-hover'}`}
       >
         {submitting ? (
           'Sending...'
@@ -260,8 +248,8 @@ function FormScreen({
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
         </svg>
         <div className="text-caption text-text-tertiary leading-relaxed">
-          By tapping "Get My Monthly Report" you enroll in the Generosity™ Monthly Water Intelligence Report, delivered the 1st of each month. Unsubscribe anytime. We never sell your email.{' '}
-          
+          By tapping "Get My Monthly Report" you enroll in the Generosity Monthly Water Intelligence Report, delivered the 1st of each month. Unsubscribe anytime. We never sell your email.{' '}
+          <a
             href="https://generositywater.com/privacy"
             target="_blank"
             rel="noopener noreferrer"
@@ -341,15 +329,7 @@ function SuccessScreen({ email, cityShort, onClose }) {
       <button
         type="button"
         onClick={onClose}
-        className="
-          w-full h-14
-          bg-text-primary text-text-onAccent
-          font-semibold text-body
-          rounded-card border-none
-          cursor-pointer
-          transition-opacity duration-200 ease-standard
-          hover:opacity-90
-        "
+        className="w-full h-14 bg-text-primary text-text-onAccent font-semibold text-body rounded-card border-none cursor-pointer transition-opacity duration-200 ease-standard hover:opacity-90"
       >
         Got It
       </button>
