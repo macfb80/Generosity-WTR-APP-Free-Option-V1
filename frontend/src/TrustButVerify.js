@@ -1244,12 +1244,11 @@ export default function TrustButVerify(){
                 ))}
                 <HeroCard
                   className="mt-2"
-                  eyebrow=""
                   title="Knowledge is only useful if you act on it."
                   subtitle="The Home WTR Hub removes everything in this library. 1,000+ contaminants."
                 >
                   
-                    href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=learn-tab&utm_campaign=knowledge-cta&discount=WELCOME100`}
+                    href="https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=learn-tab&utm_campaign=knowledge-cta&discount=WELCOME100"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full bg-brand text-text-onAccent text-center font-semibold rounded-card no-underline"
