@@ -2,33 +2,211 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Generosity™ WTR APP — Design System v1.0
+  ------------------------------------------------------------------
+  This file defines:
+  1. Root CSS variables (shadcn-compatible HSL tokens for component lib)
+  2. Base typography and body styles
+  3. Drop-pattern utility for empty/loading states (brand asset from packaging)
+  4. Focus-visible accessibility styles
+  5. Tabular figures for numerical data alignment
+
+  Brand palette source of truth: /tailwind.config.js
+  Do not introduce hex values here. Reference Tailwind tokens via @apply
+  or use the CSS variables below.
+*/
+
 @layer base {
   :root {
-    --radius: 0.5rem;
+    /* Border radius — referenced by shadcn components and Tailwind config */
+    --radius: 0.75rem;
+
+    /* shadcn-compatible HSL theme variables.
+       These are the canonical tokens shadcn components expect.
+       Values converted from our brand palette to HSL.
+       Keep these in sync with tailwind.config.js color values. */
+
+    --background: 220 20% 97%;          /* #F7F8FA */
+    --foreground: 215 25% 8%;           /* #0F1419 */
+
+    --card: 0 0% 100%;                  /* #FFFFFF */
+    --card-foreground: 215 25% 8%;      /* #0F1419 */
+
+    --popover: 0 0% 100%;               /* #FFFFFF */
+    --popover-foreground: 215 25% 8%;   /* #0F1419 */
+
+    --primary: 202 75% 61%;             /* #51B0E6 */
+    --primary-foreground: 0 0% 100%;    /* #FFFFFF */
+
+    --secondary: 220 9% 95%;            /* #F0F1F3 */
+    --secondary-foreground: 215 25% 8%; /* #0F1419 */
+
+    --muted: 220 9% 95%;                /* #F0F1F3 */
+    --muted-foreground: 215 5% 56%;     /* #8A8E93 */
+
+    --accent: 202 75% 95%;              /* #E8F4FB — brand subtle */
+    --accent-foreground: 215 25% 8%;    /* #0F1419 */
+
+    --destructive: 0 43% 51%;           /* #B84A4A */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --border: 220 9% 91%;               /* #E8EAED */
+    --input: 220 9% 91%;                /* #E8EAED */
+    --ring: 202 75% 61%;                /* #51B0E6 */
+
+    /* Semantic state HSL — for utility classes if needed */
+    --state-positive: 152 30% 42%;      /* #4A8A6F */
+    --state-attention: 40 56% 51%;      /* #C89B3C */
+    --state-critical: 0 43% 51%;        /* #B84A4A */
+  }
+
+  /* Universal box-sizing */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Base body styles
+     Background, text color, and font come from design system.
+     Tabular figures default ON for the entire app — every numeral aligns. */
+  body {
+    margin: 0;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: 'tnum' 1, 'cv11' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    /* Respect iPhone notch and home indicator */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Display type uses Barlow Condensed.
+     Apply via Tailwind font-display class on hero numerals and screen titles. */
+  .font-display,
+  h1.font-display,
+  h2.font-display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Code samples — kept lightweight since this app rarely shows code.
+     Falls back to system mono if needed. */
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  /* Focus-visible accessibility ring.
+     Applied to any interactive element receiving keyboard focus.
+     Two-color ring (white inner, brand outer) reads on any background. */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #51B0E6;
+    border-radius: 4px;
+  }
+
+  /* Disable focus ring on mouse-only interactions */
+  :focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+
+  /* Reduced motion respect — pauses LED pulse and softens transitions */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  margin: 0;
-  font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #FFFFFF;
-  color: #1A1A1A;
-  overflow-x: hidden;
+@layer components {
+  /*
+    Drop-pattern utility — brand asset from WTR HUB packaging interior.
+    Use ONLY on empty states and loading states per locked design decision.
+    Apply: <div className="bg-drop-pattern">...</div>
+
+    The pattern is a placeholder radial gradient until the real SVG asset
+    is extracted from packaging artwork (action item: vectorize box interior).
+    When the SVG is ready, replace the background-image URL below.
+  */
+  .bg-drop-pattern {
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(81, 176, 230, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(81, 176, 230, 0.03) 0%, transparent 50%);
+    background-size: 200px 200px, 240px 240px;
+    background-position: 0 0, 100px 100px;
+  }
+
+  /*
+    Skeleton shimmer for loading states.
+    Use: <div className="skeleton h-4 w-32 rounded" />
+  */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--background)) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /*
+    LED-glow utility for live-data cards (Phase 2 hardware pairing).
+    Apply: <div className="card-led-active">...</div>
+    For Phase 1, this is unused but pre-built so Phase 2 components inherit cleanly.
+  */
+  .card-led-rest {
+    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.04), 0 0 0 4px rgba(81, 176, 230, 0.20);
+  }
+
+  .card-led-active {
+    animation: led-pulse 2400ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+  }
 }
 
-code {
-  font-family: 'Chivo Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+@layer utilities {
+  /*
+    Tabular figures override — apply when a specific element should use
+    proportional figures instead of the global tabular default.
+    Rare. Most numerical data should stay tabular for alignment.
+  */
+  .figures-proportional {
+    font-feature-settings: 'tnum' 0;
+  }
 
-* {
-  box-sizing: border-box;
-}
-
-#root {
-  min-height: 100vh;
+  /*
+    Confidence dot indicators per Generosity OS protocol.
+    Use: <span className="confidence-dot confidence-verified" />
+  */
+  .confidence-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .confidence-verified      { background-color: #4A8A6F; }
+  .confidence-corroborated  { background-color: #51B0E6; }
+  .confidence-developing    { background-color: #C89B3C; }
+  .confidence-hypothesis {
+    background-color: transparent;
+    border: 1px solid #8A8E93;
+    width: 5px;
+    height: 5px;
+  }
 }
