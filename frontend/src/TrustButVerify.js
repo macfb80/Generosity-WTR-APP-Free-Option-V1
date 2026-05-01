@@ -20,7 +20,7 @@ import HealthCalc from "./components/tbv/HealthCalc";
 import MonthlyReportModal from "./components/tbv/MonthlyReportModal";
 import FounderLoginModal from "./components/tbv/FounderLoginModal";
 
-// ─── ORACLE REPORT TRANSFORM ─────────────────────────────────────────────────
+// --- ORACLE REPORT TRANSFORM -------------------------------------------------
 function transformOracleReport(report, cityLabel, zip) {
   const contaminants = (report.contaminants || []).map(c => {
     function fmtNum(val) {
@@ -89,8 +89,8 @@ function transformOracleReport(report, cityLabel, zip) {
   };
 }
 
-// ─── BOTTLE BRANDS DATA ─────────────────────────────────────────────────────
-// Preserved verbatim from prior version. Used by BottleScanView via service.
+// --- BOTTLE BRANDS DATA -----------------------------------------------------
+// eslint-disable-next-line no-unused-vars
 const BOTTLE_BRANDS = {
   "Evian":{ origin:"French Alps", tds:345, ph:7.2, fluoride:0.1, microplastics:"HIGH", pfas_risk:"MEDIUM", score:62, concern:"High TDS. Microplastic contamination in independent testing.", manufacturer:"Danone S.A.", source_type:"Natural mineral water" },
   "Dasani":{ origin:"Municipal tap (filtered)", tds:38, ph:5.6, fluoride:0.07, microplastics:"VERY HIGH", pfas_risk:"HIGH", score:78, concern:"Acidic pH 5.6, PFAS-lined packaging, highest microplastic count in 2023 Orb Media study.", manufacturer:"The Coca-Cola Company", source_type:"Purified water" },
@@ -99,10 +99,10 @@ const BOTTLE_BRANDS = {
   "Fiji Water":{ origin:"Artesian aquifer, Fiji", tds:222, ph:7.7, fluoride:0.2, microplastics:"MEDIUM", pfas_risk:"LOW", score:38, concern:"Arsenic near WHO limits. 18,000-mile carbon footprint.", manufacturer:"The Wonderful Company", source_type:"Artesian water" },
   "Smart Water":{ origin:"Municipal tap (distilled)", tds:24, ph:7.0, fluoride:0.0, microplastics:"MEDIUM", pfas_risk:"MEDIUM", score:44, concern:"No natural minerals. Electrolytes added post-distillation.", manufacturer:"The Coca-Cola Company", source_type:"Vapor distilled" },
   "Voss":{ origin:"Artesian aquifer, Norway", tds:44, ph:6.0, fluoride:0.0, microplastics:"LOW", pfas_risk:"LOW", score:29, concern:"Slightly acidic. Glass bottle option recommended.", manufacturer:"Voss of Norway ASA", source_type:"Artesian water" },
-  "Nestlé Pure Life":{ origin:"Municipal tap (filtered)", tds:45, ph:6.8, fluoride:0.08, microplastics:"HIGH", pfas_risk:"MEDIUM", score:58, concern:"Multiple source locations with varying quality. Now owned by BlueTriton.", manufacturer:"BlueTriton Brands", source_type:"Purified water" },
+  "Nestle Pure Life":{ origin:"Municipal tap (filtered)", tds:45, ph:6.8, fluoride:0.08, microplastics:"HIGH", pfas_risk:"MEDIUM", score:58, concern:"Multiple source locations with varying quality. Now owned by BlueTriton.", manufacturer:"BlueTriton Brands", source_type:"Purified water" },
   "Arrowhead":{ origin:"California springs", tds:190, ph:7.8, fluoride:0.1, microplastics:"MEDIUM", pfas_risk:"MEDIUM", score:48, concern:"High arsenic levels reported in some batches. Water rights controversy.", manufacturer:"BlueTriton Brands", source_type:"Mountain spring water" },
   "Crystal Geyser":{ origin:"Natural springs (CA/TN)", tds:95, ph:6.9, fluoride:0.1, microplastics:"MEDIUM", pfas_risk:"LOW", score:35, concern:"Arsenic violations in 2018. Bottled at multiple springs.", manufacturer:"CG Roxane LLC", source_type:"Natural alpine spring" },
-  "Deer Park":{ origin:"Mid-Atlantic springs", tds:52, ph:6.6, fluoride:0.04, microplastics:"HIGH", pfas_risk:"MEDIUM", score:52, concern:"Slightly acidic. Owned by Nestlé until 2021.", manufacturer:"BlueTriton Brands", source_type:"Spring water" },
+  "Deer Park":{ origin:"Mid-Atlantic springs", tds:52, ph:6.6, fluoride:0.04, microplastics:"HIGH", pfas_risk:"MEDIUM", score:52, concern:"Slightly acidic. Owned by Nestle until 2021.", manufacturer:"BlueTriton Brands", source_type:"Spring water" },
   "Ice Mountain":{ origin:"Great Lakes region springs", tds:35, ph:7.4, fluoride:0.02, microplastics:"HIGH", pfas_risk:"MEDIUM", score:50, concern:"Water extraction controversy in Michigan.", manufacturer:"BlueTriton Brands", source_type:"Spring water" },
   "Ozarka":{ origin:"Texas springs", tds:200, ph:7.5, fluoride:0.15, microplastics:"HIGH", pfas_risk:"MEDIUM", score:54, concern:"Higher mineral content. Regional Texas brand.", manufacturer:"BlueTriton Brands", source_type:"Spring water" },
   "Zephyrhills":{ origin:"Florida springs", tds:180, ph:7.7, fluoride:0.06, microplastics:"MEDIUM", pfas_risk:"MEDIUM", score:45, concern:"Florida aquifer source. Moderate mineral content.", manufacturer:"BlueTriton Brands", source_type:"Spring water" },
@@ -112,13 +112,14 @@ const BOTTLE_BRANDS = {
   "Propel":{ origin:"Municipal tap (filtered)", tds:30, ph:3.5, fluoride:0.0, microplastics:"MEDIUM", pfas_risk:"MEDIUM", score:65, concern:"Very acidic pH 3.5. Contains artificial sweeteners.", manufacturer:"PepsiCo Inc.", source_type:"Flavored fitness water" },
   "Hint":{ origin:"Municipal tap (filtered)", tds:12, ph:6.5, fluoride:0.0, microplastics:"MEDIUM", pfas_risk:"LOW", score:40, concern:"Fruit-infused purified water. Natural flavors only.", manufacturer:"Hint Inc.", source_type:"Fruit-infused water" },
   "La Croix":{ origin:"Municipal tap (carbonated)", tds:5, ph:4.5, fluoride:0.0, microplastics:"LOW", pfas_risk:"LOW", score:38, concern:"Sparkling water. Acidic due to carbonation. May affect tooth enamel.", manufacturer:"National Beverage Corp.", source_type:"Sparkling water" },
-  "Perrier":{ origin:"Vergèze, France", tds:475, ph:5.5, fluoride:0.1, microplastics:"LOW", pfas_risk:"LOW", score:36, concern:"Natural carbonation. High mineral content. Slightly acidic.", manufacturer:"Nestlé Waters", source_type:"Sparkling natural mineral" },
-  "San Pellegrino":{ origin:"San Pellegrino Terme, Italy", tds:950, ph:7.7, fluoride:0.4, microplastics:"LOW", pfas_risk:"LOW", score:33, concern:"Very high TDS. Not recommended for daily hydration.", manufacturer:"Nestlé Waters", source_type:"Sparkling natural mineral" },
+  "Perrier":{ origin:"Vergeze, France", tds:475, ph:5.5, fluoride:0.1, microplastics:"LOW", pfas_risk:"LOW", score:36, concern:"Natural carbonation. High mineral content. Slightly acidic.", manufacturer:"Nestle Waters", source_type:"Sparkling natural mineral" },
+  "San Pellegrino":{ origin:"San Pellegrino Terme, Italy", tds:950, ph:7.7, fluoride:0.4, microplastics:"LOW", pfas_risk:"LOW", score:33, concern:"Very high TDS. Not recommended for daily hydration.", manufacturer:"Nestle Waters", source_type:"Sparkling natural mineral" },
   "Mountain Valley":{ origin:"Arkansas springs", tds:220, ph:7.8, fluoride:0.1, microplastics:"LOW", pfas_risk:"LOW", score:28, concern:"Premium spring water. Glass bottles available. Low contamination.", manufacturer:"Mountain Valley Spring Co.", source_type:"Spring water" },
-  "Icelandic Glacial":{ origin:"Ölfus Spring, Iceland", tds:62, ph:8.4, fluoride:0.0, microplastics:"LOW", pfas_risk:"LOW", score:25, concern:"Naturally alkaline. One of the purest commercial waters.", manufacturer:"Icelandic Glacial Inc.", source_type:"Natural spring water" },
+  "Icelandic Glacial":{ origin:"Olfus Spring, Iceland", tds:62, ph:8.4, fluoride:0.0, microplastics:"LOW", pfas_risk:"LOW", score:25, concern:"Naturally alkaline. One of the purest commercial waters.", manufacturer:"Icelandic Glacial Inc.", source_type:"Natural spring water" },
 };
 
-// ─── UPC BARCODE DATABASE ────────────────────────────────────────────────────
+// --- UPC BARCODE DATABASE ----------------------------------------------------
+// eslint-disable-next-line no-unused-vars
 const UPC_DATABASE = {
   "049000006346": "Dasani", "049000028904": "Dasani", "049000028911": "Dasani",
   "049000006360": "Dasani", "049000042726": "Dasani", "049000072112": "Dasani",
@@ -134,8 +135,8 @@ const UPC_DATABASE = {
   "786162002594": "Smart Water", "786162375100": "Smart Water", "786162002600": "Smart Water",
   "896716001005": "Voss", "896716001012": "Voss", "896716001029": "Voss",
   "896716001036": "Voss", "896716002002": "Voss", "896716002019": "Voss",
-  "068274540011": "Nestlé Pure Life", "068274540028": "Nestlé Pure Life", "068274540103": "Nestlé Pure Life",
-  "068274540219": "Nestlé Pure Life", "068274348846": "Nestlé Pure Life", "068274541018": "Nestlé Pure Life",
+  "068274540011": "Nestle Pure Life", "068274540028": "Nestle Pure Life", "068274540103": "Nestle Pure Life",
+  "068274540219": "Nestle Pure Life", "068274348846": "Nestle Pure Life", "068274541018": "Nestle Pure Life",
   "071142000109": "Arrowhead", "071142000116": "Arrowhead", "071142000123": "Arrowhead",
   "071142000154": "Arrowhead", "071142006231": "Arrowhead", "071142006248": "Arrowhead",
   "654871100019": "Crystal Geyser", "654871100026": "Crystal Geyser", "654871100033": "Crystal Geyser",
@@ -148,9 +149,9 @@ const UPC_DATABASE = {
   "068274102301": "Ozarka", "068274102318": "Ozarka", "068274102325": "Ozarka",
   "073430000018": "Zephyrhills", "073430000025": "Zephyrhills", "073430000032": "Zephyrhills",
   "073430000308": "Zephyrhills", "073430000315": "Zephyrhills", "073430000322": "Zephyrhills",
-  "851icons7000019": "Essentia", "851167000026": "Essentia", "851167000033": "Essentia",
+  "851167000019": "Essentia", "851167000026": "Essentia", "851167000033": "Essentia",
   "851167000101": "Essentia", "851167000118": "Essentia", "851167000125": "Essentia",
-  "851icons0000109": "Core", "851750000116": "Core", "851750000123": "Core",
+  "851750000109": "Core", "851750000116": "Core", "851750000123": "Core",
   "851750000208": "Core", "851750000215": "Core", "851750000222": "Core",
   "012000172410": "Lifewtr", "012000172427": "Lifewtr", "012000172434": "Lifewtr",
   "012000172441": "Lifewtr", "012000172458": "Lifewtr", "012000172465": "Lifewtr",
@@ -165,10 +166,10 @@ const UPC_DATABASE = {
   "041508800013": "San Pellegrino", "041508800020": "San Pellegrino", "041508800037": "San Pellegrino",
   "041508800105": "San Pellegrino", "041508800112": "San Pellegrino", "041508800129": "San Pellegrino",
   "07464400001": "Mountain Valley", "074644000028": "Mountain Valley", "074644000035": "Mountain Valley",
-  "893icons7000014": "Icelandic Glacial", "893147000021": "Icelandic Glacial", "893147000038": "Icelandic Glacial",
+  "893147000014": "Icelandic Glacial", "893147000021": "Icelandic Glacial", "893147000038": "Icelandic Glacial",
 };
 
-// ─── CITY WATER DATA ─────────────────────────────────────────────────────────
+// --- CITY WATER DATA ---------------------------------------------------------
 const CITY_DATA = {
   "Austin, TX":{ utility:"Austin Water", source:"Colorado River / Barton Springs", tds:312, ph:7.8, hardness:"Moderate (142 mg/L)", contaminants:[
     {name:"Chromium-6",level:0.22,limit:0.10,unit:"ppb",risk:"high",category:"Heavy Metal",detail:"Known carcinogen. Exceeds CA health goal by 11x.",removed:true},
@@ -217,7 +218,7 @@ const CITY_DATA = {
   ]},
 };
 
-// ─── ZIP CODE MAPPING ────────────────────────────────────────────────────────
+// --- ZIP CODE MAPPING --------------------------------------------------------
 const ZIP_MAP = {
   "78701":"Austin, TX","78702":"Austin, TX","78703":"Austin, TX",
   "60601":"Chicago, IL","60602":"Chicago, IL","60603":"Chicago, IL","60604":"Chicago, IL","60605":"Chicago, IL","60606":"Chicago, IL",
@@ -228,7 +229,7 @@ const ZIP_MAP = {
   "85001":"Phoenix, AZ","85002":"Phoenix, AZ","85003":"Phoenix, AZ"
 };
 
-// ─── UTILITY FUNCTIONS ───────────────────────────────────────────────────────
+// --- UTILITY FUNCTIONS -------------------------------------------------------
 function getRiskScore(c){
   if(!c)return 0;
   return Math.min(100,c.filter(x=>x.risk==="high").length*22+c.filter(x=>x.risk==="medium").length*11+10);
@@ -252,7 +253,10 @@ function trackEvent(eventName, properties = {}) {
 const API_BASE = 'https://generosity-sales-engine-mvp-api.onrender.com';
 const API_BEARER = 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102';
 
-// ─── MAIN APP COMPONENT ──────────────────────────────────────────────────────
+const ARROW = '\u2192';
+const TRADEMARK = '\u2122';
+
+// --- MAIN APP COMPONENT ------------------------------------------------------
 export default function TrustButVerify(){
   const [tab,setTab]=useState("tbv");
   const [phase,setPhase]=useState("landing");
@@ -274,18 +278,34 @@ export default function TrustButVerify(){
   const [founderPinError,setFounderPinError]=useState('');
   const founderLongPressRef=useRef(null);
   const FOUNDER_PIN='0808';
+
   function handleFounderLogin(pin){
     const checkPin = pin || founderPin;
-    if(checkPin===FOUNDER_PIN){setFounderMode(true);setShowFounderLogin(false);setFounderPin('');setFounderPinError('');try{localStorage.setItem('wtr_founder_mode','true');}catch(e){}trackEvent('founder_mode_activated');}
-    else{setFounderPinError('Invalid PIN');setFounderPin('');}
+    if(checkPin===FOUNDER_PIN){
+      setFounderMode(true);
+      setShowFounderLogin(false);
+      setFounderPin('');
+      setFounderPinError('');
+      try{localStorage.setItem('wtr_founder_mode','true');}catch(e){}
+      trackEvent('founder_mode_activated');
+    } else {
+      setFounderPinError('Invalid PIN');
+      setFounderPin('');
+    }
   }
-  function handleFounderLogout(){setFounderMode(false);setTab('tbv');try{localStorage.removeItem('wtr_founder_mode');}catch(e){}}
+
+  function handleFounderLogout(){
+    setFounderMode(false);
+    setTab('tbv');
+    try{localStorage.removeItem('wtr_founder_mode');}catch(e){}
+  }
 
   const [inputError, setInputError] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [engagementPhase, setEngagementPhase] = useState("idle");
   const [householdProfile, setHouseholdProfile] = useState({ has_children: null, is_pregnant: null, has_filter: null });
+  // eslint-disable-next-line no-unused-vars
   const [pushResult, setPushResult] = useState(null);
   const [capturedProspectId, setCapturedProspectId] = useState(null);
 
@@ -304,7 +324,6 @@ export default function TrustButVerify(){
 
   useEffect(() => { registerServiceWorker(); }, []);
 
-  // Cross-component navigation event listener
   useEffect(() => {
     const handler = (e) => {
       const { tab: targetTab, scan } = e.detail || {};
@@ -316,10 +335,9 @@ export default function TrustButVerify(){
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const REPORT_CONSENT_TEXT = 'By submitting your email, you agree to receive a free Monthly Water Intelligence Report from Generosity\u2122 Water based on your zip code. Your report is generated by the Generosity\u2122 Water Intelligence Engine (WIQ\u2122) and includes local water quality data, contaminant alerts, and relevant news for your area. You can unsubscribe at any time by clicking the unsubscribe link in any email. We do not sell your email address. View our Privacy Policy at generositywater.com/privacy.';
+  const REPORT_CONSENT_TEXT = 'By submitting your email, you agree to receive a free Monthly Water Intelligence Report from Generosity Water based on your zip code. Your report is generated by the Generosity Water Intelligence Engine (WIQ) and includes local water quality data, contaminant alerts, and relevant news for your area. You can unsubscribe at any time by clicking the unsubscribe link in any email. We do not sell your email address. View our Privacy Policy at generositywater.com/privacy.';
   const REPORT_CONSENT_VERSION = 'v1.0.0-2026-04-08';
 
-  // Sync report opt-in status from backend on city change
   useEffect(() => {
     const storedEmail = reportOptInEmail;
     const storedZip = data?.zip || '';
@@ -499,13 +517,16 @@ export default function TrustButVerify(){
   const cityShort = data?.city?.split(",")[0] || '';
 
   const navTabs = [
-    { id:"tbv", label:"Trust but Verify\u2122" },
+    { id:"tbv", label:`Trust but Verify${TRADEMARK}` },
     { id:"wtr-intel", label:"WTR INTEL", badge: data ? riskScore : null },
     ...(founderMode ? [{ id:"wtr-btl", label:"WTR BTL" }, { id:"wtr-hub", label:"WTR HUB" }] : []),
   ];
 
   const headerRiskTone = riskScore > 66 ? '#B84A4A' : riskScore > 33 ? '#C89B3C' : '#4A8A6F';
   const headerRiskBg   = riskScore > 66 ? 'rgba(184, 74, 74, 0.10)' : riskScore > 33 ? 'rgba(200, 155, 60, 0.10)' : 'rgba(74, 138, 111, 0.10)';
+
+  const shopifyHubUrl = `https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}&discount=WELCOME100`;
+  const shopifyLearnUrl = "https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=learn-tab&utm_campaign=knowledge-cta&discount=WELCOME100";
 
   return (
     <div
@@ -523,8 +544,7 @@ export default function TrustButVerify(){
         .tbv-card{animation:slideUp 0.4s ease forwards}
       `}</style>
 
-      {/* Header (hidden on hardware tabs) */}
-      {tab!=="wtr-btl" && tab!=="wtr-hub" && (
+      {tab !== "wtr-btl" && tab !== "wtr-hub" && (
         <div
           className="sticky top-0 z-[100] bg-surface-card flex items-center justify-between"
           style={{
@@ -600,7 +620,6 @@ export default function TrustButVerify(){
       )}
 
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
-        {/* ═══════════════════════ TBV TAB ═══════════════════════ */}
         {tab === "tbv" && (
           <div data-testid="tbv-tab">
             <div className="sticky top-0 z-[50] bg-surface-base" style={{ padding: '14px 16px 0' }}>
@@ -615,7 +634,6 @@ export default function TrustButVerify(){
               />
             </div>
 
-            {/* Landing */}
             {tbvView === "home" && phase === "landing" && (
               <div style={{ padding: '44px 20px 20px' }} data-testid="home-landing">
                 <div className="text-center" style={{ marginBottom: 32 }}>
@@ -646,7 +664,6 @@ export default function TrustButVerify(){
                     />
                   </div>
 
-                  {/* Input + SCAN suffix button */}
                   <div style={{ maxWidth: 380, margin: '0 auto' }}>
                     <Input
                       ref={inputRef}
@@ -686,7 +703,6 @@ export default function TrustButVerify(){
                   </div>
                 </div>
 
-                {/* Stat row */}
                 <div className="grid grid-cols-3 gap-1.5" style={{ marginBottom: 14 }}>
                   {[
                     ["200M+", "Americans exposed to PFAS", "USGS 2023"],
@@ -716,7 +732,6 @@ export default function TrustButVerify(){
                   ))}
                 </div>
 
-                {/* Popular cities */}
                 <div className="text-center">
                   <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary" style={{ marginBottom: 8 }}>
                     POPULAR CITIES
@@ -743,7 +758,6 @@ export default function TrustButVerify(){
               </div>
             )}
 
-            {/* Scanning */}
             {tbvView === "home" && phase === "scanning" && (
               <div className="mx-auto" style={{ maxWidth: 360, margin: '60px auto', padding: '0 20px', textAlign: 'center' }} data-testid="home-scanning">
                 <div className="relative mx-auto" style={{ width: 80, height: 80, marginBottom: 22 }}>
@@ -804,7 +818,6 @@ export default function TrustButVerify(){
               </div>
             )}
 
-            {/* Not found */}
             {phase === "not_found" && (
               <div className="mx-auto" style={{ maxWidth: 360, margin: '40px auto', padding: '0 20px', textAlign: 'center' }} data-testid="not-found">
                 <div
@@ -843,7 +856,7 @@ export default function TrustButVerify(){
                       className="w-full bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
                       style={{ padding: 12, fontSize: 13, border: 'none' }}
                     >
-                      NOTIFY ME WHEN AVAILABLE →
+                      NOTIFY ME WHEN AVAILABLE {ARROW}
                     </button>
                   </div>
                 ) : (
@@ -876,7 +889,6 @@ export default function TrustButVerify(){
               </div>
             )}
 
-            {/* Bottle scan delegation */}
             {tbvView === "scan" && (
               <div data-testid="bottle-tab">
                 <div className="text-center" style={{ padding: '18px 20px' }}>
@@ -896,7 +908,6 @@ export default function TrustButVerify(){
           </div>
         )}
 
-        {/* ═══════════════════════ WTR INTEL TAB ═══════════════════════ */}
         {tab === "wtr-intel" && (
           <div data-testid="insights-tab">
             <div className="sticky top-0 z-[50] bg-surface-base" style={{ padding: '14px 16px 0' }}>
@@ -911,20 +922,18 @@ export default function TrustButVerify(){
               />
             </div>
 
-            {/* Report */}
             {insightView === "report" && data && (
               <div style={{ padding: '14px 16px 20px' }} data-testid="report-tab">
-                {/* Hero report card */}
                 <HeroCard
                   testId="report-hero"
                   className="tbv-card mb-3"
-                  eyebrow="TRUST BUT VERIFY™ REPORT"
+                  eyebrow={`TRUST BUT VERIFY${TRADEMARK} REPORT`}
                   title={data.city}
                   subtitle={`${data.utility}. ${data.source}.`}
                   metadata={[
-                    { label: "TDS",      value: data.tds ?? '—' },
-                    { label: "pH",       value: data.ph ?? '—' },
-                    { label: "Hardness", value: data.hardness ?? '—' },
+                    { label: "TDS",      value: data.tds ?? '-' },
+                    { label: "pH",       value: data.ph ?? '-' },
+                    { label: "Hardness", value: data.hardness ?? '-' },
                   ]}
                   rightRail={<RiskGauge score={riskScore} animated={gaugeOn} />}
                 >
@@ -936,7 +945,6 @@ export default function TrustButVerify(){
                   )}
                 </HeroCard>
 
-                {/* High-risk alert */}
                 {highRisk.length > 0 && (
                   <div
                     className="rounded-card flex items-start gap-2.5 mb-3"
@@ -956,13 +964,12 @@ export default function TrustButVerify(){
                         {highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length > 1 ? "S" : ""} FOUND
                       </div>
                       <div className="text-caption text-text-secondary">
-                        {highRisk.map(c => c.name).join(" • ")}. Levels exceed health guidelines.
+                        {highRisk.map(c => c.name).join(" \u2022 ")}. Levels exceed health guidelines.
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Monthly Report opt-in card */}
                 {reportOptInStatus === 'confirmed' ? (
                   <div className="bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
                     <Icon name="checkCircle" size={22} />
@@ -975,7 +982,10 @@ export default function TrustButVerify(){
                 ) : reportOptInStatus === 'pending' ? (
                   <div className="bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
                     <div className="rounded-full flex items-center justify-center" style={{ width: 32, height: 32, background: 'rgba(200, 155, 60, 0.12)' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C89B3C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C89B3C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>Check Your Email</div>
@@ -1011,7 +1021,6 @@ export default function TrustButVerify(){
                   </button>
                 )}
 
-                {/* Contaminants list */}
                 <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary mb-2">
                   CONTAMINANTS IN {cityShort.toUpperCase()}
                 </div>
@@ -1036,25 +1045,23 @@ export default function TrustButVerify(){
                   ))}
                 </div>
 
-                {/* Health calculator */}
                 <HealthCalc city={data.city} riskScore={riskScore} />
 
-                {/* The Solution hero (replaces navy gradient) */}
                 <HeroCard
                   className="mb-3"
                   eyebrow="THE SOLUTION"
-                  title="Trust but Verify™ Your Water."
+                  title={`Trust but Verify${TRADEMARK} Your Water.`}
                   subtitle={`The Home WTR Hub removes every contaminant found in ${cityShort}'s water, at the tap, in real time.`}
-                ><a
-                  
-                    href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}&discount=WELCOME100`}
+                >
+                  <a
+                    href={shopifyHubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => trackEvent('shopify_cta_clicked', { city: data?.city, risk_score: riskScore, discount_code: 'WELCOME100' })}
                     className="block w-full bg-brand text-text-onAccent text-center font-semibold rounded-card no-underline"
                     style={{ padding: '14px 20px', fontSize: 14 }}
                   >
-                    GET THE HOME WTR HUB →
+                    GET THE HOME WTR HUB {ARROW}
                   </a>
                   <div className="flex flex-wrap gap-3 justify-center mt-3">
                     {["30-Day Guarantee", "30-Min Install", "Financing Available"].map((t) => (
@@ -1066,7 +1073,6 @@ export default function TrustButVerify(){
                   </div>
                 </HeroCard>
 
-                {/* What gets removed list */}
                 <div className="bg-surface-card rounded-card shadow-card overflow-hidden mb-3">
                   <div className="flex items-center justify-between" style={{ padding: '12px 16px', borderBottom: '1px solid #E8EAED' }}>
                     <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>
@@ -1099,20 +1105,19 @@ export default function TrustButVerify(){
                           className="rounded-pill font-bold uppercase tracking-wider"
                           style={{ background: 'rgba(74, 138, 111, 0.10)', color: '#4A8A6F', fontSize: 9, padding: '2px 8px' }}
                         >
-                          ✓ 99%+
+                          99%+ OUT
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Hub animation */}
                 {showHub && (
                   <div className="bg-surface-card rounded-card shadow-card mb-3" style={{ padding: 14 }} data-testid="wtr-hub-section">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <div className="rounded-card flex items-center justify-center text-text-onAccent" style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)', fontSize: 14 }}>◈</div>
+                      <div className="rounded-card flex items-center justify-center text-text-onAccent" style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)', fontSize: 14 }}>HUB</div>
                       <div>
-                        <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>Generosity™ Home WTR Hub</div>
+                        <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>Generosity{TRADEMARK} Home WTR Hub</div>
                         <div className="text-brand" style={{ fontSize: 10 }}>Active Alkaline Technology. Multi-Stage.</div>
                       </div>
                     </div>
@@ -1120,7 +1125,6 @@ export default function TrustButVerify(){
                   </div>
                 )}
 
-                {/* Email capture */}
                 <div className="bg-surface-card rounded-card shadow-card mb-3" style={{ padding: 16 }} data-testid="email-capture">
                   <div className="font-display font-semibold text-text-primary" style={{ fontSize: 18, marginBottom: 4 }}>
                     Get an extra $100 off the Home WTR Hub.
@@ -1144,7 +1148,7 @@ export default function TrustButVerify(){
                         className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
                         style={{ padding: 12, fontSize: 13, border: 'none' }}
                       >
-                        GET MY $100 OFF →
+                        GET MY $100 OFF {ARROW}
                       </button>
                       <div className="text-text-tertiary text-center" style={{ fontSize: 10 }}>No spam. Unsubscribe anytime.</div>
                     </div>
@@ -1162,26 +1166,24 @@ export default function TrustButVerify(){
                   )}
                 </div>
 
-                {/* Partner footer */}
                 <div className="bg-surface-card rounded-card shadow-card flex items-center justify-between gap-2.5" style={{ padding: '12px 14px' }}>
                   <div>
                     <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>Are you a Dealer or Distributor?</div>
-                    <div className="text-text-tertiary mt-0.5" style={{ fontSize: 10 }}>Use Trust But Verify™ as your sales tool.</div>
+                    <div className="text-text-tertiary mt-0.5" style={{ fontSize: 10 }}>Use Trust But Verify{TRADEMARK} as your sales tool.</div>
                   </div>
-                  
+                  <a
                     href="https://generositywater.com/generosity-partners-paywall"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-surface-card text-brand font-bold uppercase tracking-wider rounded-card no-underline whitespace-nowrap"
                     style={{ padding: '8px 12px', fontSize: 10, border: '1px solid #51B0E6' }}
-                  ><a
-                    PARTNER PORTAL →
+                  >
+                    PARTNER PORTAL {ARROW}
                   </a>
                 </div>
               </div>
             )}
 
-            {/* Empty report */}
             {insightView === "report" && !data && (
               <div className="text-center" style={{ padding: '60px 20px' }} data-testid="report-empty">
                 <div className="flex justify-center mb-3">
@@ -1206,12 +1208,11 @@ export default function TrustButVerify(){
                   className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
                   style={{ padding: '12px 22px', fontSize: 13, border: 'none' }}
                 >
-                  TEST MY WATER →
+                  TEST MY WATER {ARROW}
                 </button>
               </div>
             )}
 
-            {/* Learn */}
             {insightView === "learn" && (
               <div style={{ padding: 18 }} data-testid="learn-tab">
                 <h2 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 14 }}>
@@ -1246,15 +1247,15 @@ export default function TrustButVerify(){
                   className="mt-2"
                   title="Knowledge is only useful if you act on it."
                   subtitle="The Home WTR Hub removes everything in this library. 1,000+ contaminants."
-                ><a
-                  
-                    href="https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=learn-tab&utm_campaign=knowledge-cta&discount=WELCOME100"
+                >
+                  <a
+                    href={shopifyLearnUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full bg-brand text-text-onAccent text-center font-semibold rounded-card no-underline"
                     style={{ padding: '14px 22px', fontSize: 13 }}
                   >
-                    LEARN MORE →
+                    LEARN MORE {ARROW}
                   </a>
                 </HeroCard>
               </div>
@@ -1262,12 +1263,10 @@ export default function TrustButVerify(){
           </div>
         )}
 
-        {/* Hardware tabs (founder-only) */}
         {tab === "wtr-btl" && <WTRBottleScreen />}
         {tab === "wtr-hub" && <WTRHubScreen />}
       </div>
 
-      {/* Bottom nav */}
       <div
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full bg-surface-card flex z-[200]"
         style={{
@@ -1342,7 +1341,6 @@ export default function TrustButVerify(){
         })}
       </div>
 
-      {/* Monthly Report Modal */}
       <MonthlyReportModal
         open={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
@@ -1359,14 +1357,12 @@ export default function TrustButVerify(){
         cityShort={cityShort}
       />
 
-      {/* Profile Modal */}
       {showProfile && (
         <div className="fixed inset-0 z-[500] bg-surface-card overflow-y-auto" style={{ animation: 'slideUp 0.3s ease' }}>
           <ProfileScreen onClose={() => setShowProfile(false)} />
         </div>
       )}
 
-      {/* Founder Login Modal */}
       <FounderLoginModal
         open={showFounderLogin}
         onClose={() => { setShowFounderLogin(false); setFounderPin(''); setFounderPinError(''); }}
@@ -1379,7 +1375,7 @@ export default function TrustButVerify(){
   );
 }
 
-// ─── ENGAGEMENT FLOW (post-email-capture) ────────────────────────────────────
+// --- ENGAGEMENT FLOW (post-email-capture) ------------------------------------
 function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile, setHouseholdProfile, data, email, capturedProspectId, setPushResult }) {
   return (
     <div className="text-center" data-testid="engagement-flow" style={{ padding: '12px 0' }}>
