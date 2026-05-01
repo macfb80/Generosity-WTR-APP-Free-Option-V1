@@ -1,13 +1,26 @@
 import { useState, useEffect, useRef } from "react";
-import { Html5Qrcode } from "html5-qrcode";
 import BottleScanView from "./components/BottleScanView";
 import WTRBottleScreen from "./components/WTRBottleScreen";
 import WTRHubScreen from "./components/WTRHubScreen";
 import ProfileScreen from "./components/ProfileScreen";
-import { requestPushPermission, isPushSupported, registerServiceWorker } from './push';
+import { requestPushPermission, registerServiceWorker } from './push';
+
+// Design system primitives
+import Icon from "./components/ds/Icon";
+import NavIcon from "./components/ds/NavIcon";
+import Input from "./components/ds/Input";
+import SegmentedToggle from "./components/ds/SegmentedToggle";
+import ContaminantCard from "./components/ds/ContaminantCard";
+import HeroCard from "./components/ds/HeroCard";
+
+// TBV-specific components
+import RiskGauge from "./components/tbv/RiskGauge";
+import WTRHubAnimation from "./components/tbv/WTRHubAnimation";
+import HealthCalc from "./components/tbv/HealthCalc";
+import MonthlyReportModal from "./components/tbv/MonthlyReportModal";
+import FounderLoginModal from "./components/tbv/FounderLoginModal";
 
 // ─── ORACLE REPORT TRANSFORM ─────────────────────────────────────────────────
-// Converts WTR-ORACLE API response shape into the shape TrustButVerify expects
 function transformOracleReport(report, cityLabel, zip) {
   const contaminants = (report.contaminants || []).map(c => {
     function fmtNum(val) {
@@ -76,17 +89,8 @@ function transformOracleReport(report, cityLabel, zip) {
   };
 }
 
-// ─── GENEROSITY™ OFFICIAL BRAND PALETTE (Updated) ────────────────────────────
-const B = { 
-  blue:"#51B0E6", blueDark:"#2A8FCA", blueLight:"#EDF6FC", blueMid:"#DCEEF9",
-  gray:"#A6A8AB", grayDark:"#6E7073", grayMid:"#C5C6C8", lightGray:"#F0F1F3",
-  white:"#FFFFFF", offWhite:"#F7F9FB", navy:"#0A1A2E", navyMid:"#0D2244",
-  border:"#C8E2F4", borderLight:"#E4F1FA",
-  danger:"#D93025", warning:"#F29423", ok:"#1E8A4C",
-  dangerBg:"#FFF3F2", warningBg:"#FFF8EE", okBg:"#F0FAF4"
-};
-
 // ─── BOTTLE BRANDS DATA ─────────────────────────────────────────────────────
+// Preserved verbatim from prior version. Used by BottleScanView via service.
 const BOTTLE_BRANDS = {
   "Evian":{ origin:"French Alps", tds:345, ph:7.2, fluoride:0.1, microplastics:"HIGH", pfas_risk:"MEDIUM", score:62, concern:"High TDS. Microplastic contamination in independent testing.", manufacturer:"Danone S.A.", source_type:"Natural mineral water" },
   "Dasani":{ origin:"Municipal tap (filtered)", tds:38, ph:5.6, fluoride:0.07, microplastics:"VERY HIGH", pfas_risk:"HIGH", score:78, concern:"Acidic pH 5.6, PFAS-lined packaging, highest microplastic count in 2023 Orb Media study.", manufacturer:"The Coca-Cola Company", source_type:"Purified water" },
@@ -175,7 +179,7 @@ const CITY_DATA = {
     {name:"Microplastics",level:"Detected",limit:"None set",unit:"",risk:"medium",category:"Emerging Contaminant",detail:"Found in blood, lungs, placentas. No safe level.",removed:true},
   ]},
   "Chicago, IL":{ utility:"City of Chicago", source:"Lake Michigan", tds:220, ph:7.9, hardness:"Moderate (143 mg/L)", contaminants:[
-    {name:"Lead",level:18.4,limit:15,unit:"ppb",risk:"high",category:"Heavy Metal",detail:"EXCEEDS LEGAL LIMIT. 400,000+ lead service lines — most of any US city.",removed:true},
+    {name:"Lead",level:18.4,limit:15,unit:"ppb",risk:"high",category:"Heavy Metal",detail:"EXCEEDS LEGAL LIMIT. 400,000+ lead service lines, most of any US city.",removed:true},
     {name:"Chromium-6",level:0.26,limit:0.10,unit:"ppb",risk:"high",category:"Heavy Metal",detail:"Known carcinogen.",removed:true},
     {name:"PFAS (Total)",level:3.4,limit:0.004,unit:"ppt",risk:"high",category:"Forever Chemicals",detail:"Multiple PFAS compounds found.",removed:true},
     {name:"Haloacetic Acids",level:39.2,limit:60,unit:"ppb",risk:"medium",category:"Disinfection Byproduct",detail:"65% of legal limit.",removed:true},
@@ -213,8 +217,6 @@ const CITY_DATA = {
   ]},
 };
 
-const GENERIC_DATA = null;
-
 // ─── ZIP CODE MAPPING ────────────────────────────────────────────────────────
 const ZIP_MAP = {
   "78701":"Austin, TX","78702":"Austin, TX","78703":"Austin, TX",
@@ -226,228 +228,12 @@ const ZIP_MAP = {
   "85001":"Phoenix, AZ","85002":"Phoenix, AZ","85003":"Phoenix, AZ"
 };
 
-// ─── RISK CONSTANTS ──────────────────────────────────────────────────────────
-const RISK_COLOR = {high:"#D93025",medium:"#F29423",low:"#1E8A4C"};
-const RISK_BG = {high:"#FFF3F2",medium:"#FFF8EE",low:"#F0FAF4"};
-const RISK_LABEL = {high:"HIGH CONCERN",medium:"DETECTED",low:"WITHIN LIMITS"};
-
 // ─── UTILITY FUNCTIONS ───────────────────────────────────────────────────────
 function getRiskScore(c){
   if(!c)return 0;
   return Math.min(100,c.filter(x=>x.risk==="high").length*22+c.filter(x=>x.risk==="medium").length*11+10);
 }
 
-// ─── RISK GAUGE COMPONENT (Animated Semicircle) ──────────────────────────────
-function RiskGauge({score,animated}){
-  const [d,setD]=useState(0);
-  useEffect(()=>{
-    if(!animated){setD(score);return;}
-    let s=0;
-    const t=setInterval(()=>{
-      s+=2;
-      if(s>=score){setD(score);clearInterval(t);}
-      else setD(s);
-    },16);
-    return()=>clearInterval(t);
-  },[score,animated]);
-  const angle=(d/100)*180-90;
-  const color=d>66?"#D93025":d>33?"#F29423":"#1E8A4C";
-  const label=d>66?"HIGH RISK":d>33?"MODERATE":"LOW RISK";
-  return(
-    <div style={{position:"relative",width:150,height:85,margin:"0 auto"}}>
-      <svg width="150" height="85" viewBox="0 0 150 85">
-        <path d="M 12 78 A 63 63 0 0 1 138 78" fill="none" stroke="#1E3A5F" strokeWidth="10" strokeLinecap="round"/>
-        <path d="M 12 78 A 63 63 0 0 1 50 20" fill="none" stroke="#1E8A4C" strokeWidth="10" strokeLinecap="round" opacity="0.7"/>
-        <path d="M 50 20 A 63 63 0 0 1 100 20" fill="none" stroke="#F29423" strokeWidth="10" strokeLinecap="round" opacity="0.7"/>
-        <path d="M 100 20 A 63 63 0 0 1 138 78" fill="none" stroke="#D93025" strokeWidth="10" strokeLinecap="round" opacity="0.7"/>
-        <line x1="75" y1="78" x2={75+48*Math.cos((angle-90)*Math.PI/180)} y2={78+48*Math.sin((angle-90)*Math.PI/180)} stroke={color} strokeWidth="2.5" strokeLinecap="round" style={{transition:"all 0.016s linear"}}/>
-        <circle cx="75" cy="78" r="5" fill={color}/>
-        <circle cx="75" cy="78" r="9" fill={color} opacity="0.2"/>
-      </svg>
-      <div style={{position:"absolute",bottom:0,left:0,right:0,textAlign:"center"}}>
-        <div style={{fontSize:22,fontWeight:900,color,lineHeight:1}}>{d}</div>
-        <div style={{fontSize:8,fontWeight:800,color,letterSpacing:"1.5px"}}>{label}</div>
-      </div>
-    </div>
-  );
-}
-
-// ─── WTR HUB FILTRATION ANIMATION ────────────────────────────────────────────
-function WTRHubAnimation({contaminants,active}){
-  const [step,setStep]=useState(0);
-  const [pidx,setPidx]=useState(0);
-  const stages=[
-    {id:"CP",color:"#51B0E6",desc:"Sediment & Carbon"},
-    {id:"RO",color:"#2A8FCA",desc:"0.0001μ Filtration"},
-    {id:"TC",color:"#1A6B99",desc:"Final Polish"},
-    {id:"ALK",color:"#1E8A4C",desc:"Mineral Infusion"}
-  ];
-  const removed=contaminants?.filter(c=>c.removed)||[];
-  useEffect(()=>{
-    if(!active)return;
-    const t=setInterval(()=>{
-      setStep(s=>(s+1)%stages.length);
-      setPidx(p=>(p+1)%Math.max(removed.length,1));
-    },1400);
-    return()=>clearInterval(t);
-  },[active,removed.length,stages.length]);
-  const cur=removed[pidx];
-  return(
-    <div style={{padding:"8px 0"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:0,marginBottom:10}}>
-        <div style={{textAlign:"center",minWidth:40}}>
-          <div style={{width:34,height:34,borderRadius:"50%",margin:"0 auto 3px",background:"#F0F1F3",border:"2px solid #A6A8AB",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <Icon name="tap" size={18} color="#A6A8AB"/>
-          </div>
-          <div style={{fontSize:7,color:"#A6A8AB"}}>TAP</div>
-        </div>
-        <div style={{color:"#C8E2F4",fontSize:12,margin:"0 2px",paddingBottom:14}}>→</div>
-        {stages.map((s,i)=>(
-          <div key={s.id} style={{display:"flex",alignItems:"center"}}>
-            <div style={{textAlign:"center"}}>
-              <div style={{width:40,height:40,borderRadius:8,margin:"0 auto 3px",background:step===i?`linear-gradient(135deg,${s.color},${s.color}cc)`:"#F0F1F3",border:`2px solid ${step===i?s.color:"#C8E2F4"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:900,color:step===i?"#fff":s.color,transition:"all 0.4s",boxShadow:step===i?`0 0 12px ${s.color}55`:"none"}}>{s.id}</div>
-              <div style={{fontSize:7,color:step===i?s.color:"#A6A8AB",whiteSpace:"nowrap"}}>{s.desc}</div>
-            </div>
-            {i<stages.length-1&&<div style={{color:"#C8E2F4",fontSize:11,margin:"0 2px",paddingBottom:14}}>→</div>}
-          </div>
-        ))}
-        <div style={{color:"#C8E2F4",fontSize:12,margin:"0 2px",paddingBottom:14}}>→</div>
-        <div style={{textAlign:"center",minWidth:40}}>
-          <div style={{width:34,height:34,borderRadius:"50%",margin:"0 auto 3px",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",animation:"pulse 2s ease-in-out infinite"}}>
-            <Icon name="sparkle" size={18} color="#FFFFFF" active/>
-          </div>
-          <div style={{fontSize:7,color:"#51B0E6",fontWeight:800}}>PURE</div>
-        </div>
-      </div>
-      {cur&&active&&(
-        <div style={{background:RISK_BG[cur.risk],border:`1px solid ${RISK_COLOR[cur.risk]}33`,borderRadius:8,padding:"8px 12px",display:"flex",alignItems:"center",gap:8,animation:"fadeSlideIn 0.4s ease"}}>
-          <div style={{width:7,height:7,borderRadius:"50%",background:RISK_COLOR[cur.risk],flexShrink:0,boxShadow:`0 0 6px ${RISK_COLOR[cur.risk]}`}}/>
-          <div style={{flex:1}}>
-            <div style={{fontSize:10,fontWeight:700,color:"#1A202C"}}>Removing: <span style={{color:RISK_COLOR[cur.risk]}}>{cur.name}</span></div>
-            <div style={{fontSize:9,color:"#A6A8AB",marginTop:1}}>{cur.detail?.split(".")[0]}</div>
-          </div>
-          <div style={{background:"#1E8A4C",color:"#fff",fontSize:8,fontWeight:900,padding:"2px 7px",borderRadius:20}}>99%+ OUT</div>
-        </div>
-      )}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,marginTop:8}}>
-        {[["1,000+","Contaminants"],["99%+","PFAS"],["99%+","Heavy Metals"],["9+ pH","Alkaline"]].map(([v,l],i)=>(
-          <div key={`stat-${i}`} style={{background:"#EDF6FC",borderRadius:6,padding:"7px 3px",textAlign:"center"}}>
-            <div style={{fontSize:11,fontWeight:900,color:"#51B0E6",lineHeight:1}}>{v}</div>
-            <div style={{fontSize:7,color:"#A6A8AB",marginTop:1}}>{l}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── HEALTH/LIFETIME CALCULATOR COMPONENT ────────────────────────────────────
-function HealthCalc({city,riskScore}){
-  const [cups,setCups]=useState(8);
-  const [years,setYears]=useState(5);
-  const [persona,setPersona]=useState("adult");
-  const personas=[
-    {id:"adult",label:"Adult",iconName:"user",mult:1.0},
-    {id:"child",label:"Child under 12",iconName:"user",mult:2.4},
-    {id:"pregnant",label:"Pregnant",iconName:"user",mult:3.1},
-    {id:"infant",label:"Infant",iconName:"user",mult:4.2}
-  ];
-  const sel=personas.find(p=>p.id===persona);
-  const gallons=(cups*0.0625)*365*years;
-  const bottles=Math.round(gallons*128/16.9);
-  const cumScore=Math.min(100,Math.round((riskScore/100)*sel.mult*Math.log(years+1)*22));
-  const cColor=cumScore>66?"#D93025":cumScore>33?"#F29423":"#1E8A4C";
-  const cBg=cumScore>66?"#FFF3F2":cumScore>33?"#FFF8EE":"#F0FAF4";
-  return(
-    <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,padding:"16px",marginBottom:14}} data-testid="health-calculator">
-      <div style={{fontSize:10,fontWeight:800,color:"#A6A8AB",letterSpacing:"1.5px",marginBottom:12}}>LIFETIME EXPOSURE CALCULATOR</div>
-      <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}} data-testid="persona-selector">
-        {personas.map(p=>(
-          <button key={p.id} onClick={()=>setPersona(p.id)} data-testid={`persona-${p.id}`} style={{background:persona===p.id?"#EDF6FC":"#F0F1F3",border:`1px solid ${persona===p.id?"#51B0E6":"#E4F1FA"}`,borderRadius:20,padding:"5px 10px",fontSize:10,cursor:"pointer",color:persona===p.id?"#51B0E6":"#A6A8AB",fontWeight:persona===p.id?800:400,display:"flex",alignItems:"center",gap:4}}>
-            <Icon name={p.iconName} size={12} color={persona===p.id?"#51B0E6":"#A6A8AB"}/> {p.label}
-          </button>
-        ))}
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-        <div>
-          <div style={{fontSize:9,color:"#A6A8AB",marginBottom:5}}>Cups/day: <strong style={{color:"#0A1A2E"}}>{cups}</strong></div>
-          <input type="range" min="2" max="20" value={cups} onChange={e=>setCups(Number(e.target.value))} data-testid="cups-slider" style={{width:"100%",accentColor:"#51B0E6"}}/>
-        </div>
-        <div>
-          <div style={{fontSize:9,color:"#A6A8AB",marginBottom:5}}>Years: <strong style={{color:"#0A1A2E"}}>{years}</strong></div>
-          <input type="range" min="1" max="30" value={years} onChange={e=>setYears(Number(e.target.value))} data-testid="years-slider" style={{width:"100%",accentColor:"#51B0E6"}}/>
-        </div>
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-        <div style={{background:"#FFF3F2",borderRadius:9,padding:"10px",textAlign:"center"}}>
-          <div style={{fontSize:18,fontWeight:900,color:"#D93025"}}>{gallons.toFixed(0)}</div>
-          <div style={{fontSize:8,color:"#A6A8AB"}}>gallons consumed</div>
-        </div>
-        <div style={{background:"#FFF8EE",borderRadius:9,padding:"10px",textAlign:"center"}}>
-          <div style={{fontSize:18,fontWeight:900,color:"#F29423"}}>{bottles.toLocaleString()}</div>
-          <div style={{fontSize:8,color:"#A6A8AB"}}>bottle equiv.</div>
-        </div>
-        <div style={{background:cBg,borderRadius:9,padding:"10px",textAlign:"center"}} data-testid="cumulative-risk">
-          <div style={{fontSize:18,fontWeight:900,color:cColor}}>{cumScore}</div>
-          <div style={{fontSize:8,color:"#A6A8AB"}}>cumulative risk</div>
-        </div>
-      </div>
-      {cumScore>50&&(
-        <div style={{background:"#FFF3F2",borderRadius:7,padding:"9px 11px",marginTop:10,fontSize:10,color:"#742A2A",lineHeight:1.6}} data-testid="risk-warning">
-          {<span style={{display:'inline-flex',verticalAlign:'middle'}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="15"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg></span>}{' '}{sel.label} faces <strong>elevated long-term risk</strong> from {city?.split(",")[0]||"your city"}'s contaminants.
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── NAVIGATION ICON COMPONENT ───────────────────────────────────────────────
-function NavIcon({id,active}){
-  const ic=active?"#51B0E6":"#A6A8AB";
-  const glow=active?"#51B0E620":"transparent";
-  if(id==="tbv") return(<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" fill={glow}/><path d="M7 9V6.5C7 6.22 7.22 6 7.5 6H10" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M18 6H20.5C20.78 6 21 6.22 21 6.5V9" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 19V21.5C21 21.78 20.78 22 20.5 22H18" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 22H7.5C7.22 22 7 21.78 7 21.5V19" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><line x1="9" y1="14" x2="19" y2="14" stroke={active?"#51B0E6":ic} strokeWidth="1.6" strokeLinecap="round"/><line x1="14" y1="10" x2="14" y2="18" stroke={active?"#51B0E6":ic} strokeWidth="1.4" strokeLinecap="round" opacity="0.5"/></svg>);
-  if(id==="wtr-intel") return(<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" fill={glow}/><circle cx="13" cy="12" r="5.5" stroke={ic} strokeWidth="1.5" fill="none"/><line x1="17" y1="16" x2="21" y2="20" stroke={ic} strokeWidth="2" strokeLinecap="round"/><line x1="11" y1="14.5" x2="11" y2="12" stroke={active?"#51B0E6":ic} strokeWidth="1.3" strokeLinecap="round"/><line x1="13" y1="14.5" x2="13" y2="10" stroke={active?"#51B0E6":ic} strokeWidth="1.3" strokeLinecap="round"/><line x1="15" y1="14.5" x2="15" y2="11.5" stroke={active?"#51B0E6":ic} strokeWidth="1.3" strokeLinecap="round"/></svg>);
-  if(id==="wtr-btl") return(<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" fill={glow}/><path d="M11 5V13L6.5 20.5C6.5 20.5 6 23 9 23H19C22 23 21.5 20.5 21.5 20.5L17 13V5" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><line x1="10" y1="5" x2="18" y2="5" stroke={ic} strokeWidth="1.8" strokeLinecap="round"/><path d="M9 19.5C9 19.5 11 17.5 14 18.5C17 19.5 19 18 19 18" stroke={active?"#51B0E6":ic} strokeWidth="1.2" strokeLinecap="round" fill="none"/><circle cx="12" cy="21" r="1.2" fill={active?"#51B0E6":ic}/></svg>);
-  if(id==="wtr-hub") return(<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" fill={glow}/><path d="M5 14L14 6L23 14" stroke={ic} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M8 12V22C8 22.55 8.45 23 9 23H19C19.55 23 20 22.55 20 22V12" stroke={ic} strokeWidth="1.4" strokeLinejoin="round" fill="none"/><path d="M14 13L11.5 17C11.5 18.38 12.62 19.5 14 19.5C15.38 19.5 16.5 18.38 16.5 17L14 13Z" fill={active?"#51B0E6":ic} opacity="0.7"/><line x1="14" y1="19.5" x2="14" y2="21.5" stroke={active?"#51B0E6":ic} strokeWidth="1.2" strokeLinecap="round"/></svg>);
-  return null;
-}
-
-// ─── UNIFIED ICON COMPONENT LIBRARY ──────────────────────────────────────────
-function Icon({name, size=20, color="#A6A8AB", active=false}) {
-  const ic = active ? "#51B0E6" : color;
-  const s = size;
-  const icons = {
-    home: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 3L2 11H4.5V20H9.5V14H14.5V20H19.5V11H22L12 3Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M12 9C12 9 10 11.5 10 12.5C10 13.6 10.9 14.5 12 14.5C13.1 14.5 14 13.6 14 12.5C14 11.5 12 9 12 9Z" fill={active?ic:"none"} stroke={ic} strokeWidth="1.2"/></svg>),
-    pin: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" stroke={ic} strokeWidth="1.5" fill="none"/><circle cx="12" cy="9" r="2.5" stroke={ic} strokeWidth="1.5" fill={active?ic:"none"}/></svg>),
-    city: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M3 21H21" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><path d="M5 21V7L10 4V21" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M10 21V10H15V21" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M15 21V6H19V21" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><line x1="7" y1="9" x2="8" y2="9" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/><line x1="7" y1="12" x2="8" y2="12" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/><line x1="7" y1="15" x2="8" y2="15" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/><line x1="12" y1="13" x2="13" y2="13" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/><line x1="12" y1="16" x2="13" y2="16" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/><line x1="17" y1="9" x2="17" y2="9" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><line x1="17" y1="12" x2="17" y2="12" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>),
-    lock: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="11" rx="2" stroke={ic} strokeWidth="1.5" fill="none"/><path d="M8 10V7C8 4.79 9.79 3 12 3C14.21 3 16 4.79 16 7V10" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><circle cx="12" cy="15" r="1.5" fill={ic}/><line x1="12" y1="16.5" x2="12" y2="18" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>),
-    scan: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M3 7V5C3 3.9 3.9 3 5 3H7" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><path d="M17 3H19C20.1 3 21 3.9 21 5V7" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><path d="M21 17V19C21 20.1 20.1 21 19 21H17" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><path d="M7 21H5C3.9 21 3 20.1 3 19V17" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><circle cx="12" cy="12" r="4" stroke={ic} strokeWidth="1.5" fill="none"/><circle cx="12" cy="12" r="1.5" fill={ic}/></svg>),
-    search: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke={ic} strokeWidth="1.5" fill="none"/><line x1="16" y1="16" x2="21" y2="21" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>),
-    camera: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M3 8C3 6.9 3.9 6 5 6H7L9 4H15L17 6H19C20.1 6 21 6.9 21 8V18C21 19.1 20.1 20 19 20H5C3.9 20 3 19.1 3 18V8Z" stroke={ic} strokeWidth="1.5" fill="none"/><circle cx="12" cy="13" r="4" stroke={ic} strokeWidth="1.5" fill="none"/><circle cx="12" cy="13" r="1.5" fill={ic}/></svg>),
-    text: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M4 7V5H20V7" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="5" x2="12" y2="19" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><path d="M8 19H16" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>),
-    drop: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 3C12 3 6 10 6 14C6 17.31 8.69 20 12 20C15.31 20 18 17.31 18 14C18 10 12 3 12 3Z" stroke={ic} strokeWidth="1.5" fill={active?`${ic}20`:"none"}/><path d="M9 14C9 14 10 12 12 12" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/></svg>),
-    droplet: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 5 10 5 14.5C5 18.64 8.13 22 12 22C15.87 22 19 18.64 19 14.5C19 10 12 2 12 2Z" stroke={ic} strokeWidth="1.5" fill="none"/><path d="M12 19C14.21 19 16 17.21 16 15" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/></svg>),
-    tap: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2V6" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><rect x="8" y="6" width="8" height="4" rx="1" stroke={ic} strokeWidth="1.5" fill="none"/><path d="M10 10V12C10 12 10 14 12 14C14 14 14 12 14 12V10" stroke={ic} strokeWidth="1.5"/><path d="M12 14V16" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><path d="M12 18C12 18 9 19 9 21H15C15 19 12 18 12 18Z" stroke={ic} strokeWidth="1.5" fill="none"/></svg>),
-    sparkle: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill={active?`${ic}30`:"none"}/><circle cx="19" cy="5" r="1.5" stroke={ic} strokeWidth="1" fill="none"/><circle cx="5" cy="18" r="1" stroke={ic} strokeWidth="1" fill="none"/></svg>),
-    hazard: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2L22 20H2L12 2Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><line x1="12" y1="9" x2="12" y2="14" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><circle cx="12" cy="17" r="1" fill={ic}/></svg>),
-    alert: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={ic} strokeWidth="1.5" fill="none"/><line x1="12" y1="8" x2="12" y2="13" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><circle cx="12" cy="16" r="1" fill={ic}/></svg>),
-    shield: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V11C4 16.5 7.5 21.25 12 22.5C16.5 21.25 20 16.5 20 11V6L12 2Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M9 12L11 14L15 10" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>),
-    flask: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M9 3V10L4 18C3.5 19 4 20 5 20H19C20 20 20.5 19 20 18L15 10V3" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><line x1="8" y1="3" x2="16" y2="3" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><path d="M7 15H17" stroke={ic} strokeWidth="1.2" strokeLinecap="round"/></svg>),
-    atom: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2" fill={ic}/><ellipse cx="12" cy="12" rx="9" ry="4" stroke={ic} strokeWidth="1.3" fill="none"/><ellipse cx="12" cy="12" rx="9" ry="4" stroke={ic} strokeWidth="1.3" fill="none" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" stroke={ic} strokeWidth="1.3" fill="none" transform="rotate(120 12 12)"/></svg>),
-    check: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={ic} strokeWidth="1.5" fill="none"/><path d="M8 12L11 15L16 9" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>),
-    checkCircle: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1E8A4C" strokeWidth="1.5" fill="#F0FAF4"/><path d="M8 12L11 15L16 9" stroke="#1E8A4C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>),
-    bell: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M18 8C18 6.4 17.4 4.9 16.2 3.8C15.1 2.6 13.6 2 12 2C10.4 2 8.9 2.6 7.8 3.8C6.6 4.9 6 6.4 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M13.7 21C13.5 21.4 13 21.6 12.5 21.7C12 21.8 11.4 21.7 11 21.5C10.5 21.2 10.2 20.8 10 20.3" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>),
-    email: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke={ic} strokeWidth="1.5" fill="none"/><path d="M3 7L12 13L21 7" stroke={ic} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>),
-    filter: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M4 4H20L14 12V18L10 20V12L4 4Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/></svg>),
-    info: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={ic} strokeWidth="1.5" fill="none"/><line x1="12" y1="11" x2="12" y2="16" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/><circle cx="12" cy="8" r="1" fill={ic}/></svg>),
-    book: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M4 4C4 4 5 3 8 3C11 3 12 4.5 12 4.5C12 4.5 13 3 16 3C19 3 20 4 20 4V19C20 19 19 18 16 18C13 18 12 19.5 12 19.5C12 19.5 11 18 8 18C5 18 4 19 4 19V4Z" stroke={ic} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><line x1="12" y1="5" x2="12" y2="19" stroke={ic} strokeWidth="1.5"/></svg>),
-    user: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke={ic} strokeWidth="1.5" fill="none"/><path d="M4 20C4 16.69 7.58 14 12 14C16.42 14 20 16.69 20 20" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>),
-    settings: (<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke={ic} strokeWidth="1.5" fill="none"/><path d="M12 1V4M12 20V23M4.22 4.22L6.34 6.34M17.66 17.66L19.78 19.78M1 12H4M20 12H23M4.22 19.78L6.34 17.66M17.66 6.34L19.78 4.22" stroke={ic} strokeWidth="1.5" strokeLinecap="round"/></svg>),
-  };
-  return icons[name] || null;
-}
-
-// ─── ANALYTICS HELPER ────────────────────────────────────────────────────────
 function generateSessionId() {
   const id = 'wtr_' + Math.random().toString(36).slice(2, 11) + '_' + Date.now().toString(36);
   try { sessionStorage.setItem('wtr_session_id', id); } catch(e) {}
@@ -462,6 +248,9 @@ function trackEvent(eventName, properties = {}) {
   const base = { session_id: getSessionId(), app_version: '2.0', timestamp: new Date().toISOString() };
   try { window.posthog?.capture(eventName, { ...base, ...properties }); } catch(e) {}
 }
+
+const API_BASE = 'https://generosity-sales-engine-mvp-api.onrender.com';
+const API_BEARER = 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102';
 
 // ─── MAIN APP COMPONENT ──────────────────────────────────────────────────────
 export default function TrustButVerify(){
@@ -491,14 +280,15 @@ export default function TrustButVerify(){
     else{setFounderPinError('Invalid PIN');setFounderPin('');}
   }
   function handleFounderLogout(){setFounderMode(false);setTab('tbv');try{localStorage.removeItem('wtr_founder_mode');}catch(e){}}
+
   const [inputError, setInputError] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [emailError, setEmailError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [engagementPhase, setEngagementPhase] = useState("idle");
   const [householdProfile, setHouseholdProfile] = useState({ has_children: null, is_pregnant: null, has_filter: null });
   const [pushResult, setPushResult] = useState(null);
   const [capturedProspectId, setCapturedProspectId] = useState(null);
+
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportOptInStatus, setReportOptInStatus] = useState(() => { try { return localStorage.getItem('wtr_report_status') || 'none'; } catch(e) { return 'none'; } });
   const [reportOptInEmail, setReportOptInEmail] = useState(() => { try { return localStorage.getItem('wtr_report_email') || ''; } catch(e) { return ''; } });
@@ -509,10 +299,12 @@ export default function TrustButVerify(){
   const [reportZipError, setReportZipError] = useState('');
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportSubmitError, setReportSubmitError] = useState('');
+
   const inputRef=useRef(null);
 
   useEffect(() => { registerServiceWorker(); }, []);
 
+  // Cross-component navigation event listener
   useEffect(() => {
     const handler = (e) => {
       const { tab: targetTab, scan } = e.detail || {};
@@ -521,18 +313,28 @@ export default function TrustButVerify(){
     };
     window.addEventListener('wtr-navigate', handler);
     return () => window.removeEventListener('wtr-navigate', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const REPORT_CONSENT_TEXT = 'By submitting your email, you agree to receive a free Monthly Water Intelligence Report from Generosity\u2122 Water based on your zip code. Your report is generated by the Generosity\u2122 Water Intelligence Engine (WIQ\u2122) and includes local water quality data, contaminant alerts, and relevant news for your area. You can unsubscribe at any time by clicking the unsubscribe link in any email. We do not sell your email address. View our Privacy Policy at generositywater.com/privacy.';
   const REPORT_CONSENT_VERSION = 'v1.0.0-2026-04-08';
 
+  // Sync report opt-in status from backend on city change
   useEffect(() => {
     const storedEmail = reportOptInEmail;
     const storedZip = data?.zip || '';
     if (storedEmail && storedZip) {
-      fetch(`https://generosity-sales-engine-mvp-api.onrender.com/api/water-report/status?email=${encodeURIComponent(storedEmail)}&zip=${encodeURIComponent(storedZip)}`, { headers: { 'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102' } })
-        .then(r => r.json()).then(d => { if (d.status && d.status !== reportOptInStatus) { setReportOptInStatus(d.status); try { localStorage.setItem('wtr_report_status', d.status); } catch(e) {} } }).catch(() => {});
+      fetch(`${API_BASE}/api/water-report/status?email=${encodeURIComponent(storedEmail)}&zip=${encodeURIComponent(storedZip)}`, { headers: { 'Authorization': API_BEARER } })
+        .then(r => r.json())
+        .then(d => {
+          if (d.status && d.status !== reportOptInStatus) {
+            setReportOptInStatus(d.status);
+            try { localStorage.setItem('wtr_report_status', d.status); } catch(e) {}
+          }
+        })
+        .catch(() => {});
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.zip]);
 
   function handleReportSubscribe() {
@@ -542,16 +344,57 @@ export default function TrustButVerify(){
     if (!cleanZip || !/^\d{5}$/.test(cleanZip)) { setReportZipError('Please enter a 5-digit ZIP code'); hasErr = true; } else { setReportZipError(''); }
     if (hasErr) return;
     setReportSubmitting(true); setReportSubmitError('');
-    fetch('https://generosity-sales-engine-mvp-api.onrender.com/api/water-report/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102' }, body: JSON.stringify({ email: reportEmail.trim().toLowerCase(), zip: cleanZip, consent_text: REPORT_CONSENT_TEXT, consent_text_version: REPORT_CONSENT_VERSION, source: 'wtr_app_intel_tab', session_id: getSessionId() }) })
-      .then(r => r.json()).then(d => { setReportSubmitting(false); if (d.error) { setReportSubmitError(d.error); return; } setReportOptInStatus('pending'); setReportOptInEmail(reportEmail.trim().toLowerCase()); try { localStorage.setItem('wtr_report_status', 'pending'); localStorage.setItem('wtr_report_email', reportEmail.trim().toLowerCase()); } catch(e) {} setReportModalScreen('success'); trackEvent('water_report_subscribed', { zip: cleanZip, email: reportEmail.trim().toLowerCase() }); })
-      .catch(() => { setReportSubmitting(false); setReportSubmitError('Something went wrong. Please try again.'); });
+    fetch(`${API_BASE}/api/water-report/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': API_BEARER },
+      body: JSON.stringify({
+        email: reportEmail.trim().toLowerCase(),
+        zip: cleanZip,
+        consent_text: REPORT_CONSENT_TEXT,
+        consent_text_version: REPORT_CONSENT_VERSION,
+        source: 'wtr_app_intel_tab',
+        session_id: getSessionId()
+      })
+    })
+      .then(r => r.json())
+      .then(d => {
+        setReportSubmitting(false);
+        if (d.error) { setReportSubmitError(d.error); return; }
+        setReportOptInStatus('pending');
+        setReportOptInEmail(reportEmail.trim().toLowerCase());
+        try {
+          localStorage.setItem('wtr_report_status', 'pending');
+          localStorage.setItem('wtr_report_email', reportEmail.trim().toLowerCase());
+        } catch(e) {}
+        setReportModalScreen('success');
+        trackEvent('water_report_subscribed', { zip: cleanZip, email: reportEmail.trim().toLowerCase() });
+      })
+      .catch(() => {
+        setReportSubmitting(false);
+        setReportSubmitError('Something went wrong. Please try again.');
+      });
   }
 
   function openReportModal() {
-    setReportModalScreen('form'); setReportEmail(reportOptInEmail || email || ''); setReportZip(data?.zip || ''); setReportEmailError(''); setReportZipError(''); setReportSubmitError(''); setReportSubmitting(false); setReportModalOpen(true); trackEvent('water_report_modal_opened');
+    setReportModalScreen('form');
+    setReportEmail(reportOptInEmail || email || '');
+    setReportZip(data?.zip || '');
+    setReportEmailError('');
+    setReportZipError('');
+    setReportSubmitError('');
+    setReportSubmitting(false);
+    setReportModalOpen(true);
+    trackEvent('water_report_modal_opened');
   }
 
-  const SCAN_STEPS=["Locating water utility...","Querying EPA SDWIS database...","Cross-referencing EWG Tap Water database...","Analyzing contaminant levels...","Comparing to health guidelines...","Generating your intelligence report..."];
+  const SCAN_STEPS = [
+    "Locating water utility...",
+    "Querying EPA SDWIS database...",
+    "Cross-referencing EWG Tap Water database...",
+    "Analyzing contaminant levels...",
+    "Comparing to health guidelines...",
+    "Generating your intelligence report..."
+  ];
 
   function resolveCity(raw){
     const s=raw.trim().toLowerCase();
@@ -562,7 +405,12 @@ export default function TrustButVerify(){
   function startScan(directInput){
     const scanInput = (typeof directInput === 'string') ? directInput : input;
     setInputError("");
-    if(!scanInput || !scanInput.trim()){ setInputError(inputMode === "address" ? "Enter your address to scan" : inputMode === "zip" ? "Enter a ZIP code to scan" : "Enter a city and state to scan"); inputRef.current?.classList.add('input-error'); setTimeout(() => inputRef.current?.classList.remove('input-error'), 400); return; }
+    if(!scanInput || !scanInput.trim()){
+      setInputError(inputMode === "address" ? "Enter your address to scan" : inputMode === "zip" ? "Enter a ZIP code to scan" : "Enter a city and state to scan");
+      inputRef.current?.classList.add('input-error');
+      setTimeout(() => inputRef.current?.classList.remove('input-error'), 400);
+      return;
+    }
     if(isScanning) return;
     setIsScanning(true);
     const cleanInput = scanInput.replace(/<[^>]*>/g, '').trim().slice(0, 100);
@@ -587,11 +435,11 @@ export default function TrustButVerify(){
           const zipMatch = cleanInput.match(/\d{5}/);
           if(zipMatch){
             try {
-              const oracleRes = await fetch(`https://generosity-sales-engine-mvp-api.onrender.com/api/wtr/report?zip=${zipMatch[0]}`, { headers: { 'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102' } });
+              const oracleRes = await fetch(`${API_BASE}/api/wtr/report?zip=${zipMatch[0]}`, { headers: { 'Authorization': API_BEARER } });
               if(oracleRes.ok){
                 const report = await oracleRes.json();
                 if(report && report.utility && report.status !== 'not_found'){
-                  const cityLabel = `${report.utility} · ${zipMatch[0]}`;
+                  const cityLabel = `${report.utility} | ${zipMatch[0]}`;
                   const transformed = transformOracleReport(report, cityLabel, zipMatch[0]);
                   setData(transformed);
                   setPhase("results"); setTab("wtr-intel");
@@ -617,488 +465,1073 @@ export default function TrustButVerify(){
     trackEvent('email_captured', { city: data?.city, risk_score: data ? getRiskScore(data.contaminants) : 0, scan_phase: scanPhase });
     setTimeout(() => setEngagementPhase("push_prompt"), 2000);
     try {
-      const payload = { email: emailTrimmed, zip: input && /^\d{5}$/.test(input.trim()) ? input.trim() : null, city: data?.city || input || null, risk_score: data ? getRiskScore(data.contaminants) : 0, high_concern_contaminants: data?.contaminants?.filter(c => c.risk === 'high').map(c => c.name) || [], source: 'wtr_app', session_id: getSessionId(), address: inputMode === 'address' ? input : null, scan_phase: scanPhase };
-      const resp = await fetch('https://generosity-sales-engine-mvp-api.onrender.com/api/wtr/capture', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102' }, body: JSON.stringify(payload) });
+      const payload = {
+        email: emailTrimmed,
+        zip: input && /^\d{5}$/.test(input.trim()) ? input.trim() : null,
+        city: data?.city || input || null,
+        risk_score: data ? getRiskScore(data.contaminants) : 0,
+        high_concern_contaminants: data?.contaminants?.filter(c => c.risk === 'high').map(c => c.name) || [],
+        source: 'wtr_app',
+        session_id: getSessionId(),
+        address: inputMode === 'address' ? input : null,
+        scan_phase: scanPhase
+      };
+      const resp = await fetch(`${API_BASE}/api/wtr/capture`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': API_BEARER },
+        body: JSON.stringify(payload)
+      });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const result = await resp.json();
       if (result.prospect_id) setCapturedProspectId(result.prospect_id);
     } catch (err) {
-      try { const dlq = JSON.parse(localStorage.getItem('wtr_capture_dlq') || '[]'); dlq.push({ email: emailTrimmed, city: data?.city || input, ts: Date.now(), scan_phase: scanPhase }); localStorage.setItem('wtr_capture_dlq', JSON.stringify(dlq.slice(-20))); } catch (e) {}
+      try {
+        const dlq = JSON.parse(localStorage.getItem('wtr_capture_dlq') || '[]');
+        dlq.push({ email: emailTrimmed, city: data?.city || input, ts: Date.now(), scan_phase: scanPhase });
+        localStorage.setItem('wtr_capture_dlq', JSON.stringify(dlq.slice(-20)));
+      } catch (e) {}
       console.warn('[WTR Capture] Failed, queued for retry:', err.message);
     }
   }
 
-  const riskScore=data?getRiskScore(data.contaminants):0;
-  const highRisk=data?.contaminants.filter(c=>c.risk==="high")||[];
-  const navTabs=[{id:"tbv",label:"Trust but Verify\u2122"},{id:"wtr-intel",label:"WTR INTEL",badge:data?riskScore:null},...(founderMode?[{id:"wtr-btl",label:"WTR BTL"},{id:"wtr-hub",label:"WTR HUB"}]:[])];
+  const riskScore = data ? getRiskScore(data.contaminants) : 0;
+  const highRisk = data?.contaminants.filter(c=>c.risk==="high")||[];
+  const cityShort = data?.city?.split(",")[0] || '';
 
-  return(
-    <div style={{minHeight:"100vh",background:"#FFFFFF",fontFamily:"'Nunito','Helvetica Neue',sans-serif",maxWidth:480,margin:"0 auto",position:"relative",display:"flex",flexDirection:"column"}} data-testid="trust-but-verify-app">
+  const navTabs = [
+    { id:"tbv", label:"Trust but Verify\u2122" },
+    { id:"wtr-intel", label:"WTR INTEL", badge: data ? riskScore : null },
+    ...(founderMode ? [{ id:"wtr-btl", label:"WTR BTL" }, { id:"wtr-hub", label:"WTR HUB" }] : []),
+  ];
+
+  const headerRiskTone = riskScore > 66 ? '#B84A4A' : riskScore > 33 ? '#C89B3C' : '#4A8A6F';
+  const headerRiskBg   = riskScore > 66 ? 'rgba(184, 74, 74, 0.10)' : riskScore > 33 ? 'rgba(200, 155, 60, 0.10)' : 'rgba(74, 138, 111, 0.10)';
+
+  return (
+    <div
+      className="min-h-screen bg-surface-base mx-auto relative flex flex-col"
+      style={{ maxWidth: 480, fontFamily: 'Montserrat, sans-serif' }}
+      data-testid="trust-but-verify-app"
+    >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-        @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.8}}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
         @keyframes ripple{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(2.2);opacity:0}}
         @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-        @keyframes scanLine{0%{top:0}50%{top:calc(100% - 3px)}100%{top:0}}
+        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+        .input-error{animation:shake 0.35s ease;border-color:#B84A4A!important}
         .tbv-card{animation:slideUp 0.4s ease forwards}
-        input:focus{outline:none;border-color:#51B0E6!important;box-shadow:0 0 0 3px #51B0E622!important}
-        button:active{opacity:0.85;transform:scale(0.98)}
-        button:hover{opacity:0.95}
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
-        .input-error { animation: shake 0.35s ease; border-color: #FF3B30 !important; }
       `}</style>
 
-      {tab!=="wtr-btl"&&tab!=="wtr-hub"&&(
-      <div style={{background:"#FFFFFF",borderBottom:"1px solid #E4F1FA",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 8px rgba(166,168,171,0.12)"}} data-testid="app-header">
-        <img src="/generosity-logo.png" alt="Generosity Water Intelligence" style={{height:48,width:"auto",cursor:"pointer"}} onClick={()=>{setPhase("landing");setTab("tbv");setData(null);setSubmitted(false);setEngagementPhase("idle");setInput("");setInputError("");window.scrollTo(0,0);}} onTouchStart={()=>{founderLongPressRef.current=setTimeout(()=>setShowFounderLogin(true),3000);}} onTouchEnd={()=>{clearTimeout(founderLongPressRef.current);}} onMouseDown={()=>{founderLongPressRef.current=setTimeout(()=>setShowFounderLogin(true),3000);}} onMouseUp={()=>{clearTimeout(founderLongPressRef.current);}}/>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          {founderMode&&<div style={{background:"linear-gradient(135deg,#0A1A2E,#1a3a5c)",color:"#51B0E6",padding:"4px 8px",borderRadius:20,fontSize:8,fontWeight:800,letterSpacing:"0.5px",border:"1px solid #51B0E633",cursor:"pointer"}} onClick={handleFounderLogout} title="Tap to exit demo mode">FOUNDER</div>}
-          {data&&<div style={{background:riskScore>66?"#FFF3F2":riskScore>33?"#FFF8EE":"#F0FAF4",border:`1px solid ${riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C"}33`,color:riskScore>66?"#D93025":riskScore>33?"#F29423":"#1E8A4C",padding:"4px 10px",borderRadius:20,fontSize:10,fontWeight:800}} data-testid="header-risk-score">Score: {riskScore}</div>}
-          <button style={{width:36,height:36,borderRadius:"50%",background:"#F0F1F3",border:"1px solid #E4F1FA",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}} data-testid="profile-btn" onClick={()=>setShowProfile(true)}><Icon name="user" size={20} color="#A6A8AB"/></button>
+      {/* Header (hidden on hardware tabs) */}
+      {tab!=="wtr-btl" && tab!=="wtr-hub" && (
+        <div
+          className="sticky top-0 z-[100] bg-surface-card flex items-center justify-between"
+          style={{
+            borderBottom: '1px solid #E8EAED',
+            padding: '10px 16px',
+            boxShadow: '0 1px 2px rgba(15, 20, 25, 0.04)',
+          }}
+          data-testid="app-header"
+        >
+          <img
+            src="/generosity-logo.png"
+            alt="Generosity Water Intelligence"
+            style={{ height: 48, width: 'auto', cursor: 'pointer' }}
+            onClick={() => {
+              setPhase("landing"); setTab("tbv"); setData(null); setSubmitted(false);
+              setEngagementPhase("idle"); setInput(""); setInputError("");
+              window.scrollTo(0, 0);
+            }}
+            onTouchStart={() => { founderLongPressRef.current = setTimeout(() => setShowFounderLogin(true), 3000); }}
+            onTouchEnd={() => { clearTimeout(founderLongPressRef.current); }}
+            onMouseDown={() => { founderLongPressRef.current = setTimeout(() => setShowFounderLogin(true), 3000); }}
+            onMouseUp={() => { clearTimeout(founderLongPressRef.current); }}
+          />
+          <div className="flex items-center gap-2">
+            {founderMode && (
+              <button
+                type="button"
+                onClick={handleFounderLogout}
+                title="Tap to exit demo mode"
+                className="text-micro font-bold uppercase tracking-widest rounded-pill cursor-pointer"
+                style={{
+                  background: '#0F1419',
+                  color: '#51B0E6',
+                  padding: '4px 10px',
+                  border: '1px solid rgba(81, 176, 230, 0.30)',
+                }}
+              >
+                FOUNDER
+              </button>
+            )}
+            {data && (
+              <div
+                data-testid="header-risk-score"
+                className="text-caption font-bold rounded-pill"
+                style={{
+                  background: headerRiskBg,
+                  color: headerRiskTone,
+                  padding: '4px 10px',
+                  border: `1px solid ${headerRiskTone}33`,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                Score: {riskScore}
+              </div>
+            )}
+            <button
+              type="button"
+              data-testid="profile-btn"
+              onClick={() => setShowProfile(true)}
+              className="rounded-full flex items-center justify-center cursor-pointer"
+              style={{
+                width: 36,
+                height: 36,
+                background: '#F0F1F3',
+                border: '1px solid #E8EAED',
+              }}
+              aria-label="Profile"
+            >
+              <Icon name="user" size={20} color="#A6A8AB" />
+            </button>
+          </div>
         </div>
-      </div>
       )}
 
-      <div style={{flex:1,overflowY:"auto",paddingBottom:80}}>
-        {tab==="tbv"&&(
+      <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
+        {/* ═══════════════════════ TBV TAB ═══════════════════════ */}
+        {tab === "tbv" && (
           <div data-testid="tbv-tab">
-            <div style={{padding:"14px 16px 0",position:"sticky",top:0,zIndex:50,background:"#FFFFFF"}}>
-              <div data-testid="tbv-toggle" style={{display:"flex",background:"#F0F1F3",borderRadius:12,padding:3,gap:3}}>
-                {[{id:"home",label:"Home Water"},{id:"scan",label:"Bottle Scan"}].map(v=>{
-                  const on=tbvView===v.id;
-                  return(<button key={v.id} onClick={()=>setTbvView(v.id)} data-testid={`tbv-toggle-${v.id}`} style={{flex:1,padding:"9px 0",borderRadius:10,border:"none",background:on?"#FFFFFF":"transparent",color:on?"#0A1A2E":"#A6A8AB",fontSize:12,fontWeight:on?800:600,cursor:"pointer",boxShadow:on?"0 1px 4px rgba(0,0,0,0.1)":"none",transition:"all 0.2s ease"}}>{v.label}</button>);
-                })}
-              </div>
+            <div className="sticky top-0 z-[50] bg-surface-base" style={{ padding: '14px 16px 0' }}>
+              <SegmentedToggle
+                testId="tbv-toggle"
+                value={tbvView}
+                onChange={setTbvView}
+                options={[
+                  { id: "home", label: "Home Water" },
+                  { id: "scan", label: "Bottle Scan" },
+                ]}
+              />
             </div>
 
-            {tbvView==="home"&&phase==="landing"&&(
-              <div style={{padding:"44px 20px 20px"}} data-testid="home-landing">
-                <div style={{textAlign:"center",marginBottom:32}}>
-                  <h1 style={{fontSize:24,fontWeight:900,color:"#0A1A2E",lineHeight:1.1,marginBottom:10,letterSpacing:"-1px",whiteSpace:"nowrap"}}>What's <span style={{color:"#51B0E6"}}>actually</span> in your water?</h1>
-                  <p style={{fontSize:13,color:"#A6A8AB",lineHeight:1.5,maxWidth:360,margin:"0 auto 18px"}}>Get a free water intelligence report — see every contaminant detected at <strong style={{color:"#0A1A2E"}}>your exact address</strong>, and the long-term risks if nothing changes.</p>
-                  <div style={{display:"flex",background:"#F0F1F3",borderRadius:10,padding:3,maxWidth:320,margin:"0 auto 10px",gap:2}} data-testid="input-mode-toggle">
-                    {[{id:"address",iconName:"home",label:"My Address"},{id:"zip",iconName:"pin",label:"ZIP Code"},{id:"city",iconName:"city",label:"City"}].map(m=>(
-                      <button key={m.id} onClick={()=>{setInputMode(m.id);setInput("");}} data-testid={`input-mode-${m.id}`} style={{flex:1,background:inputMode===m.id?"#FFFFFF":"transparent",border:inputMode===m.id?"1px solid #C8E2F4":"1px solid transparent",borderRadius:8,padding:"5px 3px",fontSize:8,fontWeight:inputMode===m.id?800:500,color:inputMode===m.id?"#51B0E6":"#A6A8AB",cursor:"pointer",boxShadow:inputMode===m.id?"0 1px 4px rgba(81,176,230,0.12)":"none",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
-                        <Icon name={m.iconName} size={11} color={inputMode===m.id?"#51B0E6":"#A6A8AB"}/>{m.label}
+            {/* Landing */}
+            {tbvView === "home" && phase === "landing" && (
+              <div style={{ padding: '44px 20px 20px' }} data-testid="home-landing">
+                <div className="text-center" style={{ marginBottom: 32 }}>
+                  <h1
+                    className="font-display font-semibold text-text-primary"
+                    style={{ fontSize: 28, lineHeight: 1.1, marginBottom: 10, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}
+                  >
+                    What's <span className="text-brand">actually</span> in your water?
+                  </h1>
+                  <p
+                    className="text-body text-text-secondary mx-auto"
+                    style={{ maxWidth: 360, lineHeight: 1.5, marginBottom: 18 }}
+                  >
+                    Get a free water intelligence report. See every contaminant detected at <strong className="text-text-primary">your exact address</strong>, and the long-term risks if nothing changes.
+                  </p>
+
+                  <div style={{ maxWidth: 320, margin: '0 auto 12px' }}>
+                    <SegmentedToggle
+                      testId="input-mode-toggle"
+                      size="small"
+                      value={inputMode}
+                      onChange={(v) => { setInputMode(v); setInput(""); }}
+                      options={[
+                        { id: "address", label: "My Address", icon: <Icon name="home" size={11} color={inputMode === "address" ? "#51B0E6" : "#A6A8AB"} /> },
+                        { id: "zip",     label: "ZIP Code",   icon: <Icon name="pin"  size={11} color={inputMode === "zip"     ? "#51B0E6" : "#A6A8AB"} /> },
+                        { id: "city",    label: "City",       icon: <Icon name="city" size={11} color={inputMode === "city"    ? "#51B0E6" : "#A6A8AB"} /> },
+                      ]}
+                    />
+                  </div>
+
+                  {/* Input + SCAN suffix button */}
+                  <div style={{ maxWidth: 380, margin: '0 auto' }}>
+                    <Input
+                      ref={inputRef}
+                      testId="address-input"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && startScan()}
+                      placeholder={
+                        inputMode === "address"
+                          ? "e.g. 1234 Maple St, Chicago IL"
+                          : inputMode === "zip"
+                          ? "e.g. 60601, 78701, 90210"
+                          : "e.g. Chicago, IL"
+                      }
+                      error={inputError}
+                      suffix={
+                        <button
+                          type="button"
+                          onClick={() => startScan()}
+                          data-testid="scan-btn"
+                          className="bg-brand text-text-onAccent font-semibold uppercase tracking-wider cursor-pointer flex items-center gap-1.5"
+                          style={{
+                            padding: '0 16px',
+                            fontSize: 12,
+                            border: 'none',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          SCAN <Icon name="scan" size={14} color="#FFFFFF" />
+                        </button>
+                      }
+                    />
+                  </div>
+
+                  <div className="text-text-quaternary" style={{ fontSize: 9, marginTop: 8 }}>
+                    EPA SDWIS + UCMR 5 Report
+                  </div>
+                </div>
+
+                {/* Stat row */}
+                <div className="grid grid-cols-3 gap-1.5" style={{ marginBottom: 14 }}>
+                  {[
+                    ["200M+", "Americans exposed to PFAS", "USGS 2023"],
+                    ["94%", "tap water has microplastics", "ORB Media / Columbia"],
+                    ["$0", "to get your report", ""],
+                  ].map(([n, t, src]) => (
+                    <div
+                      key={n}
+                      className="bg-surface-card rounded-card text-center"
+                      style={{ padding: '12px 6px', boxShadow: '0 1px 2px rgba(15, 20, 25, 0.04), 0 0 0 1px rgba(15, 20, 25, 0.03)' }}
+                    >
+                      <div
+                        className="font-display font-semibold text-brand leading-none"
+                        style={{ fontSize: 18, fontVariantNumeric: 'tabular-nums' }}
+                      >
+                        {n}
+                      </div>
+                      <div className="text-text-tertiary mt-1" style={{ fontSize: 9, lineHeight: 1.3 }}>
+                        {t}
+                      </div>
+                      {src && (
+                        <div className="text-text-quaternary mt-0.5" style={{ fontSize: 8, fontStyle: 'italic' }}>
+                          {src}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Popular cities */}
+                <div className="text-center">
+                  <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary" style={{ marginBottom: 8 }}>
+                    POPULAR CITIES
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 justify-center" data-testid="popular-cities">
+                    {Object.keys(CITY_DATA).map((city) => (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => { setInput(city); setInputMode("city"); startScan(city); }}
+                        data-testid={`city-btn-${city.toLowerCase().replace(/[,\s]+/g, '-')}`}
+                        className="bg-surface-card text-brand font-semibold rounded-pill cursor-pointer"
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: 11,
+                          border: '1px solid #C8E2F4',
+                        }}
+                      >
+                        {city}
                       </button>
                     ))}
                   </div>
-                  <div style={{display:"flex",gap:0,borderRadius:12,overflow:"hidden",border:"2px solid #51B0E6",boxShadow:"0 4px 18px rgba(81,176,230,0.14)",maxWidth:380,margin:"0 auto"}}>
-                    <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&startScan()} placeholder={inputMode==="address"?"e.g. 1234 Maple St, Chicago IL":inputMode==="zip"?"e.g. 60601, 78701, 90210...":"e.g. Chicago, IL"} data-testid="address-input" style={{flex:1,padding:"13px 15px",border:"none",fontSize:13,color:"#0A1A2E",background:"#FFFFFF",fontFamily:"inherit"}}/>
-                    <button onClick={startScan} data-testid="scan-btn" style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"13px 16px",fontSize:11,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5}}>SCAN <Icon name="scan" size={14} color="#FFFFFF"/></button>
+                </div>
+              </div>
+            )}
+
+            {/* Scanning */}
+            {tbvView === "home" && phase === "scanning" && (
+              <div className="mx-auto" style={{ maxWidth: 360, margin: '60px auto', padding: '0 20px', textAlign: 'center' }} data-testid="home-scanning">
+                <div className="relative mx-auto" style={{ width: 80, height: 80, marginBottom: 22 }}>
+                  <div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background: 'rgba(81, 176, 230, 0.12)',
+                      border: '2px solid rgba(81, 176, 230, 0.30)',
+                      animation: 'ripple 1.4s ease-out infinite',
+                    }}
+                  />
+                  <div
+                    className="rounded-full flex items-center justify-center relative z-[1]"
+                    style={{
+                      width: 80,
+                      height: 80,
+                      background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)',
+                    }}
+                  >
+                    <Icon name="droplet" size={36} color="#FFFFFF" />
                   </div>
-                  {inputError&&<div style={{fontSize:10,color:"#D93025",marginTop:6,fontWeight:600}} data-testid="input-error">{inputError}</div>}
-                  <div style={{fontSize:8,color:"#D0D2D6",marginTop:8}}>EPA SDWIS + UCMR 5 Report</div>
                 </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:14}}>
-                  {[["200M+","Americans exposed to PFAS","USGS 2023"],["94%","tap water has microplastics","ORB Media / Columbia"],["$0","to get your report",""]].map(([n,t,src])=>(
-                    <div key={n} style={{background:"#F8F9FB",border:"1px solid #ECEEF1",borderRadius:8,padding:"10px 6px",textAlign:"center"}}>
-                      <div style={{fontSize:15,fontWeight:800,color:"#51B0E6",lineHeight:1}}>{n}</div>
-                      <div style={{fontSize:8,color:"#B0B3B8",marginTop:3,lineHeight:1.3}}>{t}</div>
-                      {src&&<div style={{fontSize:6,color:"#D0D2D6",marginTop:2,fontStyle:"italic"}}>{src}</div>}
+                <h2 className="font-display font-semibold text-text-primary flex items-center justify-center gap-2" style={{ fontSize: 22, marginBottom: 18 }}>
+                  <Icon name={inputMode === "address" ? "home" : inputMode === "zip" ? "pin" : "city"} size={20} color="#51B0E6" />
+                  {inputMode === "address" ? "Scanning your address" : inputMode === "zip" ? "Scanning ZIP code" : `Analyzing ${input}`}
+                </h2>
+                <div className="bg-surface-card rounded-card overflow-hidden" style={{ boxShadow: '0 1px 2px rgba(15, 20, 25, 0.04), 0 0 0 1px rgba(15, 20, 25, 0.03)' }} data-testid="scan-steps">
+                  {SCAN_STEPS.map((msg, i) => {
+                    const done = i < scanStep;
+                    const active = i === scanStep;
+                    return (
+                      <div
+                        key={i}
+                        data-testid={`scan-step-${i}`}
+                        className="flex items-center gap-2.5"
+                        style={{
+                          padding: '10px 14px',
+                          background: done ? 'rgba(74, 138, 111, 0.06)' : active ? 'rgba(81, 176, 230, 0.06)' : 'transparent',
+                          borderBottom: i < SCAN_STEPS.length - 1 ? '1px solid #E8EAED' : 'none',
+                          fontSize: 12,
+                          color: done ? '#4A8A6F' : active ? '#51B0E6' : '#A6A8AB',
+                          fontWeight: active ? 600 : 400,
+                          transition: 'all 0.3s',
+                        }}
+                      >
+                        {done ? (
+                          <Icon name="check" size={16} color="#4A8A6F" />
+                        ) : active ? (
+                          <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #51B0E6', borderTopColor: 'transparent', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
+                        ) : (
+                          <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #C8E2F4', display: 'inline-block' }} />
+                        )}
+                        {msg}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Not found */}
+            {phase === "not_found" && (
+              <div className="mx-auto" style={{ maxWidth: 360, margin: '40px auto', padding: '0 20px', textAlign: 'center' }} data-testid="not-found">
+                <div
+                  className="rounded-full flex items-center justify-center mx-auto"
+                  style={{
+                    width: 60,
+                    height: 60,
+                    background: 'rgba(200, 155, 60, 0.10)',
+                    border: '2px solid rgba(200, 155, 60, 0.30)',
+                    marginBottom: 16,
+                  }}
+                >
+                  <Icon name="pin" size={28} color="#C89B3C" />
+                </div>
+                <h2 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 8 }}>
+                  We don't have data for this location yet
+                </h2>
+                <p className="text-body text-text-secondary" style={{ marginBottom: 18, lineHeight: 1.6 }}>
+                  Enter your email and we'll notify you when data is available. We're adding 50 new cities monthly.
+                </p>
+                {!submitted ? (
+                  <div className="mx-auto" style={{ maxWidth: 300 }}>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
+                      placeholder="Your email address"
+                      error={emailError}
+                      testId="not-found-email-input"
+                      className="mb-2"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleEmailSubmit('not_found')}
+                      data-testid="not-found-submit-btn"
+                      className="w-full bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
+                      style={{ padding: 12, fontSize: 13, border: 'none' }}
+                    >
+                      NOTIFY ME WHEN AVAILABLE →
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center" data-testid="not-found-success" style={{ padding: '10px 0' }}>
+                    <div style={{ marginBottom: 5 }}>
+                      <Icon name="checkCircle" size={28} />
                     </div>
-                  ))}
-                </div>
-                <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:8,color:"#C5C6C8",marginBottom:6,letterSpacing:"1px"}}>POPULAR CITIES</div>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center"}} data-testid="popular-cities">
-                    {Object.keys(CITY_DATA).map(city=>(
-                      <button key={city} onClick={()=>{setInput(city);setInputMode("city");startScan(city);}} data-testid={`city-btn-${city.toLowerCase().replace(/[,\s]+/g,'-')}`} style={{background:"#FFFFFF",border:"1px solid #E0E7EE",color:"#2A8FCA",padding:"4px 10px",borderRadius:16,fontSize:9,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>{city}</button>
+                    <div className="font-semibold text-state-positive" style={{ fontSize: 13 }}>You're on the list.</div>
+                    <div className="text-text-tertiary mt-1" style={{ fontSize: 11 }}>We'll email you when data for this area is ready.</div>
+                  </div>
+                )}
+                <div style={{ marginTop: 24 }}>
+                  <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary" style={{ marginBottom: 8 }}>
+                    TRY A COVERED CITY
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    {Object.keys(CITY_DATA).map((city) => (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => { setInput(city); setInputMode("city"); setPhase("landing"); setTimeout(() => startScan(city), 100); }}
+                        className="bg-surface-card text-brand font-semibold rounded-pill cursor-pointer"
+                        style={{ padding: '6px 12px', fontSize: 11, border: '1px solid #C8E2F4' }}
+                      >
+                        {city}
+                      </button>
                     ))}
                   </div>
                 </div>
               </div>
             )}
 
-            {tbvView==="home"&&phase==="scanning"&&(
-              <div style={{maxWidth:360,margin:"60px auto",padding:"0 20px",textAlign:"center"}} data-testid="home-scanning">
-                <div style={{position:"relative",width:80,height:80,margin:"0 auto 22px"}}>
-                  <div style={{position:"absolute",inset:0,borderRadius:"50%",background:"#51B0E620",border:"2px solid #51B0E644",animation:"ripple 1.4s ease-out infinite"}}/>
-                  <div style={{width:80,height:80,borderRadius:"50%",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",zIndex:1}}><Icon name="droplet" size={36} color="#FFFFFF"/></div>
-                </div>
-                <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:18,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                  <Icon name={inputMode==="address"?"home":inputMode==="zip"?"pin":"city"} size={20} color="#51B0E6"/>
-                  {inputMode==="address"?"Scanning your address...":inputMode==="zip"?"Scanning ZIP code...":`Analyzing ${input}`}
-                </h2>
-                <div style={{background:"#FFFFFF",borderRadius:12,border:"1px solid #C8E2F4",overflow:"hidden"}} data-testid="scan-steps">
-                  {SCAN_STEPS.map((msg,i)=>(
-                    <div key={i} data-testid={`scan-step-${i}`} style={{padding:"10px 14px",display:"flex",alignItems:"center",gap:10,background:i<scanStep?"#F0FFF4":i===scanStep?"#EDF6FC":"transparent",borderBottom:"1px solid #C8E2F4",fontSize:12,color:i<scanStep?"#1E8A4C":i===scanStep?"#51B0E6":"#C5C6C8",fontWeight:i===scanStep?700:400,transition:"all 0.3s"}}>
-                      {i<scanStep?<Icon name="check" size={16} color="#1E8A4C"/>:i===scanStep?<span style={{width:16,height:16,borderRadius:"50%",border:"2px solid #51B0E6",borderTopColor:"transparent",animation:"spin 1s linear infinite",display:"inline-block"}}/>:<span style={{width:16,height:16,borderRadius:"50%",border:"2px solid #C5C6C8",display:"inline-block"}}/>}
-                      {msg}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {phase==="not_found"&&(
-              <div style={{maxWidth:360,margin:"40px auto",padding:"0 20px",textAlign:"center"}} data-testid="not-found">
-                <div style={{width:60,height:60,borderRadius:"50%",background:"#FFF8EE",border:"2px solid #F2942344",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}><Icon name="pin" size={28} color="#F29423"/></div>
-                <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:8}}>We don't have data for this location yet</h2>
-                <p style={{fontSize:12,color:"#A6A8AB",lineHeight:1.6,marginBottom:18}}>Enter your email and we'll notify you when data is available. We're adding 50 new cities monthly.</p>
-                {!submitted?(
-                  <div style={{maxWidth:300,margin:"0 auto"}}>
-                    <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailError("");}} placeholder="Your email address" data-testid="not-found-email-input" style={{width:"100%",padding:"11px 13px",borderRadius:8,border:"1px solid #C8E2F4",fontSize:12,fontFamily:"inherit",background:"#FFFFFF",color:"#0A1A2E",marginBottom:8,boxSizing:"border-box"}}/>
-                    {emailError&&<div style={{fontSize:10,color:"#D93025",marginBottom:6,textAlign:"left"}}>{emailError}</div>}
-                    <button onClick={()=>handleEmailSubmit('not_found')} data-testid="not-found-submit-btn" style={{width:"100%",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer",boxSizing:"border-box"}}>NOTIFY ME WHEN AVAILABLE →</button>
-                  </div>
-                ):(
-                  <div style={{textAlign:"center",padding:"10px 0"}} data-testid="not-found-success">
-                    <div style={{fontSize:22,marginBottom:5}}>✓</div>
-                    <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>You're on the list!</div>
-                    <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>We'll email you when data for this area is ready.</div>
-                  </div>
-                )}
-                <div style={{marginTop:24}}>
-                  <div style={{fontSize:9,color:"#A6A8AB",marginBottom:8}}>TRY A COVERED CITY</div>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center"}}>
-                    {Object.keys(CITY_DATA).map(city=>(<button key={city} onClick={()=>{setInput(city);setInputMode("city");setPhase("landing");setTimeout(()=>startScan(city),100);}} style={{background:"#FFFFFF",border:"1px solid #E0E7EE",color:"#2A8FCA",padding:"4px 10px",borderRadius:16,fontSize:9,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>{city}</button>))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {tbvView==="scan"&&(
+            {/* Bottle scan delegation */}
+            {tbvView === "scan" && (
               <div data-testid="bottle-tab">
-                <div style={{padding:"18px 20px",textAlign:"center"}}>
-                  <div style={{fontSize:10,color:"#51B0E6",letterSpacing:"2px",marginBottom:5}}>BOTTLE INTELLIGENCE</div>
-                  <h2 style={{fontSize:20,fontWeight:900,marginBottom:4,letterSpacing:"-0.5px",color:"#1A2B3C"}}>What's in your bottle?</h2>
-                  <p style={{fontSize:11,color:"#64748B",maxWidth:280,margin:"0 auto"}}>Scan any plastic water bottle to see its full contamination profile.</p>
+                <div className="text-center" style={{ padding: '18px 20px' }}>
+                  <div className="text-micro uppercase tracking-widest font-semibold text-brand" style={{ marginBottom: 5 }}>
+                    BOTTLE INTELLIGENCE
+                  </div>
+                  <h2 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 4, letterSpacing: '-0.01em' }}>
+                    What's in your bottle?
+                  </h2>
+                  <p className="text-caption text-text-secondary mx-auto" style={{ maxWidth: 280 }}>
+                    Scan any plastic water bottle to see its full contamination profile.
+                  </p>
                 </div>
-                <BottleScanView onBridge={()=>{setTbvView("home");setPhase("landing");}}/>
+                <BottleScanView onBridge={() => { setTbvView("home"); setPhase("landing"); }} />
               </div>
             )}
           </div>
         )}
 
-        {tab==="wtr-intel"&&(
+        {/* ═══════════════════════ WTR INTEL TAB ═══════════════════════ */}
+        {tab === "wtr-intel" && (
           <div data-testid="insights-tab">
-            <div style={{padding:"14px 16px 0",position:"sticky",top:0,zIndex:50,background:"#FFFFFF"}}>
-              <div data-testid="insights-toggle" style={{display:"flex",background:"#F0F1F3",borderRadius:12,padding:3,gap:3}}>
-                {[{id:"report",label:"Report",badge:data?riskScore:null},{id:"learn",label:"Learn"}].map(v=>{
-                  const on=insightView===v.id;
-                  return(<button key={v.id} onClick={()=>setInsightView(v.id)} data-testid={`insights-toggle-${v.id}`} style={{flex:1,padding:"9px 0",borderRadius:10,border:"none",background:on?"#FFFFFF":"transparent",color:on?"#0A1A2E":"#A6A8AB",fontSize:12,fontWeight:on?800:600,cursor:"pointer",boxShadow:on?"0 1px 4px rgba(0,0,0,0.1)":"none",transition:"all 0.2s ease",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                    {v.label}
-                    {v.badge!=null&&<span style={{background:on?"linear-gradient(135deg,#51B0E6,#2A8FCA)":"#E4F1FA",color:on?"#FFFFFF":"#51B0E6",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:20,minWidth:18,textAlign:"center"}}>{v.badge}</span>}
-                  </button>);
-                })}
-              </div>
+            <div className="sticky top-0 z-[50] bg-surface-base" style={{ padding: '14px 16px 0' }}>
+              <SegmentedToggle
+                testId="insights-toggle"
+                value={insightView}
+                onChange={setInsightView}
+                options={[
+                  { id: "report", label: "Report", badge: data ? riskScore : null },
+                  { id: "learn", label: "Learn" },
+                ]}
+              />
             </div>
 
-            {insightView==="report"&&data&&(
-              <div style={{padding:"14px 16px 20px"}} data-testid="report-tab">
-                <div className="tbv-card" style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:18,padding:"18px",marginBottom:12,color:"#FFFFFF",position:"relative",overflow:"hidden"}}>
-                  <div style={{position:"absolute",top:-30,right:-30,width:110,height:110,borderRadius:"50%",background:"#51B0E60D"}}/>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:3}}>TRUST BUT VERIFY™ REPORT</div>
-                      <h2 style={{fontSize:20,fontWeight:900,margin:"0 0 2px",letterSpacing:"-0.5px"}} data-testid="report-city">{data.city}</h2>
-                      {input&&inputMode!=="city"&&(
-                        <div style={{fontSize:9,color:"#51B0E6",marginBottom:3,fontWeight:700}}>
-                          {inputMode==="address"?(<><span style={{display:'inline-flex',verticalAlign:'middle'}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10"/></svg></span>{' '}{input}</>):(<><span style={{display:'inline-flex',verticalAlign:'middle'}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></span>{' ZIP '}{input}</>)}
-                        </div>
-                      )}
-                      <div style={{fontSize:10,color:"#94A3B8",marginBottom:8}}>{data.utility} · {data.source}</div>
-                      <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-                        <span style={{fontSize:9,color:"#CBD5E1"}}>TDS: <strong style={{color:"#51B0E6"}}>{data.tds}</strong></span>
-                        <span style={{fontSize:9,color:"#CBD5E1"}}>pH: <strong style={{color:"#51B0E6"}}>{data.ph}</strong></span>
-                        <span style={{fontSize:9,color:"#CBD5E1"}}>Hardness: <strong style={{color:"#51B0E6"}}>{data.hardness}</strong></span>
-                      </div>
+            {/* Report */}
+            {insightView === "report" && data && (
+              <div style={{ padding: '14px 16px 20px' }} data-testid="report-tab">
+                {/* Hero report card */}
+                <HeroCard
+                  testId="report-hero"
+                  className="tbv-card mb-3"
+                  eyebrow="TRUST BUT VERIFY™ REPORT"
+                  title={data.city}
+                  subtitle={`${data.utility}. ${data.source}.`}
+                  metadata={[
+                    { label: "TDS",      value: data.tds ?? '—' },
+                    { label: "pH",       value: data.ph ?? '—' },
+                    { label: "Hardness", value: data.hardness ?? '—' },
+                  ]}
+                  rightRail={<RiskGauge score={riskScore} animated={gaugeOn} />}
+                >
+                  {input && inputMode !== "city" && (
+                    <div className="text-caption text-text-tertiary flex items-center gap-1.5">
+                      <Icon name={inputMode === "address" ? "home" : "pin"} size={12} color="#8A8E93" />
+                      {inputMode === "address" ? input : `ZIP ${input}`}
                     </div>
-                    <RiskGauge score={riskScore} animated={gaugeOn}/>
-                  </div>
-                </div>
+                  )}
+                </HeroCard>
 
-                {highRisk.length>0&&(
-                  <div style={{background:"#FFF3F2",border:"1px solid #D9302533",borderLeft:"4px solid #D93025",borderRadius:10,padding:"11px 14px",marginBottom:10,animation:"slideUp 0.4s 0.1s ease forwards",opacity:0,display:"flex",alignItems:"flex-start",gap:10}} data-testid="high-risk-alert">
-                    <Icon name="hazard" size={18} color="#D93025"/>
+                {/* High-risk alert */}
+                {highRisk.length > 0 && (
+                  <div
+                    className="rounded-card flex items-start gap-2.5 mb-3"
+                    style={{
+                      background: 'rgba(184, 74, 74, 0.06)',
+                      border: '1px solid rgba(184, 74, 74, 0.20)',
+                      borderLeft: '4px solid #B84A4A',
+                      padding: '11px 14px',
+                      animation: 'slideUp 0.4s 0.1s ease forwards',
+                      opacity: 0,
+                    }}
+                    data-testid="high-risk-alert"
+                  >
+                    <Icon name="hazard" size={18} color="#B84A4A" />
                     <div>
-                      <div style={{fontSize:10,fontWeight:800,color:"#D93025",marginBottom:3}}>{highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length>1?"S":""} FOUND</div>
-                      <div style={{fontSize:10,color:"#742A2A"}}>{highRisk.map(c=>c.name).join(" · ")} — levels exceed health guidelines</div>
+                      <div className="font-bold text-state-critical" style={{ fontSize: 11, marginBottom: 3 }}>
+                        {highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length > 1 ? "S" : ""} FOUND
+                      </div>
+                      <div className="text-caption text-text-secondary">
+                        {highRisk.map(c => c.name).join(" • ")}. Levels exceed health guidelines.
+                      </div>
                     </div>
                   </div>
                 )}
 
+                {/* Monthly Report opt-in card */}
                 {reportOptInStatus === 'confirmed' ? (
-                  <div style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 16px",display:"flex",gap:12,alignItems:"center",marginBottom:12}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#51B0E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:"#FFFFFF",lineHeight:1.3}}>Monthly Water Report — {data.city?.split(",")[0]}</div><div style={{fontSize:9,color:"#A6A8AB",marginTop:2}}>Your report arrives the 1st of every month</div></div>
-                    <span style={{color:"#51B0E6",fontSize:9,fontWeight:700,letterSpacing:"0.5px",textTransform:"uppercase"}}>ENROLLED</span>
+                  <div className="bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
+                    <Icon name="checkCircle" size={22} />
+                    <div className="flex-1">
+                      <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>Monthly Water Report. {cityShort}.</div>
+                      <div className="text-text-tertiary mt-0.5" style={{ fontSize: 11 }}>Your report arrives the 1st of every month.</div>
+                    </div>
+                    <span className="text-micro uppercase tracking-wider font-bold text-state-positive">ENROLLED</span>
                   </div>
                 ) : reportOptInStatus === 'pending' ? (
-                  <div style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 16px",display:"flex",gap:12,alignItems:"center",marginBottom:12}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FACC15" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:"#FFFFFF",lineHeight:1.3}}>Check Your Email</div><div style={{fontSize:9,color:"#A6A8AB",marginTop:2}}>Click the confirmation link we sent to {reportOptInEmail}</div></div>
-                    <button onClick={openReportModal} style={{background:"none",border:"none",color:"#51B0E6",fontSize:9,fontWeight:700,letterSpacing:"0.5px",textTransform:"uppercase",cursor:"pointer",padding:0}}>RESEND</button>
+                  <div className="bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
+                    <div className="rounded-full flex items-center justify-center" style={{ width: 32, height: 32, background: 'rgba(200, 155, 60, 0.12)' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C89B3C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>Check Your Email</div>
+                      <div className="text-text-tertiary mt-0.5" style={{ fontSize: 11 }}>Click the confirmation link sent to {reportOptInEmail}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openReportModal}
+                      className="text-brand font-bold uppercase tracking-wider cursor-pointer"
+                      style={{ background: 'none', border: 'none', fontSize: 11, padding: 0 }}
+                    >
+                      RESEND
+                    </button>
                   </div>
                 ) : (
-                  <div onClick={openReportModal} style={{background:"linear-gradient(135deg,#0A1A2E,#0E2A50)",borderRadius:12,padding:"12px 16px",display:"flex",gap:12,alignItems:"center",marginBottom:12,cursor:"pointer"}}>
-                    <Icon name="bell" size={20} color="#51B0E6"/>
-                    <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:"#FFFFFF",lineHeight:1.3}}>Monthly Water Report — {data.city?.split(",")[0]}</div><div style={{fontSize:9,color:"#A6A8AB",marginTop:2}}>Get your personalized report every month, free</div></div>
-                    <button onClick={(e)=>{e.stopPropagation();openReportModal();}} style={{background:"#51B0E6",color:"#fff",border:"none",padding:"7px 12px",borderRadius:7,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",minHeight:44,minWidth:44,display:"flex",alignItems:"center",justifyContent:"center"}} aria-label="Enable monthly water report">ENABLE</button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={openReportModal}
+                    className="w-full bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3 cursor-pointer text-left"
+                    style={{ padding: '12px 16px', border: 'none' }}
+                  >
+                    <Icon name="bell" size={22} color="#51B0E6" />
+                    <div className="flex-1">
+                      <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>Monthly Water Report. {cityShort}.</div>
+                      <div className="text-text-tertiary mt-0.5" style={{ fontSize: 11 }}>Get your personalized report every month, free.</div>
+                    </div>
+                    <span
+                      className="bg-brand text-text-onAccent font-bold uppercase tracking-wider rounded-card flex items-center justify-center"
+                      style={{ padding: '7px 14px', fontSize: 11, minHeight: 36 }}
+                    >
+                      ENABLE
+                    </span>
+                  </button>
                 )}
 
-                <div style={{fontSize:9,fontWeight:800,color:"#A6A8AB",letterSpacing:"1.5px",marginBottom:8}}>CONTAMINANTS IN {data.city?.toUpperCase().split(",")[0]}</div>
-                <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:14}} data-testid="contaminants-list">
-                  {data.contaminants.map((c,i)=>(
-                    <div key={c.name} data-testid={`contaminant-${c.name.toLowerCase().replace(/[()]/g,'').replace(/\s+/g,'-')}`} style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderLeft:`3px solid ${RISK_COLOR[c.risk]}`,borderRadius:10,padding:"11px 13px",animation:`slideUp 0.4s ${i*0.06}s ease forwards`,opacity:0}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                        <div style={{flex:1}}>
-                          <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3,flexWrap:"wrap"}}>
-                            <span style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>{c.name}</span>
-                            <span style={{fontSize:8,fontWeight:700,color:RISK_COLOR[c.risk],background:RISK_BG[c.risk],padding:"1px 6px",borderRadius:10}}>{RISK_LABEL[c.risk]}</span>
-                            <span style={{fontSize:8,color:"#A6A8AB",background:"#F0F1F3",padding:"1px 6px",borderRadius:10}}>{c.category}</span>
-                          </div>
-                          <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.5}}>{c.detail}</div>
+                {/* Contaminants list */}
+                <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary mb-2">
+                  CONTAMINANTS IN {cityShort.toUpperCase()}
+                </div>
+                <div className="flex flex-col gap-2 mb-4" data-testid="contaminants-list">
+                  {data.contaminants.map((c, i) => (
+                    <div
+                      key={c.name}
+                      style={{ animation: `slideUp 0.4s ${i * 0.06}s ease forwards`, opacity: 0 }}
+                    >
+                      <ContaminantCard
+                        testId={`contaminant-${c.name.toLowerCase().replace(/[()]/g, '').replace(/\s+/g, '-')}`}
+                        name={c.name}
+                        risk={c.risk}
+                        category={c.category}
+                        detail={c.detail}
+                        level={typeof c.level !== 'object' ? c.level : null}
+                        unit={c.unit}
+                        limit={c.limit}
+                        isViolation={c.isViolation}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Health calculator */}
+                <HealthCalc city={data.city} riskScore={riskScore} />
+
+                {/* The Solution hero (replaces navy gradient) */}
+                <HeroCard
+                  className="mb-3"
+                  eyebrow="THE SOLUTION"
+                  title="Trust but Verify™ Your Water."
+                  subtitle={`The Home WTR Hub removes every contaminant found in ${cityShort}'s water, at the tap, in real time.`}
+                >
+                  
+                    href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}&discount=WELCOME100`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackEvent('shopify_cta_clicked', { city: data?.city, risk_score: riskScore, discount_code: 'WELCOME100' })}
+                    className="block w-full bg-brand text-text-onAccent text-center font-semibold rounded-card no-underline"
+                    style={{ padding: '14px 20px', fontSize: 14 }}
+                  >
+                    GET THE HOME WTR HUB →
+                  </a>
+                  <div className="flex flex-wrap gap-3 justify-center mt-3">
+                    {["30-Day Guarantee", "30-Min Install", "Financing Available"].map((t) => (
+                      <div key={t} className="flex items-center gap-1 text-caption text-text-tertiary">
+                        <Icon name="check" size={12} color="#4A8A6F" />
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                </HeroCard>
+
+                {/* What gets removed list */}
+                <div className="bg-surface-card rounded-card shadow-card overflow-hidden mb-3">
+                  <div className="flex items-center justify-between" style={{ padding: '12px 16px', borderBottom: '1px solid #E8EAED' }}>
+                    <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>
+                      Home WTR Hub. What Gets Removed.
+                    </div>
+                    <div className="text-micro uppercase tracking-widest text-brand font-semibold">{cityShort.toUpperCase()}</div>
+                  </div>
+                  {data.contaminants.map((c, i) => {
+                    const rColor = c.risk === 'high' ? '#B84A4A' : c.risk === 'medium' ? '#C89B3C' : '#4A8A6F';
+                    return (
+                      <div
+                        key={c.name}
+                        className="grid items-center"
+                        style={{
+                          gridTemplateColumns: '1fr auto auto',
+                          padding: '10px 16px',
+                          gap: 8,
+                          borderBottom: i < data.contaminants.length - 1 ? '1px solid #F0F1F3' : 'none',
+                          background: i % 2 === 0 ? '#FFFFFF' : '#F7F8FA',
+                        }}
+                      >
+                        <div>
+                          <span className="font-semibold text-text-primary" style={{ fontSize: 12 }}>{c.name}</span>
+                          <span className="text-text-tertiary ml-2" style={{ fontSize: 10 }}>{c.category}</span>
                         </div>
-                        {c.level!=null&&typeof c.level!=="object"&&(
-                          <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-                            <div style={{fontSize:14,fontWeight:900,color:RISK_COLOR[c.risk]}}>{c.level}<span style={{fontSize:8}}>{c.unit}</span></div>
-                            {c.limit!=null&&<div style={{fontSize:8,color:"#A6A8AB"}}>limit: {c.limit}{c.unit}</div>}
-                          </div>
-                        )}
-                        {(c.level==null&&c.isViolation)&&(
-                          <div style={{background:"#FFF3F2",color:"#D93025",fontSize:8,fontWeight:700,padding:"2px 7px",borderRadius:7,flexShrink:0,marginLeft:8}}>VIOLATION</div>
-                        )}
+                        <div className="font-semibold" style={{ color: rColor, fontSize: 11, fontVariantNumeric: 'tabular-nums' }}>
+                          {c.level != null ? `${c.level} ${c.unit || ''}`.trim() : "Detected"}
+                        </div>
+                        <div
+                          className="rounded-pill font-bold uppercase tracking-wider"
+                          style={{ background: 'rgba(74, 138, 111, 0.10)', color: '#4A8A6F', fontSize: 9, padding: '2px 8px' }}
+                        >
+                          ✓ 99%+
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Hub animation */}
+                {showHub && (
+                  <div className="bg-surface-card rounded-card shadow-card mb-3" style={{ padding: 14 }} data-testid="wtr-hub-section">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <div className="rounded-card flex items-center justify-center text-text-onAccent" style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)', fontSize: 14 }}>◈</div>
+                      <div>
+                        <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>Generosity™ Home WTR Hub</div>
+                        <div className="text-brand" style={{ fontSize: 10 }}>Active Alkaline Technology. Multi-Stage.</div>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                <HealthCalc city={data.city} riskScore={riskScore}/>
-
-                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:16,padding:"22px 18px",textAlign:"center",color:"#FFFFFF",marginBottom:10}}>
-                  <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:7}}>THE SOLUTION</div>
-                  <h3 style={{fontSize:19,fontWeight:900,marginBottom:7,letterSpacing:"-0.5px"}}>Trust but Verify™ your Water.</h3>
-                  <p style={{fontSize:11,color:"#94A3B8",maxWidth:320,margin:"0 auto 16px",lineHeight:1.6}}>The Home WTR Hub removes every contaminant found in {data.city?.split(",")[0]}'s water — at the tap, in real time.</p>
-                  <a href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}&discount=WELCOME100`} target="_blank" rel="noopener noreferrer" onClick={()=>trackEvent('shopify_cta_clicked',{city:data?.city,risk_score:riskScore,discount_code:'WELCOME100'})} style={{display:"block",background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 20px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer",width:"100%",marginBottom:10,textDecoration:"none",boxSizing:"border-box"}}>GET THE HOME WTR HUB →</a>
-                  <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
-                    {["30-Day Guarantee","30-Min Install","Financing Available"].map(t=>(<div key={t} style={{fontSize:9,color:"#64748B",display:"flex",alignItems:"center",gap:3}}><span style={{color:"#1E8A4C"}}>✓</span>{t}</div>))}
-                  </div>
-                </div>
-
-                <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,overflow:"hidden",marginBottom:12}}>
-                  <div style={{background:"#0A1A2E",padding:"11px 16px",display:"flex",justifyContent:"space-between"}}>
-                    <div style={{fontSize:11,fontWeight:800,color:"#FFFFFF"}}>Home WTR Hub — What Gets Removed</div>
-                    <div style={{fontSize:8,color:"#51B0E6",letterSpacing:"1px"}}>{data.city?.split(",")[0].toUpperCase()}</div>
-                  </div>
-                  {data.contaminants.map((c,i)=>(
-                    <div key={c.name} style={{display:"grid",gridTemplateColumns:"1fr auto auto",padding:"9px 14px",gap:8,alignItems:"center",borderBottom:"1px solid #E4F1FA",background:i%2===0?"#FFFFFF":"#F0F1F3"}}>
-                      <div><span style={{fontSize:10,fontWeight:700,color:"#0A1A2E"}}>{c.name}</span><span style={{fontSize:8,color:"#A6A8AB",marginLeft:5}}>{c.category}</span></div>
-                      <div style={{fontSize:9,color:RISK_COLOR[c.risk],fontWeight:700}}>{c.level!=null?`${c.level} ${c.unit}`:"Detected"}</div>
-                      <div style={{background:"#F0FAF4",color:"#1E8A4C",fontSize:8,fontWeight:800,padding:"2px 8px",borderRadius:20}}>✓ 99%+</div>
-                    </div>
-                  ))}
-                </div>
-
-                {showHub&&(
-                  <div style={{background:"#FFFFFF",border:"1px solid #C8E2F4",borderRadius:14,padding:"14px",marginBottom:12}} data-testid="wtr-hub-section">
-                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                      <div style={{width:30,height:30,borderRadius:7,background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13}}>◈</div>
-                      <div><div style={{fontSize:11,fontWeight:800,color:"#0A1A2E"}}>Generosity™ Home WTR Hub</div><div style={{fontSize:8,color:"#51B0E6"}}>Active Alkaline Technology · Multi-Stage</div></div>
-                    </div>
-                    <WTRHubAnimation contaminants={data.contaminants} active={animating}/>
+                    <WTRHubAnimation contaminants={data.contaminants} active={animating} />
                   </div>
                 )}
 
-                <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:14,padding:"16px",marginBottom:12}} data-testid="email-capture">
-                  <div style={{fontSize:12,fontWeight:900,color:"#0A1A2E",marginBottom:4}}>Get an extra $100 off the Home WTR Hub</div>
-                  <div style={{fontSize:10,color:"#A6A8AB",marginBottom:12,lineHeight:1.5}}>Sale price $1,399.99 → Your price $1,299.99 with code WELCOME100</div>
-                  {!submitted?(
-                    <div style={{display:"flex",flexDirection:"column",gap:7}}>
-                      <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Your email address" data-testid="email-input" style={{padding:"11px 13px",borderRadius:8,border:"1px solid #C8E2F4",fontSize:12,fontFamily:"inherit",background:"#FFFFFF",color:"#0A1A2E"}}/>
-                      <button onClick={()=>handleEmailSubmit('results')} data-testid="submit-email-btn" style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px",borderRadius:8,fontSize:11,fontWeight:800,cursor:"pointer"}}>GET MY $100 OFF →</button>
-                      <div style={{fontSize:9,color:"#A6A8AB",textAlign:"center"}}>No spam. Unsubscribe anytime.</div>
+                {/* Email capture */}
+                <div className="bg-surface-card rounded-card shadow-card mb-3" style={{ padding: 16 }} data-testid="email-capture">
+                  <div className="font-display font-semibold text-text-primary" style={{ fontSize: 18, marginBottom: 4 }}>
+                    Get an extra $100 off the Home WTR Hub.
+                  </div>
+                  <div className="text-caption text-text-secondary mb-3" style={{ lineHeight: 1.5 }}>
+                    Sale price $1,399.99. Your price $1,299.99 with code WELCOME100.
+                  </div>
+                  {!submitted ? (
+                    <div className="flex flex-col gap-2">
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Your email address"
+                        testId="email-input"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleEmailSubmit('results')}
+                        data-testid="submit-email-btn"
+                        className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
+                        style={{ padding: 12, fontSize: 13, border: 'none' }}
+                      >
+                        GET MY $100 OFF →
+                      </button>
+                      <div className="text-text-tertiary text-center" style={{ fontSize: 10 }}>No spam. Unsubscribe anytime.</div>
                     </div>
-                  ):(
-                    <div style={{textAlign:"center",padding:"12px 0"}} data-testid="engagement-flow">
-                      {engagementPhase === "idle" && (<div><div style={{fontSize:22,marginBottom:5}}>✓</div><div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>Report sent! Check your email.</div><div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>Discount code: WELCOME100</div></div>)}
-                      {engagementPhase === "push_prompt" && (
-                        <div style={{maxWidth:320,margin:"0 auto",padding:"4px 0"}} data-testid="push-prompt">
-                          <div style={{width:44,height:44,borderRadius:"50%",background:"#EFF6FF",border:"2px solid #51B0E644",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px"}}><Icon name="alert" size={20} color="#51B0E6"/></div>
-                          <div style={{fontSize:13,fontWeight:800,color:"#0A1A2E",marginBottom:4}}>Water quality changes. You should know.</div>
-                          <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.5,marginBottom:12}}>Get an alert when contamination levels change in your area. We only notify when it matters.</div>
-                          <div style={{display:"flex",gap:8,justifyContent:"center"}}>
-                            <button onClick={async()=>{trackEvent('push_permission_requested',{city:data?.city});const result = await requestPushPermission(data?.zip || data?.city?.match(/\d{5}/)?.[0], capturedProspectId, {});setPushResult(result);trackEvent(result.granted ? 'push_permission_granted' : 'push_permission_denied', {city:data?.city});setEngagementPhase("household");}} style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"9px 20px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer"}}>ENABLE ALERTS</button>
-                            <button onClick={()=>{trackEvent('push_permission_dismissed',{city:data?.city});setEngagementPhase("household");}} style={{background:"transparent",color:"#A6A8AB",border:"1px solid #E2E8F0",padding:"9px 16px",borderRadius:8,fontSize:11,fontWeight:600,cursor:"pointer"}}>Not now</button>
-                          </div>
-                        </div>
-                      )}
-                      {engagementPhase === "household" && (
-                        <div style={{maxWidth:320,margin:"0 auto",padding:"4px 0",textAlign:"left"}} data-testid="household-profile">
-                          <div style={{fontSize:13,fontWeight:800,color:"#0A1A2E",marginBottom:3,textAlign:"center"}}>Personalize your risk assessment</div>
-                          <div style={{fontSize:10,color:"#A6A8AB",lineHeight:1.5,marginBottom:14,textAlign:"center"}}>Quick questions to tailor your report to your household.</div>
-                          <div style={{marginBottom:12}}>
-                            <div style={{fontSize:10,fontWeight:700,color:"#475569",marginBottom:6}}>Children under 12 at home?</div>
-                            <div style={{display:"flex",gap:6}}>{[{label:"Yes",val:true},{label:"No",val:false}].map(opt=>(<button key={opt.label} onClick={()=>setHouseholdProfile(p=>({...p,has_children:opt.val}))} style={{flex:1,padding:"8px",borderRadius:8,border:householdProfile.has_children===opt.val?"2px solid #51B0E6":"1px solid #E2E8F0",background:householdProfile.has_children===opt.val?"#EFF6FF":"#fff",color:householdProfile.has_children===opt.val?"#2A8FCA":"#64748B",fontSize:11,fontWeight:700,cursor:"pointer"}}>{opt.label}</button>))}</div>
-                          </div>
-                          <div style={{marginBottom:12}}>
-                            <div style={{fontSize:10,fontWeight:700,color:"#475569",marginBottom:6}}>Anyone pregnant or trying to conceive?</div>
-                            <div style={{display:"flex",gap:6}}>{[{label:"Yes",val:true},{label:"No",val:false}].map(opt=>(<button key={opt.label} onClick={()=>setHouseholdProfile(p=>({...p,is_pregnant:opt.val}))} style={{flex:1,padding:"8px",borderRadius:8,border:householdProfile.is_pregnant===opt.val?"2px solid #51B0E6":"1px solid #E2E8F0",background:householdProfile.is_pregnant===opt.val?"#EFF6FF":"#fff",color:householdProfile.is_pregnant===opt.val?"#2A8FCA":"#64748B",fontSize:11,fontWeight:700,cursor:"pointer"}}>{opt.label}</button>))}</div>
-                          </div>
-                          <div style={{marginBottom:14}}>
-                            <div style={{fontSize:10,fontWeight:700,color:"#475569",marginBottom:6}}>Water filter currently installed?</div>
-                            <div style={{display:"flex",gap:6}}>{[{label:"Yes",val:true},{label:"No",val:false},{label:"Not sure",val:"unsure"}].map(opt=>(<button key={opt.label} onClick={()=>setHouseholdProfile(p=>({...p,has_filter:opt.val}))} style={{flex:1,padding:"8px",borderRadius:8,border:householdProfile.has_filter===opt.val?"2px solid #51B0E6":"1px solid #E2E8F0",background:householdProfile.has_filter===opt.val?"#EFF6FF":"#fff",color:householdProfile.has_filter===opt.val?"#2A8FCA":"#64748B",fontSize:10,fontWeight:700,cursor:"pointer"}}>{opt.label}</button>))}</div>
-                          </div>
-                          <div style={{display:"flex",gap:8}}>
-                            <button onClick={async()=>{trackEvent('household_profile_submitted',{...householdProfile,city:data?.city});try{await fetch('https://generosity-sales-engine-mvp-api.onrender.com/api/wtr/capture',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102'},body:JSON.stringify({email:email,zip:data?.zip,city:data?.city,source:'household_profile_update',household_profile:householdProfile})});}catch(e){}setEngagementPhase("complete");}} style={{flex:1,background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"10px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer"}}>PERSONALIZE MY REPORT</button>
-                            <button onClick={()=>{trackEvent('household_profile_skipped',{city:data?.city});setEngagementPhase("complete");}} style={{background:"transparent",color:"#A6A8AB",border:"1px solid #E2E8F0",padding:"10px 12px",borderRadius:8,fontSize:10,fontWeight:600,cursor:"pointer"}}>Skip</button>
-                          </div>
-                        </div>
-                      )}
-                      {engagementPhase === "complete" && (
-                        <div data-testid="engagement-complete">
-                          <div style={{fontSize:22,marginBottom:5}}>✓</div>
-                          <div style={{fontSize:12,fontWeight:700,color:"#1E8A4C"}}>You're all set!</div>
-                          <div style={{fontSize:10,color:"#A6A8AB",marginTop:3}}>Discount code: <span style={{fontWeight:700,color:"#0A1A2E"}}>WELCOME100</span></div>
-                          {householdProfile.has_children&&(<div style={{marginTop:8,padding:"8px 12px",background:"#FFF8EE",border:"1px solid #F2942333",borderRadius:8,fontSize:10,color:"#92400E",lineHeight:1.5,textAlign:"left"}}>Children are especially vulnerable to lead and PFAS. The Home WTR Hub removes 99%+ of both.</div>)}
-                          {householdProfile.is_pregnant&&(<div style={{marginTop:8,padding:"8px 12px",background:"#FFF1F2",border:"1px solid #E1194233",borderRadius:8,fontSize:10,color:"#9F1239",lineHeight:1.5,textAlign:"left"}}>PFAS bioaccumulate in breast milk. Filtration before and during pregnancy is critical.</div>)}
-                        </div>
-                      )}
-                    </div>
+                  ) : (
+                    <EngagementFlow
+                      engagementPhase={engagementPhase}
+                      setEngagementPhase={setEngagementPhase}
+                      householdProfile={householdProfile}
+                      setHouseholdProfile={setHouseholdProfile}
+                      data={data}
+                      email={email}
+                      capturedProspectId={capturedProspectId}
+                      setPushResult={setPushResult}
+                    />
                   )}
                 </div>
 
-                <div style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:10,padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-                  <div><div style={{fontSize:10,fontWeight:800,color:"#0A1A2E"}}>Are you a Dealer or Distributor?</div><div style={{fontSize:9,color:"#A6A8AB",marginTop:1}}>Use Trust But Verify™ as your sales tool.</div></div>
-                  <a href="https://generositywater.com/generosity-partners-paywall" target="_blank" rel="noopener noreferrer" style={{background:"#FFFFFF",color:"#51B0E6",border:"1px solid #51B0E6",padding:"7px 12px",borderRadius:8,fontSize:9,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",textDecoration:"none"}}>PARTNER PORTAL →</a>
+                {/* Partner footer */}
+                <div className="bg-surface-card rounded-card shadow-card flex items-center justify-between gap-2.5" style={{ padding: '12px 14px' }}>
+                  <div>
+                    <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>Are you a Dealer or Distributor?</div>
+                    <div className="text-text-tertiary mt-0.5" style={{ fontSize: 10 }}>Use Trust But Verify™ as your sales tool.</div>
+                  </div>
+                  
+                    href="https://generositywater.com/generosity-partners-paywall"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-surface-card text-brand font-bold uppercase tracking-wider rounded-card no-underline whitespace-nowrap"
+                    style={{ padding: '8px 12px', fontSize: 10, border: '1px solid #51B0E6' }}
+                  >
+                    PARTNER PORTAL →
+                  </a>
                 </div>
               </div>
             )}
 
-            {insightView==="report"&&!data&&(
-              <div style={{padding:"60px 20px",textAlign:"center"}} data-testid="report-empty">
-                <div style={{display:"flex",justifyContent:"center",marginBottom:14}}><span style={{display:"inline-flex",color:"#A6A8AB"}}><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="6" width="4" height="15" rx="1"/><rect x="17" y="2" width="4" height="19" rx="1"/></svg></span></div>
-                <h3 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:7}}>No Report Yet</h3>
-                <p style={{fontSize:12,color:"#A6A8AB",marginBottom:18}}>Enter your address on the Home tab to generate your free water intelligence report.</p>
-                <button onClick={()=>{setTab("tbv");setPhase("landing");}} data-testid="go-test-water-btn" style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"12px 22px",borderRadius:10,fontSize:12,fontWeight:800,cursor:"pointer"}}>TEST MY WATER →</button>
+            {/* Empty report */}
+            {insightView === "report" && !data && (
+              <div className="text-center" style={{ padding: '60px 20px' }} data-testid="report-empty">
+                <div className="flex justify-center mb-3">
+                  <span className="text-text-tertiary inline-flex">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <rect x="3" y="12" width="4" height="9" rx="1"/>
+                      <rect x="10" y="6" width="4" height="15" rx="1"/>
+                      <rect x="17" y="2" width="4" height="19" rx="1"/>
+                    </svg>
+                  </span>
+                </div>
+                <h3 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 7 }}>
+                  No Report Yet
+                </h3>
+                <p className="text-body text-text-secondary mb-4">
+                  Enter your address on the Home tab to generate your free water intelligence report.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setTab("tbv"); setPhase("landing"); }}
+                  data-testid="go-test-water-btn"
+                  className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
+                  style={{ padding: '12px 22px', fontSize: 13, border: 'none' }}
+                >
+                  TEST MY WATER →
+                </button>
               </div>
             )}
 
-            {insightView==="learn"&&(
-              <div style={{padding:"18px"}} data-testid="learn-tab">
-                <h2 style={{fontSize:18,fontWeight:900,color:"#0A1A2E",marginBottom:14}}>Water Intelligence Library</h2>
-                {[{iconName:"hazard",title:"PFAS: Forever Chemicals",desc:"Found in 45% of US tap water. Linked to cancer, immune disruption, and reproductive harm. EPA set new limits at 4 ppt in 2024 — 1,000x stricter than before.",tag:"HIGH RISK",tc:"#D93025"},{iconName:"alert",title:"Lead: No Safe Level",desc:"Irreversible neurological damage in children under 6. From aging pipes in pre-1986 homes. Chicago has 400,000+ lead service lines.",tag:"HIGH RISK",tc:"#D93025"},{iconName:"atom",title:"Chromium-6 (Erin Brockovich)",desc:"Found in 75% of US tap water. CA health goal is 0.02 ppb — most cities test 10–25x this level.",tag:"HIGH RISK",tc:"#D93025"},{iconName:"flask",title:"Microplastics",desc:"Found in 94% of US tap water, human blood, lungs, placentas and breast milk. Average American ingests 5 grams per week.",tag:"EMERGING",tc:"#F29423"},{iconName:"droplet",title:"Why Bottled Water Isn't the Answer",desc:"70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.",tag:"MYTH",tc:"#51B0E6"},{iconName:"filter",title:"How Reverse Osmosis Works",desc:"Filters to 0.0001 microns — smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.",tag:"SOLUTION",tc:"#1E8A4C"}].map((item,i)=>(
-                  <div key={i} style={{background:"#F0F1F3",border:"1px solid #E4F1FA",borderRadius:12,padding:"14px",marginBottom:8}} data-testid={`learn-card-${i}`}>
-                    <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                      <div style={{width:36,height:36,borderRadius:8,background:"#FFFFFF",border:`1px solid ${item.tc}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name={item.iconName} size={20} color={item.tc}/></div>
-                      <div style={{flex:1}}>
-                        <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5,flexWrap:"wrap"}}><div style={{fontSize:12,fontWeight:800,color:"#0A1A2E"}}>{item.title}</div><div style={{fontSize:8,fontWeight:700,color:item.tc,background:`${item.tc}14`,padding:"2px 7px",borderRadius:10,letterSpacing:"0.4px"}}>{item.tag}</div></div>
-                        <div style={{fontSize:11,color:"#A6A8AB",lineHeight:1.6}}>{item.desc}</div>
+            {/* Learn */}
+            {insightView === "learn" && (
+              <div style={{ padding: 18 }} data-testid="learn-tab">
+                <h2 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 14 }}>
+                  Water Intelligence Library
+                </h2>
+                {[
+                  { iconName: "hazard",  title: "PFAS: Forever Chemicals",            desc: "Found in 45% of US tap water. Linked to cancer, immune disruption, and reproductive harm. EPA set new limits at 4 ppt in 2024, 1,000x stricter than before.", tag: "HIGH RISK", tc: "#B84A4A" },
+                  { iconName: "alert",   title: "Lead: No Safe Level",                desc: "Irreversible neurological damage in children under 6. From aging pipes in pre-1986 homes. Chicago has 400,000+ lead service lines.", tag: "HIGH RISK", tc: "#B84A4A" },
+                  { iconName: "atom",    title: "Chromium-6 (Erin Brockovich)",       desc: "Found in 75% of US tap water. CA health goal is 0.02 ppb. Most cities test 10 to 25x this level.", tag: "HIGH RISK", tc: "#B84A4A" },
+                  { iconName: "flask",   title: "Microplastics",                      desc: "Found in 94% of US tap water, human blood, lungs, placentas and breast milk. Average American ingests 5 grams per week.", tag: "EMERGING", tc: "#C89B3C" },
+                  { iconName: "droplet", title: "Why Bottled Water Isn't the Answer", desc: "70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.", tag: "MYTH", tc: "#51B0E6" },
+                  { iconName: "filter",  title: "How Reverse Osmosis Works",          desc: "Filters to 0.0001 microns, smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.", tag: "SOLUTION", tc: "#4A8A6F" },
+                ].map((item, i) => (
+                  <div key={i} className="bg-surface-card rounded-card shadow-card mb-2" style={{ padding: 14 }} data-testid={`learn-card-${i}`}>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="rounded-card flex items-center justify-center shrink-0" style={{ width: 36, height: 36, background: '#FFFFFF', border: `1px solid ${item.tc}33` }}>
+                        <Icon name={item.iconName} size={20} color={item.tc} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>{item.title}</div>
+                          <div className="rounded-pill font-bold uppercase tracking-wider" style={{ fontSize: 9, color: item.tc, background: `${item.tc}1F`, padding: '2px 7px' }}>
+                            {item.tag}
+                          </div>
+                        </div>
+                        <div className="text-caption text-text-secondary" style={{ lineHeight: 1.6 }}>{item.desc}</div>
                       </div>
                     </div>
                   </div>
                 ))}
-                <div style={{background:"linear-gradient(135deg,#0A1A2E,#0D2244)",borderRadius:14,padding:"18px",textAlign:"center",color:"#FFFFFF",marginTop:6}}>
-                  <div style={{marginBottom:6}}><Icon name="droplet" size={28} color="#51B0E6"/></div>
-                  <div style={{fontSize:14,fontWeight:800,marginBottom:5}}>Knowledge is only useful if you act on it.</div>
-                  <div style={{fontSize:11,color:"#94A3B8",marginBottom:12}}>The Home WTR Hub removes everything in this library — 1,000+ contaminants.</div>
-                  <button style={{background:"linear-gradient(135deg,#51B0E6,#2A8FCA)",color:"#fff",border:"none",padding:"11px 22px",borderRadius:10,fontSize:11,fontWeight:800,cursor:"pointer"}}>LEARN MORE →</button>
-                </div>
+                <HeroCard
+                  className="mt-2"
+                  eyebrow=""
+                  title="Knowledge is only useful if you act on it."
+                  subtitle="The Home WTR Hub removes everything in this library. 1,000+ contaminants."
+                >
+                  
+                    href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=learn-tab&utm_campaign=knowledge-cta&discount=WELCOME100`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-brand text-text-onAccent text-center font-semibold rounded-card no-underline"
+                    style={{ padding: '14px 22px', fontSize: 13 }}
+                  >
+                    LEARN MORE →
+                  </a>
+                </HeroCard>
               </div>
             )}
           </div>
         )}
 
-        {tab==="wtr-btl"&&(<WTRBottleScreen />)}
-        {tab==="wtr-hub"&&(<WTRHubScreen />)}
+        {/* Hardware tabs (founder-only) */}
+        {tab === "wtr-btl" && <WTRBottleScreen />}
+        {tab === "wtr-hub" && <WTRHubScreen />}
       </div>
 
-      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:"#FFFFFF",borderTop:"1px solid #E4F1FA",display:"flex",zIndex:200,boxShadow:"0 -4px 12px rgba(166,168,171,0.15)"}} data-testid="bottom-nav">
-        {navTabs.map(t=>{
-          const active=tab===t.id;
-          return(
-            <button key={t.id} onClick={()=>{setTab(t.id);if(t.id==="tbv")setPhase("landing");}} data-testid={`nav-${t.id}`} style={{flex:1,background:"transparent",border:"none",padding:"11px 4px 13px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,position:"relative",transition:"opacity 0.15s"}}>
-              {t.badge&&t.badge>0&&(<div style={{position:"absolute",top:7,right:"calc(50% - 18px)",minWidth:15,height:15,borderRadius:8,background:t.badge>66?"#D93025":"#F29423",color:"#fff",fontSize:7,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,padding:"0 3px",border:"1.5px solid #FFFFFF"}}>{t.badge}</div>)}
-              <NavIcon id={t.id} active={active}/>
-              <div style={{fontSize:8,fontWeight:active?800:500,color:active?"#51B0E6":"#A6A8AB",letterSpacing:"0.3px",lineHeight:1.2,textAlign:"center"}}>{t.label}</div>
-              {active&&<div style={{position:"absolute",bottom:3,width:4,height:4,borderRadius:"50%",background:"#51B0E6",boxShadow:"0 0 6px #51B0E6"}}/>}
+      {/* Bottom nav */}
+      <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full bg-surface-card flex z-[200]"
+        style={{
+          maxWidth: 480,
+          borderTop: '1px solid #E8EAED',
+          boxShadow: '0 -1px 2px rgba(15, 20, 25, 0.04)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
+        data-testid="bottom-nav"
+      >
+        {navTabs.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => { setTab(t.id); if (t.id === "tbv") setPhase("landing"); }}
+              data-testid={`nav-${t.id}`}
+              className="flex-1 flex flex-col items-center gap-1 cursor-pointer relative"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '10px 4px 12px',
+                transition: 'opacity 0.15s',
+              }}
+            >
+              {t.badge != null && t.badge > 0 && (
+                <div
+                  className="absolute rounded-pill flex items-center justify-center font-bold text-text-onAccent"
+                  style={{
+                    top: 7,
+                    right: 'calc(50% - 18px)',
+                    minWidth: 16,
+                    height: 16,
+                    background: t.badge > 66 ? '#B84A4A' : t.badge > 33 ? '#C89B3C' : '#4A8A6F',
+                    fontSize: 9,
+                    padding: '0 4px',
+                    border: '1.5px solid #FFFFFF',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {t.badge}
+                </div>
+              )}
+              <NavIcon id={t.id} active={active} />
+              <div
+                className="text-center"
+                style={{
+                  fontSize: 10,
+                  fontWeight: active ? 600 : 500,
+                  color: active ? '#51B0E6' : '#8A8E93',
+                  letterSpacing: '0.02em',
+                  lineHeight: 1.2,
+                }}
+              >
+                {t.label}
+              </div>
+              {active && (
+                <div
+                  className="absolute rounded-full"
+                  style={{
+                    bottom: 3,
+                    width: 4,
+                    height: 4,
+                    background: '#51B0E6',
+                    boxShadow: '0 0 6px #51B0E6',
+                  }}
+                />
+              )}
             </button>
           );
         })}
       </div>
 
-      {reportModalOpen && (
-        <>
-          <div onClick={()=>setReportModalOpen(false)} style={{position:"fixed",inset:0,zIndex:600,background:"rgba(0,0,0,0.6)"}}/>
-          <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:601,background:"#fff",borderTopLeftRadius:20,borderTopRightRadius:20,boxShadow:"0 -8px 30px rgba(0,0,0,0.18)",maxWidth:480,margin:"0 auto",animation:"sheetUp 0.3s ease"}} role="dialog" aria-modal="true">
-            <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes checkDraw{from{stroke-dashoffset:50}to{stroke-dashoffset:0}}`}</style>
-            <div style={{display:"flex",justifyContent:"center",paddingTop:12,paddingBottom:4}}><div style={{width:40,height:4,borderRadius:2,background:"#E2E8F0"}}/></div>
-            {reportModalScreen === 'form' ? (
-              <div style={{padding:"8px 24px 32px"}}>
-                <div style={{display:"flex",justifyContent:"flex-end",marginBottom:4}}><button onClick={()=>setReportModalOpen(false)} style={{background:"none",border:"none",padding:8,cursor:"pointer",minHeight:44,minWidth:44,display:"flex",alignItems:"center",justifyContent:"center"}} aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-                <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:20}}>
-                  <div style={{background:"#EBF6FD",borderRadius:12,padding:10,flexShrink:0}}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#51B0E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
-                  <div><div style={{fontSize:18,fontWeight:700,color:"#1a2744",lineHeight:1.3}}>Your Monthly Water Report</div><div style={{fontSize:14,color:"#A6A8AB",marginTop:2}}>Free · Delivered the 1st of every month</div></div>
-                </div>
-                <div style={{background:"#F0F1F3",borderRadius:12,padding:16,marginBottom:20}}>
-                  {[{icon:(<span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2C12 2 6 10 6 14a6 6 0 0012 0c0-4-6-12-6-12z"/></svg></span>),text:`Local water quality data for ${data?.city?.split(",")[0] || 'your area'}`},{icon:(<span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="15"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg></span>),text:"Contaminant alerts and health guideline updates"},{icon:(<span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="6" y1="16" x2="10" y2="16"/></svg></span>),text:"Recent news and advisories for your water utility"}].map((vp,i)=>(<div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:i<2?10:0}}><span style={{lineHeight:1,flexShrink:0,marginTop:2}}>{vp.icon}</span><span style={{fontSize:14,color:"#1a2744",lineHeight:1.4}}>{vp.text}</span></div>))}
-                </div>
-                <div style={{marginBottom:16}}>
-                  <label htmlFor="wtr-report-email" style={{display:"block",fontSize:14,fontWeight:600,color:"#1a2744",marginBottom:6}}>Email Address</label>
-                  <input id="wtr-report-email" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" value={reportEmail} onChange={(e)=>{setReportEmail(e.target.value);if(reportEmailError)setReportEmailError('');}} style={{width:"100%",height:48,padding:"0 16px",borderRadius:12,border:`1px solid ${reportEmailError?'#F87171':'#E2E8F0'}`,fontSize:16,color:"#1a2744",background:"#fff",outline:"none",boxSizing:"border-box"}}/>
-                  {reportEmailError && <div style={{color:"#EF4444",fontSize:12,marginTop:6}}>{reportEmailError}</div>}
-                </div>
-                <div style={{marginBottom:20}}>
-                  <label htmlFor="wtr-report-zip" style={{display:"block",fontSize:14,fontWeight:600,color:"#1a2744",marginBottom:6}}>ZIP Code <span style={{color:"#A6A8AB",fontWeight:400}}>(for your local water data)</span></label>
-                  <input id="wtr-report-zip" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={5} placeholder="90210" value={reportZip} onChange={(e)=>{const v=e.target.value.replace(/\D/g,'').slice(0,5);setReportZip(v);if(reportZipError)setReportZipError('');}} style={{width:"100%",height:48,padding:"0 16px",borderRadius:12,border:`1px solid ${reportZipError?'#F87171':'#E2E8F0'}`,fontSize:16,color:"#1a2744",background:"#fff",outline:"none",boxSizing:"border-box"}}/>
-                  {reportZipError && <div style={{color:"#EF4444",fontSize:12,marginTop:6}}>{reportZipError}</div>}
-                </div>
-                {reportSubmitError && (<div style={{background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:12,padding:"12px 16px",marginBottom:16}}><div style={{color:"#DC2626",fontSize:14}}>{reportSubmitError}</div></div>)}
-                <button onClick={handleReportSubscribe} disabled={reportSubmitting} style={{width:"100%",height:56,background:"#51B0E6",color:"#fff",fontWeight:700,fontSize:16,borderRadius:12,border:"none",cursor:reportSubmitting?"not-allowed":"pointer",opacity:reportSubmitting?0.6:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>{reportSubmitting ? "Sending..." : (<>Get My Monthly Report <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></>)}</button>
-                <div style={{marginTop:16,display:"flex",alignItems:"flex-start",gap:8}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A6A8AB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:2}}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                  <div style={{fontSize:12,color:"#A6A8AB",lineHeight:1.5}}>By tapping "Get My Monthly Report" you enroll in the Generosity™ Monthly Water Intelligence Report, delivered the 1st of each month. Unsubscribe anytime. We never sell your email.{" "}<a href="https://generositywater.com/privacy" target="_blank" rel="noopener noreferrer" style={{color:"#51B0E6",textDecoration:"underline"}}>Privacy Policy</a></div>
-                </div>
-              </div>
-            ) : (
-              <div style={{padding:"8px 24px 40px",textAlign:"center"}}>
-                <div style={{display:"flex",justifyContent:"flex-end",marginBottom:4}}><button onClick={()=>setReportModalOpen(false)} style={{background:"none",border:"none",padding:8,cursor:"pointer",minHeight:44,minWidth:44,display:"flex",alignItems:"center",justifyContent:"center"}} aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-                <div style={{display:"flex",justifyContent:"center",marginBottom:20}}><div style={{width:80,height:80,background:"#EBF6FD",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center"}}><svg width="40" height="40" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="25" stroke="#51B0E6" strokeWidth="2"/><path stroke="#51B0E6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" d="M14 27l8 8 16-16" style={{strokeDasharray:50,animation:"checkDraw 0.5s 0.2s ease forwards",strokeDashoffset:50}}/></svg></div></div>
-                <div style={{fontSize:20,fontWeight:700,color:"#1a2744",marginBottom:8}}>One step left</div>
-                <div style={{fontSize:14,color:"#A6A8AB",lineHeight:1.5,marginBottom:4}}>We sent a confirmation link to</div>
-                <div style={{fontSize:14,fontWeight:600,color:"#1a2744",marginBottom:16,wordBreak:"break-all"}}>{reportEmail}</div>
-                <div style={{fontSize:14,color:"#A6A8AB",lineHeight:1.5,marginBottom:24}}>Click the link to confirm your enrollment. Your first <span style={{color:"#1a2744",fontWeight:500}}>{data?.city?.split(",")[0] || 'your area'} Monthly Water Report</span> arrives on the 1st of next month.</div>
-                <div style={{background:"#F0F1F3",borderRadius:12,padding:"12px 16px",marginBottom:24,textAlign:"left"}}><div style={{fontSize:12,color:"#A6A8AB",lineHeight:1.5}}><span style={{color:"#1a2744",fontWeight:600}}>Can't find the email?</span>{" "}Check your spam or promotions folder. The email comes from{" "}<span style={{color:"#51B0E6"}}>noreply@generositywater.com</span></div></div>
-                <button onClick={()=>setReportModalOpen(false)} style={{width:"100%",height:56,background:"#1a2744",color:"#fff",fontWeight:700,fontSize:16,borderRadius:12,border:"none",cursor:"pointer"}}>Got It</button>
-              </div>
-            )}
-          </div>
-        </>
-      )}
+      {/* Monthly Report Modal */}
+      <MonthlyReportModal
+        open={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        screen={reportModalScreen}
+        email={reportEmail}
+        onEmailChange={(v) => { setReportEmail(v); if (reportEmailError) setReportEmailError(''); }}
+        emailError={reportEmailError}
+        zip={reportZip}
+        onZipChange={(v) => { setReportZip(v); if (reportZipError) setReportZipError(''); }}
+        zipError={reportZipError}
+        submitting={reportSubmitting}
+        submitError={reportSubmitError}
+        onSubmit={handleReportSubscribe}
+        cityShort={cityShort}
+      />
 
+      {/* Profile Modal */}
       {showProfile && (
-        <div style={{position:"fixed",inset:0,zIndex:500,background:"#fff",overflowY:"auto",animation:"slideUp 0.3s ease"}}>
-          <style>{`@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
-          <ProfileScreen onClose={()=>setShowProfile(false)} />
+        <div className="fixed inset-0 z-[500] bg-surface-card overflow-y-auto" style={{ animation: 'slideUp 0.3s ease' }}>
+          <ProfileScreen onClose={() => setShowProfile(false)} />
         </div>
       )}
 
-      {showFounderLogin&&(
-        <>
-          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:600,backdropFilter:"blur(4px)"}} onClick={()=>{setShowFounderLogin(false);setFounderPin('');setFounderPinError('');}} />
-          <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:601,background:"#0A1A2E",borderRadius:"20px 20px 0 0",padding:"24px",maxWidth:480,margin:"0 auto",animation:"slideUp 0.3s ease"}}>
-            <div style={{width:40,height:4,borderRadius:2,background:"#334155",margin:"0 auto 20px"}} />
-            <div style={{textAlign:"center",marginBottom:20}}>
-              <div style={{fontSize:9,color:"#51B0E6",letterSpacing:"2px",fontWeight:700,marginBottom:6}}>GENEROSITY™ WATER</div>
-              <div style={{fontSize:18,fontWeight:900,color:"#FFFFFF",marginBottom:4}}>Founder Access</div>
-              <div style={{fontSize:11,color:"#64748B"}}>Enter your PIN to unlock demo mode</div>
-            </div>
-            <div style={{display:"flex",justifyContent:"center",gap:10,marginBottom:16}}>
-              {[0,1,2,3].map(i=>(<div key={i} style={{width:44,height:52,borderRadius:10,border:`2px solid ${founderPin.length>i?'#51B0E6':'#334155'}`,background:founderPin.length>i?'#51B0E611':'#0D1B2A',display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,color:"#FFFFFF",fontWeight:900}}>{founderPin[i]?'•':''}</div>))}
-            </div>
-            {founderPinError&&<div style={{textAlign:"center",fontSize:11,color:"#D93025",marginBottom:12,fontWeight:600}}>{founderPinError}</div>}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,maxWidth:260,margin:"0 auto 16px"}}>
-              {['1','2','3','4','5','6','7','8','9','','0','⌫'].map(d=>(<button key={d||'blank'} disabled={!d} onClick={()=>{if(d==='⌫'){setFounderPin(p=>p.slice(0,-1));setFounderPinError('');}else if(founderPin.length<4){const newPin=founderPin+d;setFounderPin(newPin);setFounderPinError('');if(newPin.length===4)setTimeout(()=>{handleFounderLogin(newPin);},200);}}} style={{height:48,borderRadius:10,border:"none",background:d?"#1a2744":"transparent",color:"#FFFFFF",fontSize:18,fontWeight:700,cursor:d?"pointer":"default",opacity:d?1:0}}>{d}</button>))}
-            </div>
-            <button onClick={()=>{setShowFounderLogin(false);setFounderPin('');setFounderPinError('');}} style={{width:"100%",padding:"12px",background:"transparent",border:"1px solid #334155",borderRadius:10,color:"#64748B",fontSize:12,fontWeight:600,cursor:"pointer"}}>Cancel</button>
+      {/* Founder Login Modal */}
+      <FounderLoginModal
+        open={showFounderLogin}
+        onClose={() => { setShowFounderLogin(false); setFounderPin(''); setFounderPinError(''); }}
+        pin={founderPin}
+        onPinChange={(v) => { setFounderPin(v); setFounderPinError(''); }}
+        error={founderPinError}
+        onSubmit={(pin) => handleFounderLogin(pin)}
+      />
+    </div>
+  );
+}
+
+// ─── ENGAGEMENT FLOW (post-email-capture) ────────────────────────────────────
+function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile, setHouseholdProfile, data, email, capturedProspectId, setPushResult }) {
+  return (
+    <div className="text-center" data-testid="engagement-flow" style={{ padding: '12px 0' }}>
+      {engagementPhase === "idle" && (
+        <div>
+          <div style={{ marginBottom: 5 }}>
+            <Icon name="checkCircle" size={28} />
           </div>
-        </>
+          <div className="font-semibold text-state-positive" style={{ fontSize: 13 }}>Report sent. Check your email.</div>
+          <div className="text-text-tertiary mt-1" style={{ fontSize: 11 }}>Discount code: WELCOME100</div>
+        </div>
+      )}
+
+      {engagementPhase === "push_prompt" && (
+        <div className="mx-auto" style={{ maxWidth: 320, padding: '4px 0' }} data-testid="push-prompt">
+          <div className="rounded-full flex items-center justify-center mx-auto" style={{ width: 44, height: 44, background: '#E8F4FB', border: '2px solid rgba(81, 176, 230, 0.30)', marginBottom: 10 }}>
+            <Icon name="alert" size={20} color="#51B0E6" />
+          </div>
+          <div className="font-semibold text-text-primary" style={{ fontSize: 14, marginBottom: 4 }}>Water quality changes. You should know.</div>
+          <div className="text-caption text-text-secondary mb-3" style={{ lineHeight: 1.5 }}>
+            Get an alert when contamination levels change in your area. We only notify when it matters.
+          </div>
+          <div className="flex gap-2 justify-center">
+            <button
+              type="button"
+              onClick={async () => {
+                trackEvent('push_permission_requested', { city: data?.city });
+                const result = await requestPushPermission(data?.zip || data?.city?.match(/\d{5}/)?.[0], capturedProspectId, {});
+                setPushResult(result);
+                trackEvent(result.granted ? 'push_permission_granted' : 'push_permission_denied', { city: data?.city });
+                setEngagementPhase("household");
+              }}
+              className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
+              style={{ padding: '9px 20px', fontSize: 12, border: 'none' }}
+            >
+              ENABLE ALERTS
+            </button>
+            <button
+              type="button"
+              onClick={() => { trackEvent('push_permission_dismissed', { city: data?.city }); setEngagementPhase("household"); }}
+              className="text-text-tertiary font-semibold rounded-card cursor-pointer"
+              style={{ background: 'transparent', padding: '9px 16px', fontSize: 12, border: '1px solid #E8EAED' }}
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {engagementPhase === "household" && (
+        <div className="mx-auto text-left" style={{ maxWidth: 320, padding: '4px 0' }} data-testid="household-profile">
+          <div className="font-semibold text-text-primary text-center" style={{ fontSize: 14, marginBottom: 3 }}>
+            Personalize your risk assessment
+          </div>
+          <div className="text-caption text-text-secondary text-center mb-3" style={{ lineHeight: 1.5 }}>
+            Quick questions to tailor your report to your household.
+          </div>
+          {[
+            { key: 'has_children', label: 'Children under 12 at home?', options: [{ label: 'Yes', val: true }, { label: 'No', val: false }] },
+            { key: 'is_pregnant',  label: 'Anyone pregnant or trying to conceive?', options: [{ label: 'Yes', val: true }, { label: 'No', val: false }] },
+            { key: 'has_filter',   label: 'Water filter currently installed?', options: [{ label: 'Yes', val: true }, { label: 'No', val: false }, { label: 'Not sure', val: 'unsure' }] },
+          ].map((q) => (
+            <div key={q.key} className="mb-3">
+              <div className="font-semibold text-text-secondary mb-1.5" style={{ fontSize: 11 }}>{q.label}</div>
+              <div className="flex gap-1.5">
+                {q.options.map((opt) => {
+                  const active = householdProfile[q.key] === opt.val;
+                  return (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      onClick={() => setHouseholdProfile((p) => ({ ...p, [q.key]: opt.val }))}
+                      className="flex-1 font-bold rounded-card cursor-pointer"
+                      style={{
+                        padding: 8,
+                        border: active ? '2px solid #51B0E6' : '1px solid #E8EAED',
+                        background: active ? '#E8F4FB' : '#FFFFFF',
+                        color: active ? '#3DA0DA' : '#4A4F56',
+                        fontSize: 11,
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                trackEvent('household_profile_submitted', { ...householdProfile, city: data?.city });
+                try {
+                  await fetch(`${API_BASE}/api/wtr/capture`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': API_BEARER },
+                    body: JSON.stringify({
+                      email,
+                      zip: data?.zip,
+                      city: data?.city,
+                      source: 'household_profile_update',
+                      household_profile: householdProfile,
+                    }),
+                  });
+                } catch (e) {}
+                setEngagementPhase("complete");
+              }}
+              className="flex-1 bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
+              style={{ padding: 10, fontSize: 12, border: 'none' }}
+            >
+              PERSONALIZE MY REPORT
+            </button>
+            <button
+              type="button"
+              onClick={() => { trackEvent('household_profile_skipped', { city: data?.city }); setEngagementPhase("complete"); }}
+              className="text-text-tertiary font-semibold rounded-card cursor-pointer"
+              style={{ background: 'transparent', padding: '10px 12px', fontSize: 11, border: '1px solid #E8EAED' }}
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      )}
+
+      {engagementPhase === "complete" && (
+        <div data-testid="engagement-complete">
+          <div style={{ marginBottom: 5 }}>
+            <Icon name="checkCircle" size={28} />
+          </div>
+          <div className="font-semibold text-state-positive" style={{ fontSize: 13 }}>You're all set.</div>
+          <div className="text-text-tertiary mt-1" style={{ fontSize: 11 }}>
+            Discount code: <span className="font-bold text-text-primary">WELCOME100</span>
+          </div>
+          {householdProfile.has_children && (
+            <div
+              className="rounded-card text-left mt-2"
+              style={{ background: 'rgba(200, 155, 60, 0.08)', border: '1px solid rgba(200, 155, 60, 0.25)', padding: '8px 12px', fontSize: 11, color: '#7A5E1F', lineHeight: 1.5 }}
+            >
+              Children are especially vulnerable to lead and PFAS. The Home WTR Hub removes 99%+ of both.
+            </div>
+          )}
+          {householdProfile.is_pregnant && (
+            <div
+              className="rounded-card text-left mt-2"
+              style={{ background: 'rgba(184, 74, 74, 0.06)', border: '1px solid rgba(184, 74, 74, 0.20)', padding: '8px 12px', fontSize: 11, color: '#7A2A2A', lineHeight: 1.5 }}
+            >
+              PFAS bioaccumulate in breast milk. Filtration before and during pregnancy is critical.
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
