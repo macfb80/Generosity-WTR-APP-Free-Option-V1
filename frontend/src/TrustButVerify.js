@@ -1045,7 +1045,7 @@ export default function TrustButVerify(){
                   eyebrow="THE SOLUTION"
                   title="Trust but Verify™ Your Water."
                   subtitle={`The Home WTR Hub removes every contaminant found in ${cityShort}'s water, at the tap, in real time.`}
-                >
+                ><a
                   
                     href={`https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}&discount=WELCOME100`}
                     target="_blank"
@@ -1174,7 +1174,7 @@ export default function TrustButVerify(){
                     rel="noopener noreferrer"
                     className="bg-surface-card text-brand font-bold uppercase tracking-wider rounded-card no-underline whitespace-nowrap"
                     style={{ padding: '8px 12px', fontSize: 10, border: '1px solid #51B0E6' }}
-                  >
+                  ><a
                     PARTNER PORTAL →
                   </a>
                 </div>
@@ -1246,7 +1246,7 @@ export default function TrustButVerify(){
                   className="mt-2"
                   title="Knowledge is only useful if you act on it."
                   subtitle="The Home WTR Hub removes everything in this library. 1,000+ contaminants."
-                >
+                ><a
                   
                     href="https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=learn-tab&utm_campaign=knowledge-cta&discount=WELCOME100"
                     target="_blank"
