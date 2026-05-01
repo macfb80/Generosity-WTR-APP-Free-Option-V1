@@ -12,7 +12,6 @@ const config = {
 // Conditionally load visual editing modules only if enabled
 let babelMetadataPlugin;
 let setupDevServer;
-
 if (config.enableVisualEdits) {
   babelMetadataPlugin = require("./plugins/visual-edits/babel-metadata-plugin");
   setupDevServer = require("./plugins/visual-edits/dev-server-setup");
@@ -22,7 +21,6 @@ if (config.enableVisualEdits) {
 let WebpackHealthPlugin;
 let setupHealthEndpoints;
 let healthPluginInstance;
-
 if (config.enableHealthCheck) {
   WebpackHealthPlugin = require("./plugins/health-check/webpack-health-plugin");
   setupHealthEndpoints = require("./plugins/health-check/health-endpoints");
@@ -35,14 +33,12 @@ const webpackConfig = {
       '@': path.resolve(__dirname, 'src'),
     },
     configure: (webpackConfig) => {
-
       // Disable hot reload completely if environment variable is set
       if (config.disableHotReload) {
         // Remove hot reload related plugins
         webpackConfig.plugins = webpackConfig.plugins.filter(plugin => {
           return !(plugin.constructor.name === 'HotModuleReplacementPlugin');
         });
-
         // Disable watch mode
         webpackConfig.watch = false;
         webpackConfig.watchOptions = {
@@ -62,12 +58,10 @@ const webpackConfig = {
           ],
         };
       }
-
       // Add health check plugin to webpack if enabled
       if (config.enableHealthCheck && healthPluginInstance) {
         webpackConfig.plugins.push(healthPluginInstance);
       }
-
       return webpackConfig;
     },
   },
@@ -87,24 +81,19 @@ if (config.enableVisualEdits || config.enableHealthCheck) {
     if (config.enableVisualEdits && setupDevServer) {
       devServerConfig = setupDevServer(devServerConfig);
     }
-
     // Add health check endpoints if enabled
     if (config.enableHealthCheck && setupHealthEndpoints && healthPluginInstance) {
       const originalSetupMiddlewares = devServerConfig.setupMiddlewares;
-
       devServerConfig.setupMiddlewares = (middlewares, devServer) => {
         // Call original setup if exists
         if (originalSetupMiddlewares) {
           middlewares = originalSetupMiddlewares(middlewares, devServer);
         }
-
         // Setup health endpoints
         setupHealthEndpoints(devServer, healthPluginInstance);
-
         return middlewares;
       };
     }
-
     return devServerConfig;
   };
 }
