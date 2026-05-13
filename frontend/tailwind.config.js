@@ -1,11 +1,13 @@
 /* eslint-disable */
 // tailwind.config.js
-// Generosity WTR App v3.1 - Chrome solid, content translucent, edges fade
+// Generosity WTR App v3.2 - Smoky mirror cards, white substrate restored
 //
-// v3.1 changes from v3.0:
-//   #1: Header and bottom nav now opaque white (#FFFFFF) with subtle shadow
-//   #2: Cards 15-20% more translucent (substrate shows through more)
-//   #3: Card edges fade with soft gradient instead of hard 1px border
+// v3.2 changes from v3.1:
+//   - Substrate restored to v3.0 white + brand-blue glow (radial bottom-right + top-left)
+//   - Cards become "smoky mirror" - more translucent white-glass with heavier blur
+//   - Colored left-edge bars REMOVED from default cards
+//   - Risk-tier cards lose left edges EXCEPT card-critical (medical-grade red bar stays)
+//   - Cards have subtle inner-highlight + soft outer shadow to feel floating
 //
 // Brand color rules locked:
 //   - Primary Blue: #51B0E6 (Pantone 2915 U)
@@ -37,10 +39,10 @@ module.exports = {
         surface: {
           base:     '#FFFFFF',
           baseAlt:  '#FAFBFC',
-          /* v3.1: cards more translucent - was 0.06, now 0.045 (~25% more see-through) */
-          card:     'rgba(81, 176, 230, 0.045)',
+          /* v3.2: cards are smoky-mirror translucent white */
+          card:     'rgba(255, 255, 255, 0.55)',
           cardSolid:'#FFFFFF',
-          /* v3.1: chrome now OPAQUE white (was 0.85) */
+          /* v3.2: chrome stays opaque white (from v3.1) */
           chrome:   '#FFFFFF',
           inset:    '#F0F1F3',
         },
@@ -59,7 +61,7 @@ module.exports = {
           DEFAULT: '#51B0E6',
           hover:   '#3DA0DA',
           pressed: '#2B8FC9',
-          tint:    'rgba(81, 176, 230, 0.045)',
+          tint:    'rgba(81, 176, 230, 0.06)',
           tintMid: 'rgba(81, 176, 230, 0.10)',
           tintHi:  'rgba(81, 176, 230, 0.15)',
           edge:    '#51B0E6',
@@ -101,10 +103,8 @@ module.exports = {
       },
 
       boxShadow: {
-        /* v3.1: softer, more diffuse shadow for the fade-to-edge effect */
-        card:       '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
-        cardHover:  '0 2px 4px rgba(15, 20, 25, 0.05), 0 12px 32px rgba(15, 20, 25, 0.08), 0 20px 56px rgba(15, 20, 25, 0.06)',
-        /* v3.1: chrome shadow - subtle glass shadow underneath solid white */
+        card:       '0 1px 3px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.85)',
+        cardHover:  '0 2px 4px rgba(15, 20, 25, 0.06), 0 12px 32px rgba(15, 20, 25, 0.08), 0 20px 56px rgba(15, 20, 25, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
         chrome:     '0 1px 0 rgba(15, 20, 25, 0.04), 0 2px 8px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.02)',
         nav:        '0 -1px 0 rgba(15, 20, 25, 0.04), 0 -2px 8px rgba(15, 20, 25, 0.04), 0 -8px 24px rgba(15, 20, 25, 0.02)',
 
@@ -118,6 +118,7 @@ module.exports = {
         md: '24px',
         lg: '40px',
         xl: '60px',
+        '2xl': '80px',
       },
 
       backdropSaturate: {
@@ -151,64 +152,64 @@ module.exports = {
   plugins: [
     function ({ addUtilities }) {
       addUtilities({
-        /* ===== DEFAULT CARD: brand-blue left edge, more translucent, gradient edges ===== */
-        /* v3.1: border is now transparent with gradient. Card edge fades via mask.       */
+        /* ===== DEFAULT CARD: smoky mirror, NO left edge, floating feel ===== */
         '.card-default': {
-          'background': 'rgba(81, 176, 230, 0.045)',
-          'border': '1px solid transparent',
-          'border-left': '4px solid #51B0E6',
+          'background': 'rgba(255, 255, 255, 0.55)',
+          '-webkit-backdrop-filter': 'blur(50px) saturate(180%)',
+          'backdrop-filter': 'blur(50px) saturate(180%)',
+          'border': '1px solid rgba(255, 255, 255, 0.65)',
           'border-radius': '16px',
-          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
-          /* Soft gradient edge effect via inner-glow inset shadow */
-          'background-image': 'radial-gradient(ellipse at center, rgba(81, 176, 230, 0.05) 0%, rgba(81, 176, 230, 0.03) 60%, rgba(81, 176, 230, 0.01) 100%)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.85)',
         },
 
-        /* ===== Pure white card variant - more translucent (white-glass) ===== */
+        /* ===== Pure white solid card (rare use - for content that needs hard surface) ===== */
         '.card-white': {
-          'background': 'rgba(255, 255, 255, 0.70)',
-          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
-          'backdrop-filter': 'blur(20px) saturate(160%)',
-          'border': '1px solid transparent',
+          'background': '#FFFFFF',
+          'border': '1px solid rgba(15, 20, 25, 0.06)',
           'border-radius': '16px',
-          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06)',
         },
 
-        /* ===== HERO CARD: stronger blue presence, gradient edges ===== */
+        /* ===== HERO CARD: stronger floating mirror, slight blue bottom glow ===== */
         '.card-hero': {
-          'background': 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(81, 176, 230, 0.05) 100%)',
-          'border': '1px solid transparent',
-          'border-left': '4px solid #51B0E6',
+          'background': 'linear-gradient(180deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.50) 70%, rgba(81, 176, 230, 0.06) 100%)',
+          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
+          'backdrop-filter': 'blur(60px) saturate(180%)',
+          'border': '1px solid rgba(255, 255, 255, 0.75)',
           'border-radius': '16px',
-          'box-shadow': '0 2px 4px rgba(15, 20, 25, 0.03), 0 12px 32px rgba(15, 20, 25, 0.06), 0 24px 64px rgba(15, 20, 25, 0.04)',
+          'box-shadow': '0 2px 4px rgba(15, 20, 25, 0.04), 0 12px 32px rgba(15, 20, 25, 0.06), 0 24px 64px rgba(15, 20, 25, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
         },
 
-        /* ===== RISK-TIER CARDS: gradient edges, slightly more translucent tint ===== */
+        /* ===== RISK-TIER CARDS:                                             */
+        /* CRITICAL keeps the 4px red left edge (medical-grade signal).       */
+        /* ATTENTION and POSITIVE lose their edges per v3.2 spec.             */
         '.card-critical': {
-          'background': 'rgba(184, 74, 74, 0.045)',
-          'border': '1px solid transparent',
+          'background': 'rgba(184, 74, 74, 0.06)',
+          '-webkit-backdrop-filter': 'blur(40px) saturate(160%)',
+          'backdrop-filter': 'blur(40px) saturate(160%)',
+          'border': '1px solid rgba(184, 74, 74, 0.18)',
           'border-left': '4px solid #B84A4A',
           'border-radius': '16px',
-          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
-          'background-image': 'radial-gradient(ellipse at left center, rgba(184, 74, 74, 0.10) 0%, rgba(184, 74, 74, 0.04) 30%, rgba(184, 74, 74, 0.01) 70%, rgba(184, 74, 74, 0) 100%)',
+          'box-shadow': '0 1px 3px rgba(184, 74, 74, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.80)',
         },
         '.card-attention': {
-          'background': 'rgba(200, 155, 60, 0.045)',
-          'border': '1px solid transparent',
-          'border-left': '4px solid #C89B3C',
+          'background': 'rgba(200, 155, 60, 0.05)',
+          '-webkit-backdrop-filter': 'blur(50px) saturate(180%)',
+          'backdrop-filter': 'blur(50px) saturate(180%)',
+          'border': '1px solid rgba(200, 155, 60, 0.20)',
           'border-radius': '16px',
-          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
-          'background-image': 'radial-gradient(ellipse at left center, rgba(200, 155, 60, 0.10) 0%, rgba(200, 155, 60, 0.04) 30%, rgba(200, 155, 60, 0.01) 70%, rgba(200, 155, 60, 0) 100%)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.85)',
         },
         '.card-positive': {
-          'background': 'rgba(74, 138, 111, 0.045)',
-          'border': '1px solid transparent',
-          'border-left': '4px solid #4A8A6F',
+          'background': 'rgba(74, 138, 111, 0.05)',
+          '-webkit-backdrop-filter': 'blur(50px) saturate(180%)',
+          'backdrop-filter': 'blur(50px) saturate(180%)',
+          'border': '1px solid rgba(74, 138, 111, 0.20)',
           'border-radius': '16px',
-          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
-          'background-image': 'radial-gradient(ellipse at left center, rgba(74, 138, 111, 0.10) 0%, rgba(74, 138, 111, 0.04) 30%, rgba(74, 138, 111, 0.01) 70%, rgba(74, 138, 111, 0) 100%)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.85)',
         },
 
-        /* ===== CHROME: opaque white, no backdrop filter, subtle shadow underneath ===== */
+        /* ===== Chrome surfaces (header, nav) - opaque white from v3.1 ===== */
         '.glass-chrome': {
           'background': '#FFFFFF',
           'border-bottom': '1px solid rgba(15, 20, 25, 0.04)',
@@ -225,7 +226,6 @@ module.exports = {
           'backdrop-filter': 'blur(40px) saturate(180%)',
         },
 
-        /* ===== Brand button: saturated blue (the brand light source) ===== */
         '.btn-brand': {
           'background': '#51B0E6',
           'color': '#FFFFFF',
@@ -238,7 +238,6 @@ module.exports = {
           'border': '1px solid rgba(81, 176, 230, 0.25)',
         },
 
-        /* ===== Status pills ===== */
         '.pill-critical': {
           'background': 'rgba(184, 74, 74, 0.08)',
           'color': '#B84A4A',
