@@ -1,21 +1,19 @@
 /* eslint-disable */
 // tailwind.config.js
-// Generosity WTR App - Aluminum + Glass design system v2.1
+// Generosity WTR App - White + Brand Blue Card System v3.0
 //
-// v2.1 dial-in changes:
-//   - Aluminum substrate deepened from #6E7174 to #5A5E62 (more graphite)
-//   - Card opacity 45% to 60% (more presence, less ghost)
-//   - Edge highlight alpha 0.60 to 0.85 (visible bezel light catch)
-//   - Brushed-metal texture added via index.css (vertical line grain)
-//   - Brand-blue glow repositioned (handled in index.css)
-//   - FOUNDER pill quieter (handled in TrustButVerify.js if you want it, optional)
+// Aesthetic anchor: high-concern alert card pattern as the design language.
+//   - White substrate
+//   - Cards: subtle brand-tinted translucent surface + 4px left-edge color bar
+//   - Default left-edge: brand blue #51B0E6
+//   - Risk-tier cards keep red/amber/green left-edge bars
+//   - Clean typography, sharp 16px corners
 //
 // Brand color rules locked:
 //   - Primary Blue: #51B0E6 (Pantone 2915 U)
 //   - Brand Gray: #A6A8AB (Pantone Cool Gray 6)
+//   - Light Gray: #F0F1F3
 //   - White: #FFFFFF
-//
-// Typography: Barlow Condensed for display, Montserrat for body.
 
 module.exports = {
   content: [
@@ -25,36 +23,35 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        /* ========== ALUMINUM BACKGROUND PALETTE (v2.1: deepened) ========== */
+        /* ========== SUBSTRATE / NEUTRALS ========== */
         aluminum: {
-          50:  '#F0F1F3',
-          100: '#DCDFE2',
-          200: '#C4C7CB',
-          300: '#A6A8AB',  /* LOCKED Pantone Cool Gray 6 */
-          400: '#8A8D90',
-          500: '#6E7174',
-          550: '#5A5E62',  /* NEW v2.1 - primary background */
-          600: '#54575A',
+          50:  '#FFFFFF',
+          100: '#FAFBFC',
+          200: '#F2F4F7',
+          300: '#F0F1F3',  /* LOCKED Light Gray */
+          400: '#DCDFE2',
+          500: '#A6A8AB',  /* LOCKED Pantone Cool Gray 6 */
+          600: '#6E7174',
           700: '#3D4043',
-          800: '#2A2C2E',
-          900: '#1A1B1D',
+          800: '#1A1B1D',
+          900: '#0F1419',
         },
 
-        /* ========== SURFACES (v2.1: higher opacity glass) ========== */
+        /* ========== SURFACES ========== */
         surface: {
-          base:    '#5A5E62',                          /* v2.1: deeper */
-          baseAlt: '#3D4043',                          /* bottom gradient stop deeper */
-          card:    'rgba(255, 255, 255, 0.60)',        /* v2.1: 0.45 -> 0.60 */
-          cardSolid: 'rgba(255, 255, 255, 0.90)',
-          inset:   'rgba(255, 255, 255, 0.25)',
-          chrome:  'rgba(255, 255, 255, 0.65)',        /* v2.1: 0.55 -> 0.65 */
+          base:     '#FFFFFF',                          /* v3.0 white substrate */
+          baseAlt:  '#FAFBFC',                          /* very subtle off-white */
+          card:     'rgba(81, 176, 230, 0.06)',         /* default blue-tinted glass card */
+          cardSolid:'#FFFFFF',                          /* pure white card variant */
+          chrome:   'rgba(255, 255, 255, 0.85)',        /* nav/header glass */
+          inset:    '#F0F1F3',                          /* inset zones use locked light gray */
         },
 
         text: {
           primary:    '#0F1419',
           secondary:  '#3D4043',
           tertiary:   '#6E7174',
-          quaternary: '#8A8D90',
+          quaternary: '#A6A8AB',
           onAccent:   '#FFFFFF',
           onDark:     'rgba(255, 255, 255, 0.95)',
           onDarkMuted:'rgba(255, 255, 255, 0.65)',
@@ -64,16 +61,20 @@ module.exports = {
           DEFAULT: '#51B0E6',
           hover:   '#3DA0DA',
           pressed: '#2B8FC9',
-          tint:    'rgba(81, 176, 230, 0.15)',
-          glow:    'rgba(81, 176, 230, 0.35)',
+          tint:    'rgba(81, 176, 230, 0.06)',
+          tintMid: 'rgba(81, 176, 230, 0.12)',
+          tintHi:  'rgba(81, 176, 230, 0.18)',
+          edge:    '#51B0E6',
+          glow:    'rgba(81, 176, 230, 0.25)',
           deep:    'rgba(81, 176, 230, 0.85)',
+          ink:     '#1F6FA0',  /* dark blue for text on tinted surfaces */
         },
 
         state: {
           positive: '#4A8A6F',
           attention:'#C89B3C',
           critical: '#B84A4A',
-          neutral:  '#6E7174',
+          neutral:  '#A6A8AB',
         },
       },
 
@@ -102,22 +103,14 @@ module.exports = {
       },
 
       boxShadow: {
-        /* v2.1: stronger edge highlights, more present cards */
-        glass:      '0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
-        glassDeep:  '0 16px 48px rgba(0, 0, 0, 0.18), 0 2px 4px rgba(0, 0, 0, 0.08)',
-        glassHover: '0 12px 40px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.08)',
+        /* Soft drop shadow appropriate for cards on white substrate */
+        card:       '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+        cardHover:  '0 2px 4px rgba(15, 20, 25, 0.06), 0 8px 24px rgba(15, 20, 25, 0.08)',
+        chrome:     '0 1px 0 rgba(15, 20, 25, 0.06), 0 1px 4px rgba(15, 20, 25, 0.03)',
+        nav:        '0 -1px 0 rgba(15, 20, 25, 0.06), 0 -4px 16px rgba(15, 20, 25, 0.04)',
 
-        edge:       'inset 0 1px 0 rgba(255, 255, 255, 0.85)',          /* v2.1: 0.60 -> 0.85 */
-        edgeStrong: 'inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.08)',
-
-        card:       'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
-        cardHover:  'inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 12px 40px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.08)',
-
-        glow:       '0 0 32px rgba(81, 176, 230, 0.30), 0 0 8px rgba(81, 176, 230, 0.20)',
-        glowSoft:   '0 0 24px rgba(81, 176, 230, 0.20)',
-
-        nav:        '0 -8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.65)',
-        header:     '0 4px 24px rgba(0, 0, 0, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.04)',
+        glow:       '0 0 32px rgba(81, 176, 230, 0.25), 0 0 8px rgba(81, 176, 230, 0.15)',
+        glowSoft:   '0 0 24px rgba(81, 176, 230, 0.15)',
       },
 
       backdropBlur: {
@@ -126,7 +119,6 @@ module.exports = {
         md: '24px',
         lg: '40px',
         xl: '60px',
-        '2xl': '80px',
       },
 
       backdropSaturate: {
@@ -160,113 +152,121 @@ module.exports = {
   plugins: [
     function ({ addUtilities }) {
       addUtilities({
-        /* ===== Frosted glass card material (v2.1: 60% opacity) ===== */
-        '.glass-card': {
-          'background': 'rgba(255, 255, 255, 0.60)',
-          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
-          'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
-          'border': '1px solid rgba(255, 255, 255, 0.40)',
+        /* ===== Default card: brand-blue left-edge bar + subtle blue tint ===== */
+        '.card-default': {
+          'background': 'rgba(81, 176, 230, 0.06)',
+          'border': '1px solid rgba(81, 176, 230, 0.20)',
+          'border-left': '4px solid #51B0E6',
+          'border-radius': '16px',
+          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
         },
-        '.glass-card-solid': {
-          'background': 'rgba(255, 255, 255, 0.90)',
-          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
-          'backdrop-filter': 'blur(20px) saturate(160%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06)',
-          'border': '1px solid rgba(255, 255, 255, 0.50)',
+
+        /* ===== Pure white card variant (for content that shouldn't have brand bleed) ===== */
+        '.card-white': {
+          'background': '#FFFFFF',
+          'border': '1px solid rgba(15, 20, 25, 0.06)',
+          'border-radius': '16px',
+          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
         },
+
+        /* ===== Hero card: brand blue, stronger presence ===== */
+        '.card-hero': {
+          'background': 'linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(81, 176, 230, 0.04) 100%)',
+          'border': '1px solid rgba(81, 176, 230, 0.20)',
+          'border-left': '4px solid #51B0E6',
+          'border-radius': '16px',
+          'box-shadow': '0 2px 4px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.8) inset',
+        },
+
+        /* ===== Risk-tier card variants (left-edge color reflects risk) ===== */
+        '.card-critical': {
+          'background': 'rgba(184, 74, 74, 0.06)',
+          'border': '1px solid rgba(184, 74, 74, 0.20)',
+          'border-left': '4px solid #B84A4A',
+          'border-radius': '16px',
+          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+        },
+        '.card-attention': {
+          'background': 'rgba(200, 155, 60, 0.06)',
+          'border': '1px solid rgba(200, 155, 60, 0.20)',
+          'border-left': '4px solid #C89B3C',
+          'border-radius': '16px',
+          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+        },
+        '.card-positive': {
+          'background': 'rgba(74, 138, 111, 0.06)',
+          'border': '1px solid rgba(74, 138, 111, 0.20)',
+          'border-left': '4px solid #4A8A6F',
+          'border-radius': '16px',
+          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+        },
+
+        /* ===== Chrome surfaces (header, nav) - lighter glass on white ===== */
         '.glass-chrome': {
-          'background': 'rgba(255, 255, 255, 0.65)',
-          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
-          'backdrop-filter': 'blur(60px) saturate(180%)',
-          'border-bottom': '1px solid rgba(255, 255, 255, 0.40)',
+          'background': 'rgba(255, 255, 255, 0.85)',
+          '-webkit-backdrop-filter': 'blur(24px) saturate(180%)',
+          'backdrop-filter': 'blur(24px) saturate(180%)',
+          'border-bottom': '1px solid rgba(15, 20, 25, 0.06)',
         },
         '.glass-nav': {
-          'background': 'rgba(255, 255, 255, 0.70)',
-          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
-          'backdrop-filter': 'blur(60px) saturate(180%)',
-          'border-top': '1px solid rgba(255, 255, 255, 0.50)',
-          'box-shadow': '0 -8px 32px rgba(0, 0, 0, 0.12)',
+          'background': 'rgba(255, 255, 255, 0.90)',
+          '-webkit-backdrop-filter': 'blur(24px) saturate(180%)',
+          'backdrop-filter': 'blur(24px) saturate(180%)',
+          'border-top': '1px solid rgba(15, 20, 25, 0.06)',
+          'box-shadow': '0 -1px 0 rgba(15, 20, 25, 0.04)',
         },
-        '.glass-inset': {
-          'background': 'rgba(255, 255, 255, 0.30)',
-          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
-          'backdrop-filter': 'blur(20px) saturate(160%)',
-          'box-shadow': 'inset 0 1px 2px rgba(0, 0, 0, 0.06)',
+        '.glass-sheet': {
+          'background': 'rgba(255, 255, 255, 0.95)',
+          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
+          'backdrop-filter': 'blur(40px) saturate(180%)',
         },
 
-        '.glass-brand': {
-          'background': 'rgba(81, 176, 230, 0.85)',
-          '-webkit-backdrop-filter': 'blur(20px) saturate(180%)',
-          'backdrop-filter': 'blur(20px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.40), 0 8px 24px rgba(81, 176, 230, 0.30), 0 1px 2px rgba(81, 176, 230, 0.20)',
+        /* ===== Brand button: saturated blue (the brand light source) ===== */
+        '.btn-brand': {
+          'background': '#51B0E6',
           'color': '#FFFFFF',
+          'box-shadow': '0 1px 2px rgba(81, 176, 230, 0.30), 0 4px 16px rgba(81, 176, 230, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.20) inset',
+          'border': 'none',
         },
-        '.glass-brand-subtle': {
-          'background': 'rgba(81, 176, 230, 0.18)',
-          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
-          'backdrop-filter': 'blur(20px) saturate(160%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.40)',
-          'border': '1px solid rgba(81, 176, 230, 0.30)',
+        '.btn-brand-subtle': {
+          'background': 'rgba(81, 176, 230, 0.12)',
           'color': '#1F6FA0',
+          'border': '1px solid rgba(81, 176, 230, 0.30)',
         },
 
-        '.glass-critical': {
-          'background': 'rgba(184, 74, 74, 0.18)',
-          '-webkit-backdrop-filter': 'blur(16px) saturate(160%)',
-          'backdrop-filter': 'blur(16px) saturate(160%)',
-          'border': '1px solid rgba(184, 74, 74, 0.30)',
-          'color': '#7A2A2A',
+        /* ===== Status pills (tinted, for header risk score etc) ===== */
+        '.pill-critical': {
+          'background': 'rgba(184, 74, 74, 0.10)',
+          'color': '#B84A4A',
+          'border': '1px solid rgba(184, 74, 74, 0.25)',
         },
-        '.glass-attention': {
-          'background': 'rgba(200, 155, 60, 0.18)',
-          '-webkit-backdrop-filter': 'blur(16px) saturate(160%)',
-          'backdrop-filter': 'blur(16px) saturate(160%)',
-          'border': '1px solid rgba(200, 155, 60, 0.30)',
-          'color': '#7A5E1F',
+        '.pill-attention': {
+          'background': 'rgba(200, 155, 60, 0.10)',
+          'color': '#C89B3C',
+          'border': '1px solid rgba(200, 155, 60, 0.25)',
         },
-        '.glass-positive': {
-          'background': 'rgba(74, 138, 111, 0.18)',
-          '-webkit-backdrop-filter': 'blur(16px) saturate(160%)',
-          'backdrop-filter': 'blur(16px) saturate(160%)',
-          'border': '1px solid rgba(74, 138, 111, 0.30)',
-          'color': '#2C5A45',
+        '.pill-positive': {
+          'background': 'rgba(74, 138, 111, 0.10)',
+          'color': '#4A8A6F',
+          'border': '1px solid rgba(74, 138, 111, 0.25)',
         },
-
-        '.edge-light': {
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85)',
+        '.pill-brand': {
+          'background': 'rgba(81, 176, 230, 0.10)',
+          'color': '#1F6FA0',
+          'border': '1px solid rgba(81, 176, 230, 0.25)',
         },
-        '.edge-light-strong': {
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.08)',
+        '.pill-founder': {
+          'background': 'rgba(15, 20, 25, 0.04)',
+          'color': '#1F6FA0',
+          'border': '1px solid rgba(81, 176, 230, 0.20)',
         },
 
-        '.bleed-critical': {
-          'background': 'linear-gradient(90deg, rgba(184, 74, 74, 0.22) 0%, rgba(255, 255, 255, 0) 14%), rgba(255, 255, 255, 0.60)',
-          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
-          'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
-          'border': '1px solid rgba(255, 255, 255, 0.40)',
-        },
-        '.bleed-attention': {
-          'background': 'linear-gradient(90deg, rgba(200, 155, 60, 0.22) 0%, rgba(255, 255, 255, 0) 14%), rgba(255, 255, 255, 0.60)',
-          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
-          'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
-          'border': '1px solid rgba(255, 255, 255, 0.40)',
-        },
-        '.bleed-positive': {
-          'background': 'linear-gradient(90deg, rgba(74, 138, 111, 0.22) 0%, rgba(255, 255, 255, 0) 14%), rgba(255, 255, 255, 0.60)',
-          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
-          'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
-          'border': '1px solid rgba(255, 255, 255, 0.40)',
-        },
-
+        /* ===== Brand glow (active states) ===== */
         '.brand-glow': {
-          'box-shadow': '0 0 24px rgba(81, 176, 230, 0.30)',
+          'box-shadow': '0 0 24px rgba(81, 176, 230, 0.25)',
         },
         '.brand-glow-strong': {
-          'box-shadow': '0 0 40px rgba(81, 176, 230, 0.45), 0 0 12px rgba(81, 176, 230, 0.30)',
+          'box-shadow': '0 0 40px rgba(81, 176, 230, 0.35), 0 0 12px rgba(81, 176, 230, 0.20)',
         },
       });
     },
