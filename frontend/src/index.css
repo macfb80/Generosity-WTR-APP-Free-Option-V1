@@ -1,9 +1,6 @@
 /* src/index.css                                                              */
-/* Generosity WTR App - White + Brand Blue v3.0                               */
-/*                                                                            */
-/* White substrate. Subtle vertical texture (8% opacity) gives the surface    */
-/* paper-quality grain rather than pure flat white.                           */
-/* Subtle brand-blue radial glow positioned bottom-right (light from below).  */
+/* Generosity WTR App v3.1                                                    */
+/* Chrome opaque white. Cards more translucent. Edge gradient transitions.    */
 
 @tailwind base;
 @tailwind components;
@@ -14,9 +11,9 @@
     --aluminum-50:  #FFFFFF;
     --aluminum-100: #FAFBFC;
     --aluminum-200: #F2F4F7;
-    --aluminum-300: #F0F1F3;  /* LOCKED light gray */
+    --aluminum-300: #F0F1F3;
     --aluminum-400: #DCDFE2;
-    --aluminum-500: #A6A8AB;  /* LOCKED Pantone Cool Gray 6 */
+    --aluminum-500: #A6A8AB;
     --aluminum-600: #6E7174;
     --aluminum-700: #3D4043;
     --aluminum-800: #1A1B1D;
@@ -66,9 +63,6 @@
     padding: 0;
     font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--aluminum-900);
-
-    /* White substrate with subtle brand-blue radial glow at bottom-right.            */
-    /* The glow simulates "light from below" - the brand's light source effect.       */
     background:
       radial-gradient(
         ellipse 800px 600px at 100% 100%,
@@ -91,7 +85,6 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* ===== Subtle vertical paper grain (very low opacity for legibility) ===== */
   body::before {
     content: '';
     position: fixed;
@@ -109,7 +102,6 @@
       );
   }
 
-  /* ===== Subtle drop pattern overlay (brand-blue, very low opacity) ===== */
   body::after {
     content: '';
     position: fixed;
@@ -154,16 +146,16 @@
     border-radius: 4px;
   }
 
-  /* ===== Compat shims so existing class names continue to work ===== */
-  /* Maps old surface utilities to new v3.0 system.                          */
+  /* ===== Compat shims for legacy class names ===== */
+  /* v3.1: cards more translucent, gradient edges */
   .bg-surface-card {
-    background: rgba(81, 176, 230, 0.06);
-    border: 1px solid rgba(81, 176, 230, 0.20);
+    background: rgba(81, 176, 230, 0.045);
+    border: 1px solid transparent;
     border-left: 4px solid #51B0E6;
   }
 
   .shadow-card {
-    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06);
+    box-shadow: 0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04);
   }
 
   .bg-drop-pattern {
@@ -175,7 +167,7 @@
   }
 }
 
-/* ===== Animations (preserved from v1) ===== */
+/* ===== Animations ===== */
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
