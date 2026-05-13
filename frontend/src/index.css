@@ -1,9 +1,11 @@
 /* src/index.css                                                              */
-/* Generosity WTR App - Aluminum + Glass design system v2.0                   */
+/* Generosity WTR App - Aluminum + Glass design system v2.1                   */
 /*                                                                            */
-/* Body background: aluminum gradient (Cool Gray evolution).                  */
-/* Light source: radial brand-blue glow behind the header area, fading down.  */
-/* Drop pattern: low-opacity overlay (~3-5%), brand-blue tinted.              */
+/* v2.1 dial-in changes:                                                      */
+/*   - Substrate deepened to aluminum-550 (#5A5E62) with vertical gradient    */
+/*   - Brushed-metal grain texture added (vertical lines, 8% opacity)         */
+/*   - Brand-blue glow repositioned from header (0%) to behind hero (25%)     */
+/*   - Drop pattern overlay strengthened from 3.5% to 5% opacity              */
 
 @tailwind base;
 @tailwind components;
@@ -11,32 +13,30 @@
 
 @layer base {
   :root {
-    /* ===== Aluminum substrate ===== */
     --aluminum-50:  #F0F1F3;
     --aluminum-100: #DCDFE2;
     --aluminum-200: #C4C7CB;
-    --aluminum-300: #A6A8AB;  /* Pantone Cool Gray 6 - LOCKED brand gray */
+    --aluminum-300: #A6A8AB;  /* Pantone Cool Gray 6 LOCKED */
     --aluminum-400: #8A8D90;
-    --aluminum-500: #6E7174;  /* primary app background */
+    --aluminum-500: #6E7174;
+    --aluminum-550: #5A5E62;  /* v2.1 primary background */
     --aluminum-600: #54575A;
     --aluminum-700: #3D4043;
     --aluminum-800: #2A2C2E;
     --aluminum-900: #1A1B1D;
 
-    /* ===== Brand ===== */
-    --brand:        #51B0E6;  /* Pantone 2915 U */
+    --brand:        #51B0E6;
     --brand-hover:  #3DA0DA;
     --brand-pressed:#2B8FC9;
     --brand-glow:   rgba(81, 176, 230, 0.35);
 
-    /* ===== State ===== */
     --state-positive:  #4A8A6F;
     --state-attention: #C89B3C;
     --state-critical:  #B84A4A;
     --state-neutral:   #6E7174;
 
-    /* ===== Shadcn HSL variables (preserved for compat) ===== */
-    --background: 210 6% 45%;
+    /* Shadcn compat */
+    --background: 210 5% 37%;          /* v2.1: aluminum-550 */
     --foreground: 210 11% 8%;
     --card: 0 0% 100%;
     --card-foreground: 210 11% 8%;
@@ -52,14 +52,14 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 50% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 100% / 0.30;
-    --input: 0 0% 100% / 0.45;
+    --border: 0 0% 100% / 0.40;
+    --input: 0 0% 100% / 0.60;
     --ring: 201 75% 61%;
     --radius: 1rem;
   }
 
   html {
-    background: var(--aluminum-500);
+    background: var(--aluminum-550);
     -webkit-text-size-adjust: 100%;
   }
 
@@ -69,25 +69,33 @@
     font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--aluminum-900);
 
-    /* ===== Aluminum substrate with brand-blue light source ===== */
-    /* Two stacked radial gradients:                                          */
-    /*   1. Brand blue glow positioned behind the header area                 */
-    /*   2. Aluminum gradient from lighter top to deeper bottom               */
+    /* ===== v2.1 substrate: deeper graphite gradient + repositioned blue glow ===== */
+    /* Three stacked layers, painted bottom-up:                                       */
+    /*   3. (top)    Brand-blue radial glow positioned at 25% Y (behind hero area)    */
+    /*   2.          Subtle horizontal warm-to-cool gradient overlay                  */
+    /*   1. (bottom) Vertical aluminum gradient (lighter top, deeper bottom)          */
     background:
       radial-gradient(
-        ellipse 800px 600px at 50% 0%,
-        rgba(81, 176, 230, 0.18) 0%,
-        rgba(81, 176, 230, 0.06) 30%,
-        rgba(81, 176, 230, 0) 60%
+        ellipse 700px 500px at 50% 22%,
+        rgba(81, 176, 230, 0.22) 0%,
+        rgba(81, 176, 230, 0.08) 35%,
+        rgba(81, 176, 230, 0) 65%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(90, 94, 98, 1) 0%,
+        rgba(86, 90, 94, 1) 50%,
+        rgba(82, 86, 90, 1) 100%
       ),
       linear-gradient(
         180deg,
-        var(--aluminum-400) 0%,
-        var(--aluminum-500) 35%,
-        var(--aluminum-600) 100%
+        #6A6E72 0%,
+        #5A5E62 35%,
+        #4E5256 100%
       );
     background-attachment: fixed;
     background-repeat: no-repeat;
+    background-blend-mode: normal, overlay, normal;
     min-height: 100vh;
     min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
@@ -95,24 +103,46 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* ===== Drop pattern overlay ===== */
-  /* Subtle brand-tinted drop pattern at very low opacity.                    */
-  /* Tile size 64px so it reads as texture, not motif.                        */
+  /* ===== v2.1 brushed-metal grain ===== */
+  /* Very fine vertical lines at 8% opacity simulate milled-aluminum surface.        */
+  /* Repeating linear gradient gives the substrate true metal feel.                  */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.035;
+    z-index: 0;
+    opacity: 0.08;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0px,
+        rgba(255, 255, 255, 0) 1px,
+        rgba(255, 255, 255, 0.35) 1px,
+        rgba(255, 255, 255, 0.35) 2px,
+        rgba(0, 0, 0, 0.18) 2px,
+        rgba(0, 0, 0, 0.18) 3px,
+        rgba(255, 255, 255, 0) 3px,
+        rgba(255, 255, 255, 0) 4px
+      );
+    mix-blend-mode: overlay;
+  }
+
+  /* ===== v2.1 drop pattern overlay (strengthened to 5%) ===== */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.05;
     background-image:
       radial-gradient(circle at 16px 16px, var(--brand) 0%, var(--brand) 2px, transparent 3px),
       radial-gradient(circle at 48px 48px, var(--brand) 0%, var(--brand) 2px, transparent 3px);
     background-size: 64px 64px;
-    z-index: 0;
-    mix-blend-mode: overlay;
+    mix-blend-mode: screen;
   }
 
-  /* ===== Bring app content above the drop overlay ===== */
   #root {
     position: relative;
     z-index: 1;
@@ -122,13 +152,12 @@
 }
 
 @layer components {
-  /* ===== Skeleton shimmer ===== */
   .skeleton {
     background: linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.25) 0%,
-      rgba(255, 255, 255, 0.45) 50%,
-      rgba(255, 255, 255, 0.25) 100%
+      rgba(255, 255, 255, 0.30) 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0.30) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
@@ -139,57 +168,49 @@
     100% { background-position: 200% 0; }
   }
 
-  /* ===== Focus visible (accessibility) ===== */
   :focus-visible {
     outline: 2px solid var(--brand);
     outline-offset: 2px;
     border-radius: 4px;
   }
 
-  /* ===== Compat shims for older glass-morphism classes ===== */
-  /* These map legacy classnames to the new glass system so any existing      */
-  /* component still works during migration.                                  */
   .glass-card-legacy {
-    background: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.60);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
     backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.30);
+    border: 1px solid rgba(255, 255, 255, 0.40);
     border-radius: 16px;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.60),
-      0 8px 32px rgba(0, 0, 0, 0.10),
-      0 1px 2px rgba(0, 0, 0, 0.04);
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 1px 2px rgba(0, 0, 0, 0.06);
   }
 
-  /* ===== Drop pattern utility (for empty/loading states inside cards) ===== */
   .bg-drop-pattern {
-    background-color: rgba(255, 255, 255, 0.30);
+    background-color: rgba(255, 255, 255, 0.40);
     background-image:
-      radial-gradient(circle at 16px 16px, rgba(81, 176, 230, 0.15) 0%, rgba(81, 176, 230, 0.15) 2px, transparent 3px),
-      radial-gradient(circle at 48px 48px, rgba(81, 176, 230, 0.15) 0%, rgba(81, 176, 230, 0.15) 2px, transparent 3px);
+      radial-gradient(circle at 16px 16px, rgba(81, 176, 230, 0.18) 0%, rgba(81, 176, 230, 0.18) 2px, transparent 3px),
+      radial-gradient(circle at 48px 48px, rgba(81, 176, 230, 0.18) 0%, rgba(81, 176, 230, 0.18) 2px, transparent 3px);
     background-size: 64px 64px;
   }
 }
 
-/* ===== Risk-tier color animation for active alerts ===== */
+/* ===== Animations (preserved from v1) ===== */
 @keyframes critical-pulse {
-  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(184, 74, 74, 0.12); }
-  50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(184, 74, 74, 0.20); }
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(184, 74, 74, 0.14); }
+  50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(184, 74, 74, 0.22); }
 }
 
-/* ===== Slide up animation for cards (preserves existing pattern) ===== */
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Ripple animation for scan state ===== */
 @keyframes ripple {
   0%   { transform: scale(0.9); opacity: 0.8; }
   100% { transform: scale(2.2); opacity: 0; }
 }
 
-/* ===== Pulse and spin (preserved from v1) ===== */
 @keyframes pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.08); opacity: 0.8; }
