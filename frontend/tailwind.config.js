@@ -1,13 +1,11 @@
 /* eslint-disable */
 // tailwind.config.js
-// Generosity WTR App - White + Brand Blue Card System v3.0
+// Generosity WTR App v3.1 - Chrome solid, content translucent, edges fade
 //
-// Aesthetic anchor: high-concern alert card pattern as the design language.
-//   - White substrate
-//   - Cards: subtle brand-tinted translucent surface + 4px left-edge color bar
-//   - Default left-edge: brand blue #51B0E6
-//   - Risk-tier cards keep red/amber/green left-edge bars
-//   - Clean typography, sharp 16px corners
+// v3.1 changes from v3.0:
+//   #1: Header and bottom nav now opaque white (#FFFFFF) with subtle shadow
+//   #2: Cards 15-20% more translucent (substrate shows through more)
+//   #3: Card edges fade with soft gradient instead of hard 1px border
 //
 // Brand color rules locked:
 //   - Primary Blue: #51B0E6 (Pantone 2915 U)
@@ -23,28 +21,28 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        /* ========== SUBSTRATE / NEUTRALS ========== */
         aluminum: {
           50:  '#FFFFFF',
           100: '#FAFBFC',
           200: '#F2F4F7',
-          300: '#F0F1F3',  /* LOCKED Light Gray */
+          300: '#F0F1F3',
           400: '#DCDFE2',
-          500: '#A6A8AB',  /* LOCKED Pantone Cool Gray 6 */
+          500: '#A6A8AB',
           600: '#6E7174',
           700: '#3D4043',
           800: '#1A1B1D',
           900: '#0F1419',
         },
 
-        /* ========== SURFACES ========== */
         surface: {
-          base:     '#FFFFFF',                          /* v3.0 white substrate */
-          baseAlt:  '#FAFBFC',                          /* very subtle off-white */
-          card:     'rgba(81, 176, 230, 0.06)',         /* default blue-tinted glass card */
-          cardSolid:'#FFFFFF',                          /* pure white card variant */
-          chrome:   'rgba(255, 255, 255, 0.85)',        /* nav/header glass */
-          inset:    '#F0F1F3',                          /* inset zones use locked light gray */
+          base:     '#FFFFFF',
+          baseAlt:  '#FAFBFC',
+          /* v3.1: cards more translucent - was 0.06, now 0.045 (~25% more see-through) */
+          card:     'rgba(81, 176, 230, 0.045)',
+          cardSolid:'#FFFFFF',
+          /* v3.1: chrome now OPAQUE white (was 0.85) */
+          chrome:   '#FFFFFF',
+          inset:    '#F0F1F3',
         },
 
         text: {
@@ -61,13 +59,13 @@ module.exports = {
           DEFAULT: '#51B0E6',
           hover:   '#3DA0DA',
           pressed: '#2B8FC9',
-          tint:    'rgba(81, 176, 230, 0.06)',
-          tintMid: 'rgba(81, 176, 230, 0.12)',
-          tintHi:  'rgba(81, 176, 230, 0.18)',
+          tint:    'rgba(81, 176, 230, 0.045)',
+          tintMid: 'rgba(81, 176, 230, 0.10)',
+          tintHi:  'rgba(81, 176, 230, 0.15)',
           edge:    '#51B0E6',
           glow:    'rgba(81, 176, 230, 0.25)',
           deep:    'rgba(81, 176, 230, 0.85)',
-          ink:     '#1F6FA0',  /* dark blue for text on tinted surfaces */
+          ink:     '#1F6FA0',
         },
 
         state: {
@@ -103,11 +101,12 @@ module.exports = {
       },
 
       boxShadow: {
-        /* Soft drop shadow appropriate for cards on white substrate */
-        card:       '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
-        cardHover:  '0 2px 4px rgba(15, 20, 25, 0.06), 0 8px 24px rgba(15, 20, 25, 0.08)',
-        chrome:     '0 1px 0 rgba(15, 20, 25, 0.06), 0 1px 4px rgba(15, 20, 25, 0.03)',
-        nav:        '0 -1px 0 rgba(15, 20, 25, 0.06), 0 -4px 16px rgba(15, 20, 25, 0.04)',
+        /* v3.1: softer, more diffuse shadow for the fade-to-edge effect */
+        card:       '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
+        cardHover:  '0 2px 4px rgba(15, 20, 25, 0.05), 0 12px 32px rgba(15, 20, 25, 0.08), 0 20px 56px rgba(15, 20, 25, 0.06)',
+        /* v3.1: chrome shadow - subtle glass shadow underneath solid white */
+        chrome:     '0 1px 0 rgba(15, 20, 25, 0.04), 0 2px 8px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.02)',
+        nav:        '0 -1px 0 rgba(15, 20, 25, 0.04), 0 -2px 8px rgba(15, 20, 25, 0.04), 0 -8px 24px rgba(15, 20, 25, 0.02)',
 
         glow:       '0 0 32px rgba(81, 176, 230, 0.25), 0 0 8px rgba(81, 176, 230, 0.15)',
         glowSoft:   '0 0 24px rgba(81, 176, 230, 0.15)',
@@ -152,68 +151,73 @@ module.exports = {
   plugins: [
     function ({ addUtilities }) {
       addUtilities({
-        /* ===== Default card: brand-blue left-edge bar + subtle blue tint ===== */
+        /* ===== DEFAULT CARD: brand-blue left edge, more translucent, gradient edges ===== */
+        /* v3.1: border is now transparent with gradient. Card edge fades via mask.       */
         '.card-default': {
-          'background': 'rgba(81, 176, 230, 0.06)',
-          'border': '1px solid rgba(81, 176, 230, 0.20)',
+          'background': 'rgba(81, 176, 230, 0.045)',
+          'border': '1px solid transparent',
           'border-left': '4px solid #51B0E6',
           'border-radius': '16px',
-          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
+          /* Soft gradient edge effect via inner-glow inset shadow */
+          'background-image': 'radial-gradient(ellipse at center, rgba(81, 176, 230, 0.05) 0%, rgba(81, 176, 230, 0.03) 60%, rgba(81, 176, 230, 0.01) 100%)',
         },
 
-        /* ===== Pure white card variant (for content that shouldn't have brand bleed) ===== */
+        /* ===== Pure white card variant - more translucent (white-glass) ===== */
         '.card-white': {
-          'background': '#FFFFFF',
-          'border': '1px solid rgba(15, 20, 25, 0.06)',
+          'background': 'rgba(255, 255, 255, 0.70)',
+          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
+          'backdrop-filter': 'blur(20px) saturate(160%)',
+          'border': '1px solid transparent',
           'border-radius': '16px',
-          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
         },
 
-        /* ===== Hero card: brand blue, stronger presence ===== */
+        /* ===== HERO CARD: stronger blue presence, gradient edges ===== */
         '.card-hero': {
-          'background': 'linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(81, 176, 230, 0.04) 100%)',
-          'border': '1px solid rgba(81, 176, 230, 0.20)',
+          'background': 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(81, 176, 230, 0.05) 100%)',
+          'border': '1px solid transparent',
           'border-left': '4px solid #51B0E6',
           'border-radius': '16px',
-          'box-shadow': '0 2px 4px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.8) inset',
+          'box-shadow': '0 2px 4px rgba(15, 20, 25, 0.03), 0 12px 32px rgba(15, 20, 25, 0.06), 0 24px 64px rgba(15, 20, 25, 0.04)',
         },
 
-        /* ===== Risk-tier card variants (left-edge color reflects risk) ===== */
+        /* ===== RISK-TIER CARDS: gradient edges, slightly more translucent tint ===== */
         '.card-critical': {
-          'background': 'rgba(184, 74, 74, 0.06)',
-          'border': '1px solid rgba(184, 74, 74, 0.20)',
+          'background': 'rgba(184, 74, 74, 0.045)',
+          'border': '1px solid transparent',
           'border-left': '4px solid #B84A4A',
           'border-radius': '16px',
-          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
+          'background-image': 'radial-gradient(ellipse at left center, rgba(184, 74, 74, 0.10) 0%, rgba(184, 74, 74, 0.04) 30%, rgba(184, 74, 74, 0.01) 70%, rgba(184, 74, 74, 0) 100%)',
         },
         '.card-attention': {
-          'background': 'rgba(200, 155, 60, 0.06)',
-          'border': '1px solid rgba(200, 155, 60, 0.20)',
+          'background': 'rgba(200, 155, 60, 0.045)',
+          'border': '1px solid transparent',
           'border-left': '4px solid #C89B3C',
           'border-radius': '16px',
-          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
+          'background-image': 'radial-gradient(ellipse at left center, rgba(200, 155, 60, 0.10) 0%, rgba(200, 155, 60, 0.04) 30%, rgba(200, 155, 60, 0.01) 70%, rgba(200, 155, 60, 0) 100%)',
         },
         '.card-positive': {
-          'background': 'rgba(74, 138, 111, 0.06)',
-          'border': '1px solid rgba(74, 138, 111, 0.20)',
+          'background': 'rgba(74, 138, 111, 0.045)',
+          'border': '1px solid transparent',
           'border-left': '4px solid #4A8A6F',
           'border-radius': '16px',
-          'box-shadow': '0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06)',
+          'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04)',
+          'background-image': 'radial-gradient(ellipse at left center, rgba(74, 138, 111, 0.10) 0%, rgba(74, 138, 111, 0.04) 30%, rgba(74, 138, 111, 0.01) 70%, rgba(74, 138, 111, 0) 100%)',
         },
 
-        /* ===== Chrome surfaces (header, nav) - lighter glass on white ===== */
+        /* ===== CHROME: opaque white, no backdrop filter, subtle shadow underneath ===== */
         '.glass-chrome': {
-          'background': 'rgba(255, 255, 255, 0.85)',
-          '-webkit-backdrop-filter': 'blur(24px) saturate(180%)',
-          'backdrop-filter': 'blur(24px) saturate(180%)',
-          'border-bottom': '1px solid rgba(15, 20, 25, 0.06)',
+          'background': '#FFFFFF',
+          'border-bottom': '1px solid rgba(15, 20, 25, 0.04)',
+          'box-shadow': '0 1px 0 rgba(15, 20, 25, 0.04), 0 2px 8px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.02)',
         },
         '.glass-nav': {
-          'background': 'rgba(255, 255, 255, 0.90)',
-          '-webkit-backdrop-filter': 'blur(24px) saturate(180%)',
-          'backdrop-filter': 'blur(24px) saturate(180%)',
-          'border-top': '1px solid rgba(15, 20, 25, 0.06)',
-          'box-shadow': '0 -1px 0 rgba(15, 20, 25, 0.04)',
+          'background': '#FFFFFF',
+          'border-top': '1px solid rgba(15, 20, 25, 0.04)',
+          'box-shadow': '0 -1px 0 rgba(15, 20, 25, 0.04), 0 -2px 8px rgba(15, 20, 25, 0.04), 0 -8px 24px rgba(15, 20, 25, 0.02)',
         },
         '.glass-sheet': {
           'background': 'rgba(255, 255, 255, 0.95)',
@@ -229,39 +233,38 @@ module.exports = {
           'border': 'none',
         },
         '.btn-brand-subtle': {
-          'background': 'rgba(81, 176, 230, 0.12)',
-          'color': '#1F6FA0',
-          'border': '1px solid rgba(81, 176, 230, 0.30)',
-        },
-
-        /* ===== Status pills (tinted, for header risk score etc) ===== */
-        '.pill-critical': {
-          'background': 'rgba(184, 74, 74, 0.10)',
-          'color': '#B84A4A',
-          'border': '1px solid rgba(184, 74, 74, 0.25)',
-        },
-        '.pill-attention': {
-          'background': 'rgba(200, 155, 60, 0.10)',
-          'color': '#C89B3C',
-          'border': '1px solid rgba(200, 155, 60, 0.25)',
-        },
-        '.pill-positive': {
-          'background': 'rgba(74, 138, 111, 0.10)',
-          'color': '#4A8A6F',
-          'border': '1px solid rgba(74, 138, 111, 0.25)',
-        },
-        '.pill-brand': {
           'background': 'rgba(81, 176, 230, 0.10)',
           'color': '#1F6FA0',
           'border': '1px solid rgba(81, 176, 230, 0.25)',
         },
-        '.pill-founder': {
-          'background': 'rgba(15, 20, 25, 0.04)',
+
+        /* ===== Status pills ===== */
+        '.pill-critical': {
+          'background': 'rgba(184, 74, 74, 0.08)',
+          'color': '#B84A4A',
+          'border': '1px solid rgba(184, 74, 74, 0.20)',
+        },
+        '.pill-attention': {
+          'background': 'rgba(200, 155, 60, 0.08)',
+          'color': '#C89B3C',
+          'border': '1px solid rgba(200, 155, 60, 0.20)',
+        },
+        '.pill-positive': {
+          'background': 'rgba(74, 138, 111, 0.08)',
+          'color': '#4A8A6F',
+          'border': '1px solid rgba(74, 138, 111, 0.20)',
+        },
+        '.pill-brand': {
+          'background': 'rgba(81, 176, 230, 0.08)',
           'color': '#1F6FA0',
           'border': '1px solid rgba(81, 176, 230, 0.20)',
         },
+        '.pill-founder': {
+          'background': 'rgba(15, 20, 25, 0.04)',
+          'color': '#1F6FA0',
+          'border': '1px solid rgba(81, 176, 230, 0.18)',
+        },
 
-        /* ===== Brand glow (active states) ===== */
         '.brand-glow': {
           'box-shadow': '0 0 24px rgba(81, 176, 230, 0.25)',
         },
