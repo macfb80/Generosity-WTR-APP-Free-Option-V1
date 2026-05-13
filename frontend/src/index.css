@@ -1,6 +1,9 @@
 /* src/index.css                                                              */
-/* Generosity WTR App v3.1                                                    */
-/* Chrome opaque white. Cards more translucent. Edge gradient transitions.    */
+/* Generosity WTR App v3.2 - Smoky mirror cards on white substrate            */
+/*                                                                            */
+/* Substrate restored to v3.0 style: white with subtle brand-blue radial      */
+/* glow bottom-right + top-left. No vertical grain. Cards are smoky-mirror    */
+/* glass with strong backdrop blur, no colored left edges (except critical).  */
 
 @tailwind base;
 @tailwind components;
@@ -63,16 +66,20 @@
     padding: 0;
     font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--aluminum-900);
+
+    /* v3.2: White substrate with subtle brand-blue radial glows.                     */
+    /* Bottom-right glow is the "light source" - stronger and warmer.                 */
+    /* Top-left glow is a secondary ambient - lighter and cooler.                     */
     background:
       radial-gradient(
         ellipse 800px 600px at 100% 100%,
-        rgba(81, 176, 230, 0.08) 0%,
-        rgba(81, 176, 230, 0.03) 40%,
+        rgba(81, 176, 230, 0.10) 0%,
+        rgba(81, 176, 230, 0.04) 40%,
         rgba(81, 176, 230, 0) 70%
       ),
       radial-gradient(
         ellipse 600px 500px at 0% 0%,
-        rgba(81, 176, 230, 0.04) 0%,
+        rgba(81, 176, 230, 0.05) 0%,
         rgba(81, 176, 230, 0) 60%
       ),
       #FFFFFF;
@@ -85,30 +92,14 @@
     text-rendering: optimizeLegibility;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.035;
-    background-image:
-      repeating-linear-gradient(
-        90deg,
-        rgba(15, 20, 25, 0) 0px,
-        rgba(15, 20, 25, 0) 2px,
-        rgba(15, 20, 25, 0.4) 2px,
-        rgba(15, 20, 25, 0.4) 3px
-      );
-  }
-
+  /* v3.2: Subtle drop pattern overlay (brand-blue, very low opacity) */
   body::after {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.025;
+    opacity: 0.022;
     background-image:
       radial-gradient(circle at 16px 16px, var(--brand) 0%, var(--brand) 2px, transparent 3px),
       radial-gradient(circle at 48px 48px, var(--brand) 0%, var(--brand) 2px, transparent 3px);
@@ -147,15 +138,16 @@
   }
 
   /* ===== Compat shims for legacy class names ===== */
-  /* v3.1: cards more translucent, gradient edges */
+  /* v3.2: smoky mirror, NO left edge (since default cards no longer have one) */
   .bg-surface-card {
-    background: rgba(81, 176, 230, 0.045);
-    border: 1px solid transparent;
-    border-left: 4px solid #51B0E6;
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(50px) saturate(180%);
+    backdrop-filter: blur(50px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
   }
 
   .shadow-card {
-    box-shadow: 0 1px 3px rgba(15, 20, 25, 0.03), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04);
+    box-shadow: 0 1px 3px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.85);
   }
 
   .bg-drop-pattern {
