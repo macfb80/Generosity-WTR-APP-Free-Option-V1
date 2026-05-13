@@ -664,108 +664,115 @@ export default function TrustButVerify(){
                   />
                 </div>
 
-                {/* v3.2: Custom Google-style search bar - magnifying glass INSIDE the input */}
-                <div style={{ width: '100%', maxWidth: 380, marginBottom: 8 }}>
-                  <div
-                    className="card-default"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0 6px 0 16px',
-                      minHeight: 52,
-                      position: 'relative',
-                    }}
-                  >
-                    <input
-                      ref={inputRef}
-                      data-testid="address-input"
-                      type="text"
-                      value={input}
-                      onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(""); }}
-                      onKeyDown={(e) => { if (e.key === "Enter") startScan(); }}
-                      placeholder={
-                        inputMode === "address"
-                          ? "Enter your address"
-                          : inputMode === "zip"
-                          ? "Enter ZIP code"
-                          : "Enter city, state"
-                      }
+                {/* v3.3: Top group - logo, search, EPA, toggle */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {/* Search bar with magnifying glass inside */}
+                  <div style={{ width: '100%', maxWidth: 380, marginBottom: 8 }}>
+                    <div
+                      className="card-default"
                       style={{
-                        flex: 1,
-                        background: 'transparent',
-                        border: 'none',
-                        outline: 'none',
-                        fontSize: 14,
-                        fontFamily: 'Montserrat, sans-serif',
-                        color: '#0F1419',
-                        padding: '14px 0',
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => startScan()}
-                      data-testid="scan-btn"
-                      aria-label="Search water intelligence"
-                      className="cursor-pointer flex items-center justify-center"
-                      style={{
-                        width: 40,
-                        height: 40,
-                        background: 'transparent',
-                        border: 'none',
-                        borderRadius: 999,
-                        marginLeft: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0 6px 0 16px',
+                        minHeight: 52,
+                        position: 'relative',
                       }}
                     >
-                      <Icon name="scan" size={22} color="#51B0E6" />
-                    </button>
-                  </div>
-                  {inputError && (
-                    <div className="text-caption" style={{ color: '#B84A4A', marginTop: 6, paddingLeft: 16, fontSize: 11 }}>
-                      {inputError}
+                      <input
+                        ref={inputRef}
+                        data-testid="address-input"
+                        type="text"
+                        value={input}
+                        onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(""); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") startScan(); }}
+                        placeholder={
+                          inputMode === "address"
+                            ? "Enter your address"
+                            : inputMode === "zip"
+                            ? "Enter ZIP code"
+                            : "Enter city, state"
+                        }
+                        style={{
+                          flex: 1,
+                          background: 'transparent',
+                          border: 'none',
+                          outline: 'none',
+                          fontSize: 14,
+                          fontFamily: 'Montserrat, sans-serif',
+                          color: '#0F1419',
+                          padding: '14px 0',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => startScan()}
+                        data-testid="scan-btn"
+                        aria-label="Search water intelligence"
+                        className="cursor-pointer flex items-center justify-center"
+                        style={{
+                          width: 40,
+                          height: 40,
+                          background: 'transparent',
+                          border: 'none',
+                          borderRadius: 999,
+                          marginLeft: 4,
+                        }}
+                      >
+                        <Icon name="scan" size={22} color="#51B0E6" />
+                      </button>
                     </div>
-                  )}
+                    {inputError && (
+                      <div className="text-caption" style={{ color: '#B84A4A', marginTop: 6, paddingLeft: 16, fontSize: 11 }}>
+                        {inputError}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* EPA caption */}
+                  <div style={{ fontSize: 9, marginBottom: 14, color: '#A6A8AB', letterSpacing: '0.02em' }}>
+                    EPA SDWIS + UCMR 5 Report
+                  </div>
+
+                  {/* Input mode toggle below EPA caption */}
+                  <div style={{ width: '100%', maxWidth: 280, marginBottom: 28 }}>
+                    <SegmentedToggle
+                      testId="input-mode-toggle"
+                      size="small"
+                      value={inputMode}
+                      onChange={(v) => { setInputMode(v); setInput(""); }}
+                      options={[
+                        { id: "address", label: "Address", icon: <Icon name="home" size={10} color={inputMode === "address" ? "#51B0E6" : "#A6A8AB"} /> },
+                        { id: "zip",     label: "ZIP",     icon: <Icon name="pin"  size={10} color={inputMode === "zip"     ? "#51B0E6" : "#A6A8AB"} /> },
+                        { id: "city",    label: "City",    icon: <Icon name="city" size={10} color={inputMode === "city"    ? "#51B0E6" : "#A6A8AB"} /> },
+                      ]}
+                    />
+                  </div>
+
+                  {/* v3.3: Headline carries the punch. Paragraph supports it. */}
+                  <div className="text-center" style={{ marginBottom: 32, maxWidth: 340, padding: '0 8px' }}>
+                    <h1
+                      className="font-display font-semibold"
+                      style={{ fontSize: 28, lineHeight: 1.15, marginBottom: 12, letterSpacing: '-0.02em', color: '#0F1419' }}
+                    >
+                      Drink <span style={{ color: '#51B0E6' }}>Intelligently</span>.
+                    </h1>
+                    <p style={{ fontSize: 14, lineHeight: 1.55, color: '#3D4043' }}>
+                      94% of US tap water contains microplastics. Yours probably does too. Find out what else is in your Water.
+                    </p>
+                  </div>
                 </div>
 
-                {/* EPA caption */}
-                <div style={{ fontSize: 9, marginBottom: 14, color: '#A6A8AB', letterSpacing: '0.02em' }}>
-                  EPA SDWIS + UCMR 5 Report
-                </div>
+                {/* v3.3: Spacer pushes Popular Cities toward bottom */}
+                <div style={{ flex: 1, minHeight: 24 }} />
 
-                {/* v3.2: Input mode toggle moved BELOW search bar, smaller */}
-                <div style={{ width: '100%', maxWidth: 280, marginBottom: 22 }}>
-                  <SegmentedToggle
-                    testId="input-mode-toggle"
-                    size="small"
-                    value={inputMode}
-                    onChange={(v) => { setInputMode(v); setInput(""); }}
-                    options={[
-                      { id: "address", label: "Address", icon: <Icon name="home" size={10} color={inputMode === "address" ? "#51B0E6" : "#A6A8AB"} /> },
-                      { id: "zip",     label: "ZIP",     icon: <Icon name="pin"  size={10} color={inputMode === "zip"     ? "#51B0E6" : "#A6A8AB"} /> },
-                      { id: "city",    label: "City",    icon: <Icon name="city" size={10} color={inputMode === "city"    ? "#51B0E6" : "#A6A8AB"} /> },
-                    ]}
-                  />
-                </div>
-
-                {/* v3.2: Headline + smaller paragraph, quieter feel */}
-                <div className="text-center" style={{ marginBottom: 26, maxWidth: 320 }}>
-                  <h1
-                    className="font-display font-semibold"
-                    style={{ fontSize: 18, lineHeight: 1.25, marginBottom: 6, letterSpacing: '-0.01em', color: '#0F1419' }}
-                  >
-                    What's <span style={{ color: '#51B0E6' }}>actually</span> in your water?
-                  </h1>
-                  <p style={{ fontSize: 12, lineHeight: 1.5, color: '#6E7174' }}>
-                    See every contaminant detected at your exact address.
-                  </p>
-                </div>
-
-                {/* v3.2: Popular cities - max 2 rows, smaller pills */}
-                <div className="text-center" style={{ width: '100%', maxWidth: 360 }}>
-                  <div className="text-micro uppercase tracking-widest font-semibold" style={{ marginBottom: 10, color: '#A6A8AB', fontSize: 9, letterSpacing: '0.10em' }}>
+                {/* v3.3: Popular cities pinned near bottom - 3 on top row + 4 on bottom row */}
+                <div className="text-center" style={{ width: '100%', maxWidth: 380, paddingBottom: 8 }}>
+                  <div className="text-micro uppercase tracking-widest font-semibold" style={{ marginBottom: 12, color: '#A6A8AB', fontSize: 9, letterSpacing: '0.10em' }}>
                     POPULAR CITIES
                   </div>
-                  <div className="flex flex-wrap gap-1.5 justify-center" data-testid="popular-cities">
-                    {Object.keys(CITY_DATA).slice(0, 6).map((city) => (
+                  {/* Top row: 3 cities */}
+                  <div className="flex gap-1.5 justify-center" style={{ marginBottom: 8 }} data-testid="popular-cities-row1">
+                    {Object.keys(CITY_DATA).slice(0, 3).map((city) => (
                       <button
                         key={city}
                         type="button"
@@ -773,13 +780,36 @@ export default function TrustButVerify(){
                         data-testid={`city-btn-${city.toLowerCase().replace(/[,\s]+/g, '-')}`}
                         className="font-medium rounded-pill cursor-pointer"
                         style={{
-                          padding: '4px 10px',
-                          fontSize: 10,
-                          background: 'rgba(255, 255, 255, 0.55)',
+                          padding: '6px 14px',
+                          fontSize: 11,
+                          background: 'rgba(255, 255, 255, 0.45)',
                           color: '#1F6FA0',
-                          border: '1px solid rgba(81, 176, 230, 0.20)',
-                          backdropFilter: 'blur(20px) saturate(180%)',
-                          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                          border: '1px solid rgba(81, 176, 230, 0.22)',
+                          backdropFilter: 'blur(30px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+                        }}
+                      >
+                        {city.split(',')[0]}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Bottom row: 4 cities */}
+                  <div className="flex gap-1.5 justify-center" data-testid="popular-cities-row2">
+                    {Object.keys(CITY_DATA).slice(3, 7).map((city) => (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => { setInput(city); setInputMode("city"); startScan(city); }}
+                        data-testid={`city-btn-${city.toLowerCase().replace(/[,\s]+/g, '-')}`}
+                        className="font-medium rounded-pill cursor-pointer"
+                        style={{
+                          padding: '6px 14px',
+                          fontSize: 11,
+                          background: 'rgba(255, 255, 255, 0.45)',
+                          color: '#1F6FA0',
+                          border: '1px solid rgba(81, 176, 230, 0.22)',
+                          backdropFilter: 'blur(30px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
                         }}
                       >
                         {city.split(',')[0]}
