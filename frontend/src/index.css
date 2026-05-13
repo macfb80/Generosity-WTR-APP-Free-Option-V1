@@ -1,212 +1,216 @@
+/* src/index.css                                                              */
+/* Generosity WTR App - Aluminum + Glass design system v2.0                   */
+/*                                                                            */
+/* Body background: aluminum gradient (Cool Gray evolution).                  */
+/* Light source: radial brand-blue glow behind the header area, fading down.  */
+/* Drop pattern: low-opacity overlay (~3-5%), brand-blue tinted.              */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/*
-  Generosity™ WTR APP — Design System v1.0
-  ------------------------------------------------------------------
-  This file defines:
-  1. Root CSS variables (shadcn-compatible HSL tokens for component lib)
-  2. Base typography and body styles
-  3. Drop-pattern utility for empty/loading states (brand asset from packaging)
-  4. Focus-visible accessibility styles
-  5. Tabular figures for numerical data alignment
-
-  Brand palette source of truth: /tailwind.config.js
-  Do not introduce hex values here. Reference Tailwind tokens via @apply
-  or use the CSS variables below.
-*/
-
 @layer base {
   :root {
-    /* Border radius — referenced by shadcn components and Tailwind config */
-    --radius: 0.75rem;
+    /* ===== Aluminum substrate ===== */
+    --aluminum-50:  #F0F1F3;
+    --aluminum-100: #DCDFE2;
+    --aluminum-200: #C4C7CB;
+    --aluminum-300: #A6A8AB;  /* Pantone Cool Gray 6 - LOCKED brand gray */
+    --aluminum-400: #8A8D90;
+    --aluminum-500: #6E7174;  /* primary app background */
+    --aluminum-600: #54575A;
+    --aluminum-700: #3D4043;
+    --aluminum-800: #2A2C2E;
+    --aluminum-900: #1A1B1D;
 
-    /* shadcn-compatible HSL theme variables.
-       These are the canonical tokens shadcn components expect.
-       Values converted from our brand palette to HSL.
-       Keep these in sync with tailwind.config.js color values. */
+    /* ===== Brand ===== */
+    --brand:        #51B0E6;  /* Pantone 2915 U */
+    --brand-hover:  #3DA0DA;
+    --brand-pressed:#2B8FC9;
+    --brand-glow:   rgba(81, 176, 230, 0.35);
 
-    --background: 220 20% 97%;          /* #F7F8FA */
-    --foreground: 215 25% 8%;           /* #0F1419 */
+    /* ===== State ===== */
+    --state-positive:  #4A8A6F;
+    --state-attention: #C89B3C;
+    --state-critical:  #B84A4A;
+    --state-neutral:   #6E7174;
 
-    --card: 0 0% 100%;                  /* #FFFFFF */
-    --card-foreground: 215 25% 8%;      /* #0F1419 */
-
-    --popover: 0 0% 100%;               /* #FFFFFF */
-    --popover-foreground: 215 25% 8%;   /* #0F1419 */
-
-    --primary: 202 75% 61%;             /* #51B0E6 */
-    --primary-foreground: 0 0% 100%;    /* #FFFFFF */
-
-    --secondary: 220 9% 95%;            /* #F0F1F3 */
-    --secondary-foreground: 215 25% 8%; /* #0F1419 */
-
-    --muted: 220 9% 95%;                /* #F0F1F3 */
-    --muted-foreground: 215 5% 56%;     /* #8A8E93 */
-
-    --accent: 202 75% 95%;              /* #E8F4FB — brand subtle */
-    --accent-foreground: 215 25% 8%;    /* #0F1419 */
-
-    --destructive: 0 43% 51%;           /* #B84A4A */
-    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
-
-    --border: 220 9% 91%;               /* #E8EAED */
-    --input: 220 9% 91%;                /* #E8EAED */
-    --ring: 202 75% 61%;                /* #51B0E6 */
-
-    /* Semantic state HSL — for utility classes if needed */
-    --state-positive: 152 30% 42%;      /* #4A8A6F */
-    --state-attention: 40 56% 51%;      /* #C89B3C */
-    --state-critical: 0 43% 51%;        /* #B84A4A */
+    /* ===== Shadcn HSL variables (preserved for compat) ===== */
+    --background: 210 6% 45%;
+    --foreground: 210 11% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 11% 8%;
+    --primary: 201 75% 61%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 6% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 6% 45%;
+    --muted-foreground: 210 6% 75%;
+    --accent: 201 75% 61%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 50% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 100% / 0.30;
+    --input: 0 0% 100% / 0.45;
+    --ring: 201 75% 61%;
+    --radius: 1rem;
   }
 
-  /* Universal box-sizing */
-  * {
-    box-sizing: border-box;
+  html {
+    background: var(--aluminum-500);
+    -webkit-text-size-adjust: 100%;
   }
 
-  /* Base body styles
-     Background, text color, and font come from design system.
-     Tabular figures default ON for the entire app — every numeral aligns. */
   body {
     margin: 0;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-feature-settings: 'tnum' 1, 'cv11' 1;
+    padding: 0;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--aluminum-900);
+
+    /* ===== Aluminum substrate with brand-blue light source ===== */
+    /* Two stacked radial gradients:                                          */
+    /*   1. Brand blue glow positioned behind the header area                 */
+    /*   2. Aluminum gradient from lighter top to deeper bottom               */
+    background:
+      radial-gradient(
+        ellipse 800px 600px at 50% 0%,
+        rgba(81, 176, 230, 0.18) 0%,
+        rgba(81, 176, 230, 0.06) 30%,
+        rgba(81, 176, 230, 0) 60%
+      ),
+      linear-gradient(
+        180deg,
+        var(--aluminum-400) 0%,
+        var(--aluminum-500) 35%,
+        var(--aluminum-600) 100%
+      );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    /* Respect iPhone notch and home indicator */
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    text-rendering: optimizeLegibility;
   }
 
-  /* Display type uses Barlow Condensed.
-     Apply via Tailwind font-display class on hero numerals and screen titles. */
-  .font-display,
-  h1.font-display,
-  h2.font-display {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-feature-settings: 'tnum' 1;
+  /* ===== Drop pattern overlay ===== */
+  /* Subtle brand-tinted drop pattern at very low opacity.                    */
+  /* Tile size 64px so it reads as texture, not motif.                        */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image:
+      radial-gradient(circle at 16px 16px, var(--brand) 0%, var(--brand) 2px, transparent 3px),
+      radial-gradient(circle at 48px 48px, var(--brand) 0%, var(--brand) 2px, transparent 3px);
+    background-size: 64px 64px;
+    z-index: 0;
+    mix-blend-mode: overlay;
   }
 
-  /* Code samples — kept lightweight since this app rarely shows code.
-     Falls back to system mono if needed. */
-  code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
-  }
-
+  /* ===== Bring app content above the drop overlay ===== */
   #root {
+    position: relative;
+    z-index: 1;
     min-height: 100vh;
-  }
-
-  /* Focus-visible accessibility ring.
-     Applied to any interactive element receiving keyboard focus.
-     Two-color ring (white inner, brand outer) reads on any background. */
-  :focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #51B0E6;
-    border-radius: 4px;
-  }
-
-  /* Disable focus ring on mouse-only interactions */
-  :focus:not(:focus-visible) {
-    outline: none;
-    box-shadow: none;
-  }
-
-  /* Reduced motion respect — pauses LED pulse and softens transitions */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+    min-height: 100dvh;
   }
 }
 
 @layer components {
-  /*
-    Drop-pattern utility — brand asset from WTR HUB packaging interior.
-    Use ONLY on empty states and loading states per locked design decision.
-    Apply: <div className="bg-drop-pattern">...</div>
-
-    The pattern is a placeholder radial gradient until the real SVG asset
-    is extracted from packaging artwork (action item: vectorize box interior).
-    When the SVG is ready, replace the background-image URL below.
-  */
-  .bg-drop-pattern {
-    background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(81, 176, 230, 0.04) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(81, 176, 230, 0.03) 0%, transparent 50%);
-    background-size: 200px 200px, 240px 240px;
-    background-position: 0 0, 100px 100px;
-  }
-
-  /*
-    Skeleton shimmer for loading states.
-    Use: <div className="skeleton h-4 w-32 rounded" />
-  */
+  /* ===== Skeleton shimmer ===== */
   .skeleton {
     background: linear-gradient(
       90deg,
-      hsl(var(--muted)) 0%,
-      hsl(var(--background)) 50%,
-      hsl(var(--muted)) 100%
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      rgba(255, 255, 255, 0.25) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
   }
 
-  /*
-    LED-glow utility for live-data cards (Phase 2 hardware pairing).
-    Apply: <div className="card-led-active">...</div>
-    For Phase 1, this is unused but pre-built so Phase 2 components inherit cleanly.
-  */
-  .card-led-rest {
-    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.04), 0 0 0 4px rgba(81, 176, 230, 0.20);
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
 
-  .card-led-active {
-    animation: led-pulse 2400ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+  /* ===== Focus visible (accessibility) ===== */
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ===== Compat shims for older glass-morphism classes ===== */
+  /* These map legacy classnames to the new glass system so any existing      */
+  /* component still works during migration.                                  */
+  .glass-card-legacy {
+    background: rgba(255, 255, 255, 0.45);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.30);
+    border-radius: 16px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.60),
+      0 8px 32px rgba(0, 0, 0, 0.10),
+      0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  /* ===== Drop pattern utility (for empty/loading states inside cards) ===== */
+  .bg-drop-pattern {
+    background-color: rgba(255, 255, 255, 0.30);
+    background-image:
+      radial-gradient(circle at 16px 16px, rgba(81, 176, 230, 0.15) 0%, rgba(81, 176, 230, 0.15) 2px, transparent 3px),
+      radial-gradient(circle at 48px 48px, rgba(81, 176, 230, 0.15) 0%, rgba(81, 176, 230, 0.15) 2px, transparent 3px);
+    background-size: 64px 64px;
   }
 }
 
-@layer utilities {
-  /*
-    Tabular figures override — apply when a specific element should use
-    proportional figures instead of the global tabular default.
-    Rare. Most numerical data should stay tabular for alignment.
-  */
-  .figures-proportional {
-    font-feature-settings: 'tnum' 0;
-  }
+/* ===== Risk-tier color animation for active alerts ===== */
+@keyframes critical-pulse {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(184, 74, 74, 0.12); }
+  50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(184, 74, 74, 0.20); }
+}
 
-  /*
-    Confidence dot indicators per Generosity OS protocol.
-    Use: <span className="confidence-dot confidence-verified" />
-  */
-  .confidence-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-  .confidence-verified      { background-color: #4A8A6F; }
-  .confidence-corroborated  { background-color: #51B0E6; }
-  .confidence-developing    { background-color: #C89B3C; }
-  .confidence-hypothesis {
-    background-color: transparent;
-    border: 1px solid #8A8E93;
-    width: 5px;
-    height: 5px;
-  }
+/* ===== Slide up animation for cards (preserves existing pattern) ===== */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Ripple animation for scan state ===== */
+@keyframes ripple {
+  0%   { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* ===== Pulse and spin (preserved from v1) ===== */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.08); opacity: 0.8; }
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shake {
+  0%, 100%       { transform: translateX(0); }
+  20%, 60%       { transform: translateX(-6px); }
+  40%, 80%       { transform: translateX(6px); }
+}
+
+.input-error {
+  animation: shake 0.35s ease;
+  border-color: var(--state-critical) !important;
+}
+
+.tbv-card {
+  animation: slideUp 0.4s ease forwards;
 }
