@@ -1,13 +1,17 @@
 // src/components/ds/ContaminantCard.jsx
-// Glass material card with risk-tier color bleeding in from the left edge
-// as a soft gradient (replaces previous hard 3px stripe).
+// v3.0 - Risk-tier card with solid 4px left-edge color bar (matches the
+// alert-card pattern Micah anchored to in the reference photo).
+//
+// high risk   -> card-critical  (red left edge, pink tint)
+// medium risk -> card-attention (amber left edge, amber tint)
+// low risk    -> card-positive  (green left edge, green tint)
 
 import React from 'react';
 
-const RISK_TONE = {
-  high:   { color: '#B84A4A', bleedClass: 'bleed-critical',  glow: 'rgba(184, 74, 74, 0.18)' },
-  medium: { color: '#C89B3C', bleedClass: 'bleed-attention', glow: 'rgba(200, 155, 60, 0.18)' },
-  low:    { color: '#4A8A6F', bleedClass: 'bleed-positive',  glow: 'rgba(74, 138, 111, 0.18)' },
+const RISK_TIER = {
+  high:   { className: 'card-critical',  color: '#B84A4A', tagBg: 'rgba(184, 74, 74, 0.12)' },
+  medium: { className: 'card-attention', color: '#C89B3C', tagBg: 'rgba(200, 155, 60, 0.12)' },
+  low:    { className: 'card-positive',  color: '#4A8A6F', tagBg: 'rgba(74, 138, 111, 0.12)' },
 };
 
 const RISK_LABEL = {
@@ -27,13 +31,13 @@ export default function ContaminantCard({
   limit,
   isViolation,
 }) {
-  const tone = RISK_TONE[risk] || RISK_TONE.medium;
+  const tier = RISK_TIER[risk] || RISK_TIER.medium;
   const tag = RISK_LABEL[risk] || 'DETECTED';
 
   return (
     <div
       data-testid={testId}
-      className={`${tone.bleedClass} rounded-card`}
+      className={tier.className}
       style={{ padding: 14 }}
     >
       <div className="grid items-start gap-3" style={{ gridTemplateColumns: '1fr auto' }}>
@@ -50,10 +54,10 @@ export default function ContaminantCard({
               className="rounded-pill font-bold uppercase tracking-wider"
               style={{
                 fontSize: 9,
-                color: tone.color,
-                background: tone.glow,
+                color: tier.color,
+                background: tier.tagBg,
                 padding: '2px 8px',
-                border: `1px solid ${tone.color}33`,
+                border: `1px solid ${tier.color}40`,
               }}
             >
               {tag}
@@ -101,7 +105,7 @@ export default function ContaminantCard({
             <div
               className="font-display font-semibold leading-none"
               style={{
-                color: tone.color,
+                color: tier.color,
                 fontSize: 22,
                 fontVariantNumeric: 'tabular-nums',
                 letterSpacing: '-0.01em',
@@ -122,7 +126,7 @@ export default function ContaminantCard({
                 className="uppercase tracking-wider"
                 style={{
                   fontSize: 9,
-                  color: '#8A8D90',
+                  color: '#A6A8AB',
                   marginTop: 4,
                   letterSpacing: '0.06em',
                 }}
