@@ -1,7 +1,7 @@
 // src/components/ds/HeroCard.jsx
-// Glass material hero card. Replaces solid white card with frosted glass on
-// aluminum substrate. Supports optional eyebrow, title, subtitle, metadata
-// row, right rail (for risk gauge etc), and arbitrary children for CTAs.
+// v3.0 - White hero card with subtle brand-blue gradient and 4px left edge.
+// Replaces the heavy frosted glass approach with the alert-card style
+// pattern Micah anchored to in the reference photo.
 
 import React from 'react';
 
@@ -18,14 +18,14 @@ export default function HeroCard({
   return (
     <div
       data-testid={testId}
-      className={`glass-card rounded-card ${className}`}
+      className={`card-hero ${className}`}
       style={{ padding: 20 }}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           {eyebrow && (
             <div
-              className="text-micro uppercase font-bold mb-2"
+              className="uppercase font-bold mb-2"
               style={{
                 color: '#1F6FA0',
                 letterSpacing: '0.10em',
@@ -50,8 +50,8 @@ export default function HeroCard({
           )}
           {subtitle && (
             <div
-              className="text-body leading-relaxed"
-              style={{ color: '#3D4043', marginBottom: metadata ? 14 : 0 }}
+              className="leading-relaxed"
+              style={{ color: '#3D4043', fontSize: 14, marginBottom: metadata ? 14 : 0 }}
             >
               {subtitle}
             </div>
@@ -61,7 +61,7 @@ export default function HeroCard({
               {metadata.map((m, i) => (
                 <div key={i} className="flex flex-col">
                   <span
-                    className="text-micro uppercase font-semibold"
+                    className="uppercase font-semibold"
                     style={{
                       color: '#6E7174',
                       fontSize: 9,
