@@ -528,10 +528,14 @@ export default function TrustButVerify(){
   const shopifyHubUrl = `https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=in-app-report&utm_campaign=water-threat-scan&utm_content=${encodeURIComponent((data?.city||'direct').replace(/\s/g,'-').toLowerCase())}&utm_term=${riskScore}&discount=WELCOME100`;
   const shopifyLearnUrl = "https://generositywtr.myshopify.com/products/home-hydration-hub?utm_source=wtr-app&utm_medium=learn-tab&utm_campaign=knowledge-cta&discount=WELCOME100";
 
+  // v3.1: Hide header on Google-homepage landing screen
+  const isGoogleLanding = tab === "tbv" && tbvView === "home" && phase === "landing";
+  const showHeader = !isGoogleLanding && tab !== "wtr-btl" && tab !== "wtr-hub";
+
   return (
     <div
-      className="min-h-screen bg-surface-base mx-auto relative flex flex-col"
-      style={{ maxWidth: 480, fontFamily: 'Montserrat, sans-serif' }}
+      className="min-h-screen mx-auto relative flex flex-col"
+      style={{ maxWidth: 480, fontFamily: 'Montserrat, sans-serif', background: 'transparent' }}
       data-testid="trust-but-verify-app"
     >
       <style>{`
@@ -544,13 +548,11 @@ export default function TrustButVerify(){
         .tbv-card{animation:slideUp 0.4s ease forwards}
       `}</style>
 
-      {tab !== "wtr-btl" && tab !== "wtr-hub" && (
+      {showHeader && (
         <div
-          className="sticky top-0 z-[100] bg-surface-card flex items-center justify-between"
+          className="sticky top-0 z-[100] glass-chrome flex items-center justify-between"
           style={{
-            borderBottom: '1px solid #E8EAED',
             padding: '10px 16px',
-            boxShadow: '0 1px 2px rgba(15, 20, 25, 0.04)',
           }}
           data-testid="app-header"
         >
@@ -574,12 +576,9 @@ export default function TrustButVerify(){
                 type="button"
                 onClick={handleFounderLogout}
                 title="Tap to exit demo mode"
-                className="text-micro font-bold uppercase tracking-widest rounded-pill cursor-pointer"
+                className="text-micro font-bold uppercase tracking-widest rounded-pill cursor-pointer pill-founder"
                 style={{
-                  background: '#0F1419',
-                  color: '#51B0E6',
                   padding: '4px 10px',
-                  border: '1px solid rgba(81, 176, 230, 0.30)',
                 }}
               >
                 FOUNDER
@@ -609,7 +608,7 @@ export default function TrustButVerify(){
                 width: 36,
                 height: 36,
                 background: '#F0F1F3',
-                border: '1px solid #E8EAED',
+                border: '1px solid rgba(15, 20, 25, 0.06)',
               }}
               aria-label="Profile"
             >
@@ -622,55 +621,83 @@ export default function TrustButVerify(){
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
         {tab === "tbv" && (
           <div data-testid="tbv-tab">
-            <div className="sticky top-0 z-[50] bg-surface-base" style={{ padding: '14px 16px 0' }}>
-              <SegmentedToggle
-                testId="tbv-toggle"
-                value={tbvView}
-                onChange={setTbvView}
-                options={[
-                  { id: "home", label: "Home Water" },
-                  { id: "scan", label: "Bottle Scan" },
-                ]}
-              />
-            </div>
+            {/* v3.1: On Google-homepage landing, NO segmented toggle at top.
+                Toggle returns when user is in scan/results states or bottle tab. */}
+            {!isGoogleLanding && (
+              <div className="sticky top-0 z-[50]" style={{ padding: '14px 16px 0', background: '#FFFFFF' }}>
+                <SegmentedToggle
+                  testId="tbv-toggle"
+                  value={tbvView}
+                  onChange={setTbvView}
+                  options={[
+                    { id: "home", label: "Home Water" },
+                    { id: "scan", label: "Bottle Scan" },
+                  ]}
+                />
+              </div>
+            )}
 
             {tbvView === "home" && phase === "landing" && (
-              <div style={{ padding: '44px 20px 20px' }} data-testid="home-landing">
-                <div className="text-center" style={{ marginBottom: 32 }}>
-                  <h1
-                    className="font-display font-semibold text-text-primary"
-                    style={{ fontSize: 28, lineHeight: 1.1, marginBottom: 10, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}
-                  >
-                    What's <span className="text-brand">actually</span> in your water?
-                  </h1>
-                  <p
-                    className="text-body text-text-secondary mx-auto"
-                    style={{ maxWidth: 360, lineHeight: 1.5, marginBottom: 18 }}
-                  >
-                    Get a free water intelligence report. See every contaminant detected at <strong className="text-text-primary">your exact address</strong>, and the long-term risks if nothing changes.
-                  </p>
+              <div
+                data-testid="home-landing"
+                style={{
+                  minHeight: 'calc(100vh - 80px)',
+                  minHeight: 'calc(100dvh - 80px)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '32px 20px 24px',
+                }}
+              >
+                {/* Google-homepage logo treatment (110px) */}
+                <div
+                  style={{ marginTop: 32, marginBottom: 36, cursor: 'pointer', userSelect: 'none' }}
+                  onTouchStart={() => { founderLongPressRef.current = setTimeout(() => setShowFounderLogin(true), 3000); }}
+                  onTouchEnd={() => { clearTimeout(founderLongPressRef.current); }}
+                  onMouseDown={() => { founderLongPressRef.current = setTimeout(() => setShowFounderLogin(true), 3000); }}
+                  onMouseUp={() => { clearTimeout(founderLongPressRef.current); }}
+                >
+                  <img
+                    src="/generosity-logo.png"
+                    alt="Generosity Water Intelligence"
+                    style={{ height: 110, width: 'auto', display: 'block' }}
+                  />
+                </div>
 
-                  <div style={{ maxWidth: 320, margin: '0 auto 12px' }}>
-                    <SegmentedToggle
-                      testId="input-mode-toggle"
-                      size="small"
-                      value={inputMode}
-                      onChange={(v) => { setInputMode(v); setInput(""); }}
-                      options={[
-                        { id: "address", label: "My Address", icon: <Icon name="home" size={11} color={inputMode === "address" ? "#51B0E6" : "#A6A8AB"} /> },
-                        { id: "zip",     label: "ZIP Code",   icon: <Icon name="pin"  size={11} color={inputMode === "zip"     ? "#51B0E6" : "#A6A8AB"} /> },
-                        { id: "city",    label: "City",       icon: <Icon name="city" size={11} color={inputMode === "city"    ? "#51B0E6" : "#A6A8AB"} /> },
-                      ]}
-                    />
-                  </div>
+                {/* Segmented toggle for input mode (compact) */}
+                <div style={{ width: '100%', maxWidth: 360, marginBottom: 12 }}>
+                  <SegmentedToggle
+                    testId="input-mode-toggle"
+                    size="small"
+                    value={inputMode}
+                    onChange={(v) => { setInputMode(v); setInput(""); }}
+                    options={[
+                      { id: "address", label: "My Address", icon: <Icon name="home" size={11} color={inputMode === "address" ? "#51B0E6" : "#A6A8AB"} /> },
+                      { id: "zip",     label: "ZIP Code",   icon: <Icon name="pin"  size={11} color={inputMode === "zip"     ? "#51B0E6" : "#A6A8AB"} /> },
+                      { id: "city",    label: "City",       icon: <Icon name="city" size={11} color={inputMode === "city"    ? "#51B0E6" : "#A6A8AB"} /> },
+                    ]}
+                  />
+                </div>
 
-                  <div style={{ maxWidth: 380, margin: '0 auto' }}>
-                    <Input
+                {/* v3.1: Custom Google-style search bar with magnifying glass INSIDE the input */}
+                <div style={{ width: '100%', maxWidth: 380, marginBottom: 4 }}>
+                  <div
+                    className="card-default"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '0 6px 0 16px',
+                      minHeight: 52,
+                      position: 'relative',
+                    }}
+                  >
+                    <input
                       ref={inputRef}
-                      testId="address-input"
+                      data-testid="address-input"
+                      type="text"
                       value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && startScan()}
+                      onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") startScan(); }}
                       placeholder={
                         inputMode === "address"
                           ? "e.g. 1234 Maple St, Chicago IL"
@@ -678,32 +705,63 @@ export default function TrustButVerify(){
                           ? "e.g. 60601, 78701, 90210"
                           : "e.g. Chicago, IL"
                       }
-                      error={inputError}
-                      suffix={
-                        <button
-                          type="button"
-                          onClick={() => startScan()}
-                          data-testid="scan-btn"
-                          className="bg-brand text-text-onAccent font-semibold uppercase tracking-wider cursor-pointer flex items-center gap-1.5"
-                          style={{
-                            padding: '0 16px',
-                            fontSize: 12,
-                            border: 'none',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          SCAN <Icon name="scan" size={14} color="#FFFFFF" />
-                        </button>
-                      }
+                      style={{
+                        flex: 1,
+                        background: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        fontSize: 14,
+                        fontFamily: 'Montserrat, sans-serif',
+                        color: '#0F1419',
+                        padding: '14px 0',
+                      }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => startScan()}
+                      data-testid="scan-btn"
+                      aria-label="Search water intelligence"
+                      className="cursor-pointer flex items-center justify-center"
+                      style={{
+                        width: 40,
+                        height: 40,
+                        background: 'transparent',
+                        border: 'none',
+                        borderRadius: 999,
+                        marginLeft: 4,
+                      }}
+                    >
+                      <Icon name="scan" size={22} color="#51B0E6" />
+                    </button>
                   </div>
-
-                  <div className="text-text-quaternary" style={{ fontSize: 9, marginTop: 8 }}>
-                    EPA SDWIS + UCMR 5 Report
-                  </div>
+                  {inputError && (
+                    <div className="text-caption" style={{ color: '#B84A4A', marginTop: 6, paddingLeft: 16, fontSize: 11 }}>
+                      {inputError}
+                    </div>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-1.5" style={{ marginBottom: 14 }}>
+                <div className="text-text-quaternary" style={{ fontSize: 9, marginBottom: 18, color: '#A6A8AB' }}>
+                  EPA SDWIS + UCMR 5 Report
+                </div>
+
+                {/* Headline + paragraph moved BELOW the search bar (per spec) */}
+                <div className="text-center" style={{ marginBottom: 28, maxWidth: 360 }}>
+                  <h1
+                    className="font-display font-semibold"
+                    style={{ fontSize: 22, lineHeight: 1.2, marginBottom: 8, letterSpacing: '-0.015em', color: '#0F1419' }}
+                  >
+                    What's <span style={{ color: '#51B0E6' }}>actually</span> in your water?
+                  </h1>
+                  <p
+                    style={{ fontSize: 13, lineHeight: 1.55, color: '#3D4043' }}
+                  >
+                    Get a free water intelligence report. See every contaminant detected at <strong style={{ color: '#0F1419' }}>your exact address</strong>, and the long-term risks if nothing changes.
+                  </p>
+                </div>
+
+                {/* Stat row */}
+                <div className="grid grid-cols-3 gap-2" style={{ width: '100%', maxWidth: 380, marginBottom: 20 }}>
                   {[
                     ["200M+", "Americans exposed to PFAS", "USGS 2023"],
                     ["94%", "tap water has microplastics", "ORB Media / Columbia"],
@@ -711,20 +769,20 @@ export default function TrustButVerify(){
                   ].map(([n, t, src]) => (
                     <div
                       key={n}
-                      className="bg-surface-card rounded-card text-center"
-                      style={{ padding: '12px 6px', boxShadow: '0 1px 2px rgba(15, 20, 25, 0.04), 0 0 0 1px rgba(15, 20, 25, 0.03)' }}
+                      className="card-default text-center"
+                      style={{ padding: '12px 6px' }}
                     >
                       <div
-                        className="font-display font-semibold text-brand leading-none"
-                        style={{ fontSize: 18, fontVariantNumeric: 'tabular-nums' }}
+                        className="font-display font-semibold leading-none"
+                        style={{ fontSize: 18, fontVariantNumeric: 'tabular-nums', color: '#51B0E6' }}
                       >
                         {n}
                       </div>
-                      <div className="text-text-tertiary mt-1" style={{ fontSize: 9, lineHeight: 1.3 }}>
+                      <div style={{ fontSize: 9, lineHeight: 1.3, marginTop: 4, color: '#6E7174' }}>
                         {t}
                       </div>
                       {src && (
-                        <div className="text-text-quaternary mt-0.5" style={{ fontSize: 8, fontStyle: 'italic' }}>
+                        <div style={{ fontSize: 8, fontStyle: 'italic', marginTop: 2, color: '#A6A8AB' }}>
                           {src}
                         </div>
                       )}
@@ -732,8 +790,9 @@ export default function TrustButVerify(){
                   ))}
                 </div>
 
-                <div className="text-center">
-                  <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary" style={{ marginBottom: 8 }}>
+                {/* Popular cities */}
+                <div className="text-center" style={{ width: '100%' }}>
+                  <div className="text-micro uppercase tracking-widest font-semibold" style={{ marginBottom: 10, color: '#6E7174', fontSize: 10 }}>
                     POPULAR CITIES
                   </div>
                   <div className="flex flex-wrap gap-1.5 justify-center" data-testid="popular-cities">
@@ -743,11 +802,13 @@ export default function TrustButVerify(){
                         type="button"
                         onClick={() => { setInput(city); setInputMode("city"); startScan(city); }}
                         data-testid={`city-btn-${city.toLowerCase().replace(/[,\s]+/g, '-')}`}
-                        className="bg-surface-card text-brand font-semibold rounded-pill cursor-pointer"
+                        className="font-semibold rounded-pill cursor-pointer"
                         style={{
                           padding: '6px 12px',
                           fontSize: 11,
-                          border: '1px solid #C8E2F4',
+                          background: '#FFFFFF',
+                          color: '#51B0E6',
+                          border: '1px solid rgba(81, 176, 230, 0.25)',
                         }}
                       >
                         {city}
@@ -780,11 +841,11 @@ export default function TrustButVerify(){
                     <Icon name="droplet" size={36} color="#FFFFFF" />
                   </div>
                 </div>
-                <h2 className="font-display font-semibold text-text-primary flex items-center justify-center gap-2" style={{ fontSize: 22, marginBottom: 18 }}>
+                <h2 className="font-display font-semibold flex items-center justify-center gap-2" style={{ fontSize: 22, marginBottom: 18, color: '#0F1419' }}>
                   <Icon name={inputMode === "address" ? "home" : inputMode === "zip" ? "pin" : "city"} size={20} color="#51B0E6" />
                   {inputMode === "address" ? "Scanning your address" : inputMode === "zip" ? "Scanning ZIP code" : `Analyzing ${input}`}
                 </h2>
-                <div className="bg-surface-card rounded-card overflow-hidden" style={{ boxShadow: '0 1px 2px rgba(15, 20, 25, 0.04), 0 0 0 1px rgba(15, 20, 25, 0.03)' }} data-testid="scan-steps">
+                <div className="card-default overflow-hidden" data-testid="scan-steps" style={{ padding: 0 }}>
                   {SCAN_STEPS.map((msg, i) => {
                     const done = i < scanStep;
                     const active = i === scanStep;
@@ -796,7 +857,7 @@ export default function TrustButVerify(){
                         style={{
                           padding: '10px 14px',
                           background: done ? 'rgba(74, 138, 111, 0.06)' : active ? 'rgba(81, 176, 230, 0.06)' : 'transparent',
-                          borderBottom: i < SCAN_STEPS.length - 1 ? '1px solid #E8EAED' : 'none',
+                          borderBottom: i < SCAN_STEPS.length - 1 ? '1px solid rgba(15, 20, 25, 0.04)' : 'none',
                           fontSize: 12,
                           color: done ? '#4A8A6F' : active ? '#51B0E6' : '#A6A8AB',
                           fontWeight: active ? 600 : 400,
@@ -808,7 +869,7 @@ export default function TrustButVerify(){
                         ) : active ? (
                           <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #51B0E6', borderTopColor: 'transparent', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
                         ) : (
-                          <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #C8E2F4', display: 'inline-block' }} />
+                          <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(81, 176, 230, 0.25)', display: 'inline-block' }} />
                         )}
                         {msg}
                       </div>
@@ -832,10 +893,10 @@ export default function TrustButVerify(){
                 >
                   <Icon name="pin" size={28} color="#C89B3C" />
                 </div>
-                <h2 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 8 }}>
+                <h2 className="font-display font-semibold" style={{ fontSize: 22, marginBottom: 8, color: '#0F1419' }}>
                   We don't have data for this location yet
                 </h2>
-                <p className="text-body text-text-secondary" style={{ marginBottom: 18, lineHeight: 1.6 }}>
+                <p style={{ marginBottom: 18, lineHeight: 1.6, fontSize: 14, color: '#3D4043' }}>
                   Enter your email and we'll notify you when data is available. We're adding 50 new cities monthly.
                 </p>
                 {!submitted ? (
@@ -853,8 +914,8 @@ export default function TrustButVerify(){
                       type="button"
                       onClick={() => handleEmailSubmit('not_found')}
                       data-testid="not-found-submit-btn"
-                      className="w-full bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
-                      style={{ padding: 12, fontSize: 13, border: 'none' }}
+                      className="w-full btn-brand font-semibold rounded-card cursor-pointer"
+                      style={{ padding: 12, fontSize: 13 }}
                     >
                       NOTIFY ME WHEN AVAILABLE {ARROW}
                     </button>
@@ -864,12 +925,12 @@ export default function TrustButVerify(){
                     <div style={{ marginBottom: 5 }}>
                       <Icon name="checkCircle" size={28} />
                     </div>
-                    <div className="font-semibold text-state-positive" style={{ fontSize: 13 }}>You're on the list.</div>
-                    <div className="text-text-tertiary mt-1" style={{ fontSize: 11 }}>We'll email you when data for this area is ready.</div>
+                    <div className="font-semibold" style={{ fontSize: 13, color: '#4A8A6F' }}>You're on the list.</div>
+                    <div style={{ fontSize: 11, marginTop: 4, color: '#6E7174' }}>We'll email you when data for this area is ready.</div>
                   </div>
                 )}
                 <div style={{ marginTop: 24 }}>
-                  <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary" style={{ marginBottom: 8 }}>
+                  <div className="text-micro uppercase tracking-widest font-semibold" style={{ marginBottom: 8, fontSize: 10, color: '#6E7174' }}>
                     TRY A COVERED CITY
                   </div>
                   <div className="flex flex-wrap gap-1.5 justify-center">
@@ -878,8 +939,8 @@ export default function TrustButVerify(){
                         key={city}
                         type="button"
                         onClick={() => { setInput(city); setInputMode("city"); setPhase("landing"); setTimeout(() => startScan(city), 100); }}
-                        className="bg-surface-card text-brand font-semibold rounded-pill cursor-pointer"
-                        style={{ padding: '6px 12px', fontSize: 11, border: '1px solid #C8E2F4' }}
+                        className="font-semibold rounded-pill cursor-pointer"
+                        style={{ padding: '6px 12px', fontSize: 11, background: '#FFFFFF', color: '#51B0E6', border: '1px solid rgba(81, 176, 230, 0.25)' }}
                       >
                         {city}
                       </button>
@@ -892,13 +953,13 @@ export default function TrustButVerify(){
             {tbvView === "scan" && (
               <div data-testid="bottle-tab">
                 <div className="text-center" style={{ padding: '18px 20px' }}>
-                  <div className="text-micro uppercase tracking-widest font-semibold text-brand" style={{ marginBottom: 5 }}>
+                  <div className="text-micro uppercase tracking-widest font-semibold" style={{ marginBottom: 5, fontSize: 10, color: '#1F6FA0' }}>
                     BOTTLE INTELLIGENCE
                   </div>
-                  <h2 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 4, letterSpacing: '-0.01em' }}>
+                  <h2 className="font-display font-semibold" style={{ fontSize: 22, marginBottom: 4, letterSpacing: '-0.01em', color: '#0F1419' }}>
                     What's in your bottle?
                   </h2>
-                  <p className="text-caption text-text-secondary mx-auto" style={{ maxWidth: 280 }}>
+                  <p style={{ fontSize: 12, color: '#3D4043', maxWidth: 280, margin: '0 auto', lineHeight: 1.5 }}>
                     Scan any plastic water bottle to see its full contamination profile.
                   </p>
                 </div>
@@ -910,7 +971,7 @@ export default function TrustButVerify(){
 
         {tab === "wtr-intel" && (
           <div data-testid="insights-tab">
-            <div className="sticky top-0 z-[50] bg-surface-base" style={{ padding: '14px 16px 0' }}>
+            <div className="sticky top-0 z-[50]" style={{ padding: '14px 16px 0', background: '#FFFFFF' }}>
               <SegmentedToggle
                 testId="insights-toggle"
                 value={insightView}
@@ -938,7 +999,7 @@ export default function TrustButVerify(){
                   rightRail={<RiskGauge score={riskScore} animated={gaugeOn} />}
                 >
                   {input && inputMode !== "city" && (
-                    <div className="text-caption text-text-tertiary flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: '#6E7174' }}>
                       <Icon name={inputMode === "address" ? "home" : "pin"} size={12} color="#8A8E93" />
                       {inputMode === "address" ? input : `ZIP ${input}`}
                     </div>
@@ -947,11 +1008,8 @@ export default function TrustButVerify(){
 
                 {highRisk.length > 0 && (
                   <div
-                    className="rounded-card flex items-start gap-2.5 mb-3"
+                    className="card-critical flex items-start gap-2.5 mb-3"
                     style={{
-                      background: 'rgba(184, 74, 74, 0.06)',
-                      border: '1px solid rgba(184, 74, 74, 0.20)',
-                      borderLeft: '4px solid #B84A4A',
                       padding: '11px 14px',
                       animation: 'slideUp 0.4s 0.1s ease forwards',
                       opacity: 0,
@@ -960,10 +1018,10 @@ export default function TrustButVerify(){
                   >
                     <Icon name="hazard" size={18} color="#B84A4A" />
                     <div>
-                      <div className="font-bold text-state-critical" style={{ fontSize: 11, marginBottom: 3 }}>
+                      <div className="font-bold" style={{ fontSize: 11, marginBottom: 3, color: '#B84A4A' }}>
                         {highRisk.length} HIGH-CONCERN CONTAMINANT{highRisk.length > 1 ? "S" : ""} FOUND
                       </div>
-                      <div className="text-caption text-text-secondary">
+                      <div style={{ fontSize: 12, color: '#3D4043', lineHeight: 1.5 }}>
                         {highRisk.map(c => c.name).join(" \u2022 ")}. Levels exceed health guidelines.
                       </div>
                     </div>
@@ -971,16 +1029,16 @@ export default function TrustButVerify(){
                 )}
 
                 {reportOptInStatus === 'confirmed' ? (
-                  <div className="bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
+                  <div className="card-default flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
                     <Icon name="checkCircle" size={22} />
                     <div className="flex-1">
-                      <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>Monthly Water Report. {cityShort}.</div>
-                      <div className="text-text-tertiary mt-0.5" style={{ fontSize: 11 }}>Your report arrives the 1st of every month.</div>
+                      <div className="font-semibold" style={{ fontSize: 13, color: '#0F1419' }}>Monthly Water Report. {cityShort}.</div>
+                      <div style={{ fontSize: 11, marginTop: 2, color: '#6E7174' }}>Your report arrives the 1st of every month.</div>
                     </div>
-                    <span className="text-micro uppercase tracking-wider font-bold text-state-positive">ENROLLED</span>
+                    <span className="text-micro uppercase tracking-wider font-bold" style={{ color: '#4A8A6F' }}>ENROLLED</span>
                   </div>
                 ) : reportOptInStatus === 'pending' ? (
-                  <div className="bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
+                  <div className="card-default flex items-center gap-3 mb-3" style={{ padding: '12px 16px' }}>
                     <div className="rounded-full flex items-center justify-center" style={{ width: 32, height: 32, background: 'rgba(200, 155, 60, 0.12)' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C89B3C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/>
@@ -988,14 +1046,14 @@ export default function TrustButVerify(){
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>Check Your Email</div>
-                      <div className="text-text-tertiary mt-0.5" style={{ fontSize: 11 }}>Click the confirmation link sent to {reportOptInEmail}</div>
+                      <div className="font-semibold" style={{ fontSize: 13, color: '#0F1419' }}>Check Your Email</div>
+                      <div style={{ fontSize: 11, marginTop: 2, color: '#6E7174' }}>Click the confirmation link sent to {reportOptInEmail}</div>
                     </div>
                     <button
                       type="button"
                       onClick={openReportModal}
-                      className="text-brand font-bold uppercase tracking-wider cursor-pointer"
-                      style={{ background: 'none', border: 'none', fontSize: 11, padding: 0 }}
+                      className="font-bold uppercase tracking-wider cursor-pointer"
+                      style={{ background: 'none', border: 'none', fontSize: 11, padding: 0, color: '#51B0E6' }}
                     >
                       RESEND
                     </button>
@@ -1004,16 +1062,16 @@ export default function TrustButVerify(){
                   <button
                     type="button"
                     onClick={openReportModal}
-                    className="w-full bg-surface-card rounded-card shadow-card flex items-center gap-3 mb-3 cursor-pointer text-left"
-                    style={{ padding: '12px 16px', border: 'none' }}
+                    className="w-full card-default flex items-center gap-3 mb-3 cursor-pointer text-left"
+                    style={{ padding: '12px 16px' }}
                   >
                     <Icon name="bell" size={22} color="#51B0E6" />
                     <div className="flex-1">
-                      <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>Monthly Water Report. {cityShort}.</div>
-                      <div className="text-text-tertiary mt-0.5" style={{ fontSize: 11 }}>Get your personalized report every month, free.</div>
+                      <div className="font-semibold" style={{ fontSize: 13, color: '#0F1419' }}>Monthly Water Report. {cityShort}.</div>
+                      <div style={{ fontSize: 11, marginTop: 2, color: '#6E7174' }}>Get your personalized report every month, free.</div>
                     </div>
                     <span
-                      className="bg-brand text-text-onAccent font-bold uppercase tracking-wider rounded-card flex items-center justify-center"
+                      className="btn-brand font-bold uppercase tracking-wider rounded-card flex items-center justify-center"
                       style={{ padding: '7px 14px', fontSize: 11, minHeight: 36 }}
                     >
                       ENABLE
@@ -1021,7 +1079,7 @@ export default function TrustButVerify(){
                   </button>
                 )}
 
-                <div className="text-micro uppercase tracking-widest font-semibold text-text-tertiary mb-2">
+                <div className="text-micro uppercase tracking-widest font-semibold mb-2" style={{ fontSize: 10, color: '#6E7174' }}>
                   CONTAMINANTS IN {cityShort.toUpperCase()}
                 </div>
                 <div className="flex flex-col gap-2 mb-4" data-testid="contaminants-list">
@@ -1058,14 +1116,14 @@ export default function TrustButVerify(){
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => trackEvent('shopify_cta_clicked', { city: data?.city, risk_score: riskScore, discount_code: 'WELCOME100' })}
-                    className="block w-full bg-brand text-text-onAccent text-center font-semibold rounded-card no-underline"
+                    className="block w-full btn-brand text-center font-semibold rounded-card no-underline"
                     style={{ padding: '14px 20px', fontSize: 14 }}
                   >
                     GET THE HOME WTR HUB {ARROW}
                   </a>
                   <div className="flex flex-wrap gap-3 justify-center mt-3">
                     {["30-Day Guarantee", "30-Min Install", "Financing Available"].map((t) => (
-                      <div key={t} className="flex items-center gap-1 text-caption text-text-tertiary">
+                      <div key={t} className="flex items-center gap-1" style={{ fontSize: 12, color: '#6E7174' }}>
                         <Icon name="check" size={12} color="#4A8A6F" />
                         {t}
                       </div>
@@ -1073,12 +1131,12 @@ export default function TrustButVerify(){
                   </div>
                 </HeroCard>
 
-                <div className="bg-surface-card rounded-card shadow-card overflow-hidden mb-3">
-                  <div className="flex items-center justify-between" style={{ padding: '12px 16px', borderBottom: '1px solid #E8EAED' }}>
-                    <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>
+                <div className="card-default overflow-hidden mb-3" style={{ padding: 0 }}>
+                  <div className="flex items-center justify-between" style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 20, 25, 0.04)' }}>
+                    <div className="font-semibold" style={{ fontSize: 12, color: '#0F1419' }}>
                       Home WTR Hub. What Gets Removed.
                     </div>
-                    <div className="text-micro uppercase tracking-widest text-brand font-semibold">{cityShort.toUpperCase()}</div>
+                    <div className="text-micro uppercase tracking-widest font-semibold" style={{ fontSize: 10, color: '#1F6FA0' }}>{cityShort.toUpperCase()}</div>
                   </div>
                   {data.contaminants.map((c, i) => {
                     const rColor = c.risk === 'high' ? '#B84A4A' : c.risk === 'medium' ? '#C89B3C' : '#4A8A6F';
@@ -1090,13 +1148,13 @@ export default function TrustButVerify(){
                           gridTemplateColumns: '1fr auto auto',
                           padding: '10px 16px',
                           gap: 8,
-                          borderBottom: i < data.contaminants.length - 1 ? '1px solid #F0F1F3' : 'none',
-                          background: i % 2 === 0 ? '#FFFFFF' : '#F7F8FA',
+                          borderBottom: i < data.contaminants.length - 1 ? '1px solid rgba(15, 20, 25, 0.04)' : 'none',
+                          background: i % 2 === 0 ? 'transparent' : 'rgba(81, 176, 230, 0.02)',
                         }}
                       >
                         <div>
-                          <span className="font-semibold text-text-primary" style={{ fontSize: 12 }}>{c.name}</span>
-                          <span className="text-text-tertiary ml-2" style={{ fontSize: 10 }}>{c.category}</span>
+                          <span className="font-semibold" style={{ fontSize: 12, color: '#0F1419' }}>{c.name}</span>
+                          <span style={{ fontSize: 10, marginLeft: 8, color: '#6E7174' }}>{c.category}</span>
                         </div>
                         <div className="font-semibold" style={{ color: rColor, fontSize: 11, fontVariantNumeric: 'tabular-nums' }}>
                           {c.level != null ? `${c.level} ${c.unit || ''}`.trim() : "Detected"}
@@ -1113,23 +1171,23 @@ export default function TrustButVerify(){
                 </div>
 
                 {showHub && (
-                  <div className="bg-surface-card rounded-card shadow-card mb-3" style={{ padding: 14 }} data-testid="wtr-hub-section">
+                  <div className="card-default mb-3" style={{ padding: 14 }} data-testid="wtr-hub-section">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <div className="rounded-card flex items-center justify-center text-text-onAccent" style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)', fontSize: 14 }}>HUB</div>
+                      <div className="rounded-card flex items-center justify-center" style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)', color: '#FFFFFF', fontSize: 14 }}>HUB</div>
                       <div>
-                        <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>Generosity{TRADEMARK} Home WTR Hub</div>
-                        <div className="text-brand" style={{ fontSize: 10 }}>Active Alkaline Technology. Multi-Stage.</div>
+                        <div className="font-semibold" style={{ fontSize: 12, color: '#0F1419' }}>Generosity{TRADEMARK} Home WTR Hub</div>
+                        <div style={{ fontSize: 10, color: '#1F6FA0' }}>Active Alkaline Technology. Multi-Stage.</div>
                       </div>
                     </div>
                     <WTRHubAnimation contaminants={data.contaminants} active={animating} />
                   </div>
                 )}
 
-                <div className="bg-surface-card rounded-card shadow-card mb-3" style={{ padding: 16 }} data-testid="email-capture">
-                  <div className="font-display font-semibold text-text-primary" style={{ fontSize: 18, marginBottom: 4 }}>
+                <div className="card-default mb-3" style={{ padding: 16 }} data-testid="email-capture">
+                  <div className="font-display font-semibold" style={{ fontSize: 18, marginBottom: 4, color: '#0F1419' }}>
                     Get an extra $100 off the Home WTR Hub.
                   </div>
-                  <div className="text-caption text-text-secondary mb-3" style={{ lineHeight: 1.5 }}>
+                  <div style={{ fontSize: 12, lineHeight: 1.5, marginBottom: 12, color: '#3D4043' }}>
                     Sale price $1,399.99. Your price $1,299.99 with code WELCOME100.
                   </div>
                   {!submitted ? (
@@ -1145,12 +1203,12 @@ export default function TrustButVerify(){
                         type="button"
                         onClick={() => handleEmailSubmit('results')}
                         data-testid="submit-email-btn"
-                        className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
-                        style={{ padding: 12, fontSize: 13, border: 'none' }}
+                        className="btn-brand font-semibold rounded-card cursor-pointer"
+                        style={{ padding: 12, fontSize: 13 }}
                       >
                         GET MY $100 OFF {ARROW}
                       </button>
-                      <div className="text-text-tertiary text-center" style={{ fontSize: 10 }}>No spam. Unsubscribe anytime.</div>
+                      <div className="text-center" style={{ fontSize: 10, color: '#A6A8AB' }}>No spam. Unsubscribe anytime.</div>
                     </div>
                   ) : (
                     <EngagementFlow
@@ -1166,17 +1224,17 @@ export default function TrustButVerify(){
                   )}
                 </div>
 
-                <div className="bg-surface-card rounded-card shadow-card flex items-center justify-between gap-2.5" style={{ padding: '12px 14px' }}>
+                <div className="card-default flex items-center justify-between gap-2.5" style={{ padding: '12px 14px' }}>
                   <div>
-                    <div className="font-semibold text-text-primary" style={{ fontSize: 12 }}>Are you a Dealer or Distributor?</div>
-                    <div className="text-text-tertiary mt-0.5" style={{ fontSize: 10 }}>Use Trust But Verify{TRADEMARK} as your sales tool.</div>
+                    <div className="font-semibold" style={{ fontSize: 12, color: '#0F1419' }}>Are you a Dealer or Distributor?</div>
+                    <div style={{ fontSize: 10, marginTop: 2, color: '#6E7174' }}>Use Trust But Verify{TRADEMARK} as your sales tool.</div>
                   </div>
                   <a
                     href="https://generositywater.com/generosity-partners-paywall"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-surface-card text-brand font-bold uppercase tracking-wider rounded-card no-underline whitespace-nowrap"
-                    style={{ padding: '8px 12px', fontSize: 10, border: '1px solid #51B0E6' }}
+                    className="font-bold uppercase tracking-wider rounded-card no-underline whitespace-nowrap"
+                    style={{ padding: '8px 12px', fontSize: 10, background: '#FFFFFF', color: '#51B0E6', border: '1px solid rgba(81, 176, 230, 0.40)' }}
                   >
                     PARTNER PORTAL {ARROW}
                   </a>
@@ -1187,7 +1245,7 @@ export default function TrustButVerify(){
             {insightView === "report" && !data && (
               <div className="text-center" style={{ padding: '60px 20px' }} data-testid="report-empty">
                 <div className="flex justify-center mb-3">
-                  <span className="text-text-tertiary inline-flex">
+                  <span style={{ color: '#A6A8AB', display: 'inline-flex' }}>
                     <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <rect x="3" y="12" width="4" height="9" rx="1"/>
                       <rect x="10" y="6" width="4" height="15" rx="1"/>
@@ -1195,18 +1253,18 @@ export default function TrustButVerify(){
                     </svg>
                   </span>
                 </div>
-                <h3 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 7 }}>
+                <h3 className="font-display font-semibold" style={{ fontSize: 22, marginBottom: 7, color: '#0F1419' }}>
                   No Report Yet
                 </h3>
-                <p className="text-body text-text-secondary mb-4">
+                <p style={{ marginBottom: 16, fontSize: 14, color: '#3D4043' }}>
                   Enter your address on the Home tab to generate your free water intelligence report.
                 </p>
                 <button
                   type="button"
                   onClick={() => { setTab("tbv"); setPhase("landing"); }}
                   data-testid="go-test-water-btn"
-                  className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
-                  style={{ padding: '12px 22px', fontSize: 13, border: 'none' }}
+                  className="btn-brand font-semibold rounded-card cursor-pointer"
+                  style={{ padding: '12px 22px', fontSize: 13 }}
                 >
                   TEST MY WATER {ARROW}
                 </button>
@@ -1215,7 +1273,7 @@ export default function TrustButVerify(){
 
             {insightView === "learn" && (
               <div style={{ padding: 18 }} data-testid="learn-tab">
-                <h2 className="font-display font-semibold text-text-primary" style={{ fontSize: 22, marginBottom: 14 }}>
+                <h2 className="font-display font-semibold" style={{ fontSize: 22, marginBottom: 14, color: '#0F1419' }}>
                   Water Intelligence Library
                 </h2>
                 {[
@@ -1226,19 +1284,19 @@ export default function TrustButVerify(){
                   { iconName: "droplet", title: "Why Bottled Water Isn't the Answer", desc: "70% comes from municipal tap. Plastic leaches BPA and microplastics. Costs 1,000x more than filtered tap water.", tag: "MYTH", tc: "#51B0E6" },
                   { iconName: "filter",  title: "How Reverse Osmosis Works",          desc: "Filters to 0.0001 microns, smaller than any virus, bacteria, PFAS molecule, or heavy metal. Gold standard for home filtration.", tag: "SOLUTION", tc: "#4A8A6F" },
                 ].map((item, i) => (
-                  <div key={i} className="bg-surface-card rounded-card shadow-card mb-2" style={{ padding: 14 }} data-testid={`learn-card-${i}`}>
+                  <div key={i} className="card-default mb-2" style={{ padding: 14 }} data-testid={`learn-card-${i}`}>
                     <div className="flex gap-2.5 items-start">
                       <div className="rounded-card flex items-center justify-center shrink-0" style={{ width: 36, height: 36, background: '#FFFFFF', border: `1px solid ${item.tc}33` }}>
                         <Icon name={item.iconName} size={20} color={item.tc} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <div className="font-semibold text-text-primary" style={{ fontSize: 13 }}>{item.title}</div>
+                          <div className="font-semibold" style={{ fontSize: 13, color: '#0F1419' }}>{item.title}</div>
                           <div className="rounded-pill font-bold uppercase tracking-wider" style={{ fontSize: 9, color: item.tc, background: `${item.tc}1F`, padding: '2px 7px' }}>
                             {item.tag}
                           </div>
                         </div>
-                        <div className="text-caption text-text-secondary" style={{ lineHeight: 1.6 }}>{item.desc}</div>
+                        <div style={{ fontSize: 12, lineHeight: 1.6, color: '#3D4043' }}>{item.desc}</div>
                       </div>
                     </div>
                   </div>
@@ -1252,7 +1310,7 @@ export default function TrustButVerify(){
                     href={shopifyLearnUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full bg-brand text-text-onAccent text-center font-semibold rounded-card no-underline"
+                    className="block w-full btn-brand text-center font-semibold rounded-card no-underline"
                     style={{ padding: '14px 22px', fontSize: 13 }}
                   >
                     LEARN MORE {ARROW}
@@ -1268,11 +1326,9 @@ export default function TrustButVerify(){
       </div>
 
       <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full bg-surface-card flex z-[200]"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full glass-nav flex z-[200]"
         style={{
           maxWidth: 480,
-          borderTop: '1px solid #E8EAED',
-          boxShadow: '0 -1px 2px rgba(15, 20, 25, 0.04)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
         data-testid="bottom-nav"
@@ -1295,7 +1351,7 @@ export default function TrustButVerify(){
             >
               {t.badge != null && t.badge > 0 && (
                 <div
-                  className="absolute rounded-pill flex items-center justify-center font-bold text-text-onAccent"
+                  className="absolute rounded-pill flex items-center justify-center font-bold"
                   style={{
                     top: 7,
                     right: 'calc(50% - 18px)',
@@ -1306,6 +1362,7 @@ export default function TrustButVerify(){
                     padding: '0 4px',
                     border: '1.5px solid #FFFFFF',
                     fontVariantNumeric: 'tabular-nums',
+                    color: '#FFFFFF',
                   }}
                 >
                   {t.badge}
@@ -1358,7 +1415,7 @@ export default function TrustButVerify(){
       />
 
       {showProfile && (
-        <div className="fixed inset-0 z-[500] bg-surface-card overflow-y-auto" style={{ animation: 'slideUp 0.3s ease' }}>
+        <div className="fixed inset-0 z-[500] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease', background: '#FFFFFF' }}>
           <ProfileScreen onClose={() => setShowProfile(false)} />
         </div>
       )}
@@ -1384,18 +1441,18 @@ function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile,
           <div style={{ marginBottom: 5 }}>
             <Icon name="checkCircle" size={28} />
           </div>
-          <div className="font-semibold text-state-positive" style={{ fontSize: 13 }}>Report sent. Check your email.</div>
-          <div className="text-text-tertiary mt-1" style={{ fontSize: 11 }}>Discount code: WELCOME100</div>
+          <div className="font-semibold" style={{ fontSize: 13, color: '#4A8A6F' }}>Report sent. Check your email.</div>
+          <div style={{ fontSize: 11, marginTop: 4, color: '#6E7174' }}>Discount code: WELCOME100</div>
         </div>
       )}
 
       {engagementPhase === "push_prompt" && (
         <div className="mx-auto" style={{ maxWidth: 320, padding: '4px 0' }} data-testid="push-prompt">
-          <div className="rounded-full flex items-center justify-center mx-auto" style={{ width: 44, height: 44, background: '#E8F4FB', border: '2px solid rgba(81, 176, 230, 0.30)', marginBottom: 10 }}>
+          <div className="rounded-full flex items-center justify-center mx-auto" style={{ width: 44, height: 44, background: 'rgba(81, 176, 230, 0.10)', border: '2px solid rgba(81, 176, 230, 0.30)', marginBottom: 10 }}>
             <Icon name="alert" size={20} color="#51B0E6" />
           </div>
-          <div className="font-semibold text-text-primary" style={{ fontSize: 14, marginBottom: 4 }}>Water quality changes. You should know.</div>
-          <div className="text-caption text-text-secondary mb-3" style={{ lineHeight: 1.5 }}>
+          <div className="font-semibold" style={{ fontSize: 14, marginBottom: 4, color: '#0F1419' }}>Water quality changes. You should know.</div>
+          <div style={{ fontSize: 12, lineHeight: 1.5, marginBottom: 12, color: '#3D4043' }}>
             Get an alert when contamination levels change in your area. We only notify when it matters.
           </div>
           <div className="flex gap-2 justify-center">
@@ -1408,16 +1465,16 @@ function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile,
                 trackEvent(result.granted ? 'push_permission_granted' : 'push_permission_denied', { city: data?.city });
                 setEngagementPhase("household");
               }}
-              className="bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
-              style={{ padding: '9px 20px', fontSize: 12, border: 'none' }}
+              className="btn-brand font-semibold rounded-card cursor-pointer"
+              style={{ padding: '9px 20px', fontSize: 12 }}
             >
               ENABLE ALERTS
             </button>
             <button
               type="button"
               onClick={() => { trackEvent('push_permission_dismissed', { city: data?.city }); setEngagementPhase("household"); }}
-              className="text-text-tertiary font-semibold rounded-card cursor-pointer"
-              style={{ background: 'transparent', padding: '9px 16px', fontSize: 12, border: '1px solid #E8EAED' }}
+              className="font-semibold rounded-card cursor-pointer"
+              style={{ background: 'transparent', padding: '9px 16px', fontSize: 12, border: '1px solid rgba(15, 20, 25, 0.06)', color: '#6E7174' }}
             >
               Not now
             </button>
@@ -1427,10 +1484,10 @@ function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile,
 
       {engagementPhase === "household" && (
         <div className="mx-auto text-left" style={{ maxWidth: 320, padding: '4px 0' }} data-testid="household-profile">
-          <div className="font-semibold text-text-primary text-center" style={{ fontSize: 14, marginBottom: 3 }}>
+          <div className="font-semibold text-center" style={{ fontSize: 14, marginBottom: 3, color: '#0F1419' }}>
             Personalize your risk assessment
           </div>
-          <div className="text-caption text-text-secondary text-center mb-3" style={{ lineHeight: 1.5 }}>
+          <div className="text-center mb-3" style={{ fontSize: 12, lineHeight: 1.5, color: '#3D4043' }}>
             Quick questions to tailor your report to your household.
           </div>
           {[
@@ -1439,7 +1496,7 @@ function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile,
             { key: 'has_filter',   label: 'Water filter currently installed?', options: [{ label: 'Yes', val: true }, { label: 'No', val: false }, { label: 'Not sure', val: 'unsure' }] },
           ].map((q) => (
             <div key={q.key} className="mb-3">
-              <div className="font-semibold text-text-secondary mb-1.5" style={{ fontSize: 11 }}>{q.label}</div>
+              <div className="font-semibold mb-1.5" style={{ fontSize: 11, color: '#3D4043' }}>{q.label}</div>
               <div className="flex gap-1.5">
                 {q.options.map((opt) => {
                   const active = householdProfile[q.key] === opt.val;
@@ -1451,9 +1508,9 @@ function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile,
                       className="flex-1 font-bold rounded-card cursor-pointer"
                       style={{
                         padding: 8,
-                        border: active ? '2px solid #51B0E6' : '1px solid #E8EAED',
-                        background: active ? '#E8F4FB' : '#FFFFFF',
-                        color: active ? '#3DA0DA' : '#4A4F56',
+                        border: active ? '2px solid #51B0E6' : '1px solid rgba(15, 20, 25, 0.06)',
+                        background: active ? 'rgba(81, 176, 230, 0.06)' : '#FFFFFF',
+                        color: active ? '#1F6FA0' : '#4A4F56',
                         fontSize: 11,
                       }}
                     >
@@ -1484,16 +1541,16 @@ function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile,
                 } catch (e) {}
                 setEngagementPhase("complete");
               }}
-              className="flex-1 bg-brand text-text-onAccent font-semibold rounded-card cursor-pointer"
-              style={{ padding: 10, fontSize: 12, border: 'none' }}
+              className="flex-1 btn-brand font-semibold rounded-card cursor-pointer"
+              style={{ padding: 10, fontSize: 12 }}
             >
               PERSONALIZE MY REPORT
             </button>
             <button
               type="button"
               onClick={() => { trackEvent('household_profile_skipped', { city: data?.city }); setEngagementPhase("complete"); }}
-              className="text-text-tertiary font-semibold rounded-card cursor-pointer"
-              style={{ background: 'transparent', padding: '10px 12px', fontSize: 11, border: '1px solid #E8EAED' }}
+              className="font-semibold rounded-card cursor-pointer"
+              style={{ background: 'transparent', padding: '10px 12px', fontSize: 11, border: '1px solid rgba(15, 20, 25, 0.06)', color: '#6E7174' }}
             >
               Skip
             </button>
@@ -1506,9 +1563,9 @@ function EngagementFlow({ engagementPhase, setEngagementPhase, householdProfile,
           <div style={{ marginBottom: 5 }}>
             <Icon name="checkCircle" size={28} />
           </div>
-          <div className="font-semibold text-state-positive" style={{ fontSize: 13 }}>You're all set.</div>
-          <div className="text-text-tertiary mt-1" style={{ fontSize: 11 }}>
-            Discount code: <span className="font-bold text-text-primary">WELCOME100</span>
+          <div className="font-semibold" style={{ fontSize: 13, color: '#4A8A6F' }}>You're all set.</div>
+          <div style={{ fontSize: 11, marginTop: 4, color: '#6E7174' }}>
+            Discount code: <span className="font-bold" style={{ color: '#0F1419' }}>WELCOME100</span>
           </div>
           {householdProfile.has_children && (
             <div
