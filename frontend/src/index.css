@@ -1,11 +1,9 @@
 /* src/index.css                                                              */
-/* Generosity WTR App - Aluminum + Glass design system v2.1                   */
+/* Generosity WTR App - White + Brand Blue v3.0                               */
 /*                                                                            */
-/* v2.1 dial-in changes:                                                      */
-/*   - Substrate deepened to aluminum-550 (#5A5E62) with vertical gradient    */
-/*   - Brushed-metal grain texture added (vertical lines, 8% opacity)         */
-/*   - Brand-blue glow repositioned from header (0%) to behind hero (25%)     */
-/*   - Drop pattern overlay strengthened from 3.5% to 5% opacity              */
+/* White substrate. Subtle vertical texture (8% opacity) gives the surface    */
+/* paper-quality grain rather than pure flat white.                           */
+/* Subtle brand-blue radial glow positioned bottom-right (light from below).  */
 
 @tailwind base;
 @tailwind components;
@@ -13,30 +11,30 @@
 
 @layer base {
   :root {
-    --aluminum-50:  #F0F1F3;
-    --aluminum-100: #DCDFE2;
-    --aluminum-200: #C4C7CB;
-    --aluminum-300: #A6A8AB;  /* Pantone Cool Gray 6 LOCKED */
-    --aluminum-400: #8A8D90;
-    --aluminum-500: #6E7174;
-    --aluminum-550: #5A5E62;  /* v2.1 primary background */
-    --aluminum-600: #54575A;
+    --aluminum-50:  #FFFFFF;
+    --aluminum-100: #FAFBFC;
+    --aluminum-200: #F2F4F7;
+    --aluminum-300: #F0F1F3;  /* LOCKED light gray */
+    --aluminum-400: #DCDFE2;
+    --aluminum-500: #A6A8AB;  /* LOCKED Pantone Cool Gray 6 */
+    --aluminum-600: #6E7174;
     --aluminum-700: #3D4043;
-    --aluminum-800: #2A2C2E;
-    --aluminum-900: #1A1B1D;
+    --aluminum-800: #1A1B1D;
+    --aluminum-900: #0F1419;
 
     --brand:        #51B0E6;
     --brand-hover:  #3DA0DA;
     --brand-pressed:#2B8FC9;
-    --brand-glow:   rgba(81, 176, 230, 0.35);
+    --brand-glow:   rgba(81, 176, 230, 0.25);
+    --brand-ink:    #1F6FA0;
 
     --state-positive:  #4A8A6F;
     --state-attention: #C89B3C;
     --state-critical:  #B84A4A;
-    --state-neutral:   #6E7174;
+    --state-neutral:   #A6A8AB;
 
     /* Shadcn compat */
-    --background: 210 5% 37%;          /* v2.1: aluminum-550 */
+    --background: 0 0% 100%;
     --foreground: 210 11% 8%;
     --card: 0 0% 100%;
     --card-foreground: 210 11% 8%;
@@ -44,22 +42,22 @@
     --popover-foreground: 210 11% 8%;
     --primary: 201 75% 61%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 6% 45%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 6% 45%;
-    --muted-foreground: 210 6% 75%;
+    --secondary: 210 14% 96%;
+    --secondary-foreground: 210 11% 8%;
+    --muted: 210 14% 96%;
+    --muted-foreground: 210 6% 45%;
     --accent: 201 75% 61%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 50% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 100% / 0.40;
-    --input: 0 0% 100% / 0.60;
+    --border: 210 11% 8% / 0.06;
+    --input: 210 11% 8% / 0.10;
     --ring: 201 75% 61%;
     --radius: 1rem;
   }
 
   html {
-    background: var(--aluminum-550);
+    background: #FFFFFF;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -69,33 +67,23 @@
     font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--aluminum-900);
 
-    /* ===== v2.1 substrate: deeper graphite gradient + repositioned blue glow ===== */
-    /* Three stacked layers, painted bottom-up:                                       */
-    /*   3. (top)    Brand-blue radial glow positioned at 25% Y (behind hero area)    */
-    /*   2.          Subtle horizontal warm-to-cool gradient overlay                  */
-    /*   1. (bottom) Vertical aluminum gradient (lighter top, deeper bottom)          */
+    /* White substrate with subtle brand-blue radial glow at bottom-right.            */
+    /* The glow simulates "light from below" - the brand's light source effect.       */
     background:
       radial-gradient(
-        ellipse 700px 500px at 50% 22%,
-        rgba(81, 176, 230, 0.22) 0%,
-        rgba(81, 176, 230, 0.08) 35%,
-        rgba(81, 176, 230, 0) 65%
+        ellipse 800px 600px at 100% 100%,
+        rgba(81, 176, 230, 0.08) 0%,
+        rgba(81, 176, 230, 0.03) 40%,
+        rgba(81, 176, 230, 0) 70%
       ),
-      linear-gradient(
-        90deg,
-        rgba(90, 94, 98, 1) 0%,
-        rgba(86, 90, 94, 1) 50%,
-        rgba(82, 86, 90, 1) 100%
+      radial-gradient(
+        ellipse 600px 500px at 0% 0%,
+        rgba(81, 176, 230, 0.04) 0%,
+        rgba(81, 176, 230, 0) 60%
       ),
-      linear-gradient(
-        180deg,
-        #6A6E72 0%,
-        #5A5E62 35%,
-        #4E5256 100%
-      );
+      #FFFFFF;
     background-attachment: fixed;
     background-repeat: no-repeat;
-    background-blend-mode: normal, overlay, normal;
     min-height: 100vh;
     min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
@@ -103,44 +91,36 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* ===== v2.1 brushed-metal grain ===== */
-  /* Very fine vertical lines at 8% opacity simulate milled-aluminum surface.        */
-  /* Repeating linear gradient gives the substrate true metal feel.                  */
+  /* ===== Subtle vertical paper grain (very low opacity for legibility) ===== */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.08;
+    opacity: 0.035;
     background-image:
       repeating-linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0) 0px,
-        rgba(255, 255, 255, 0) 1px,
-        rgba(255, 255, 255, 0.35) 1px,
-        rgba(255, 255, 255, 0.35) 2px,
-        rgba(0, 0, 0, 0.18) 2px,
-        rgba(0, 0, 0, 0.18) 3px,
-        rgba(255, 255, 255, 0) 3px,
-        rgba(255, 255, 255, 0) 4px
+        rgba(15, 20, 25, 0) 0px,
+        rgba(15, 20, 25, 0) 2px,
+        rgba(15, 20, 25, 0.4) 2px,
+        rgba(15, 20, 25, 0.4) 3px
       );
-    mix-blend-mode: overlay;
   }
 
-  /* ===== v2.1 drop pattern overlay (strengthened to 5%) ===== */
+  /* ===== Subtle drop pattern overlay (brand-blue, very low opacity) ===== */
   body::after {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.05;
+    opacity: 0.025;
     background-image:
       radial-gradient(circle at 16px 16px, var(--brand) 0%, var(--brand) 2px, transparent 3px),
       radial-gradient(circle at 48px 48px, var(--brand) 0%, var(--brand) 2px, transparent 3px);
     background-size: 64px 64px;
-    mix-blend-mode: screen;
   }
 
   #root {
@@ -155,9 +135,9 @@
   .skeleton {
     background: linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.30) 0%,
-      rgba(255, 255, 255, 0.55) 50%,
-      rgba(255, 255, 255, 0.30) 100%
+      rgba(81, 176, 230, 0.04) 0%,
+      rgba(81, 176, 230, 0.10) 50%,
+      rgba(81, 176, 230, 0.04) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
@@ -174,33 +154,28 @@
     border-radius: 4px;
   }
 
-  .glass-card-legacy {
-    background: rgba(255, 255, 255, 0.60);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.40);
-    border-radius: 16px;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      0 8px 32px rgba(0, 0, 0, 0.12),
-      0 1px 2px rgba(0, 0, 0, 0.06);
+  /* ===== Compat shims so existing class names continue to work ===== */
+  /* Maps old surface utilities to new v3.0 system.                          */
+  .bg-surface-card {
+    background: rgba(81, 176, 230, 0.06);
+    border: 1px solid rgba(81, 176, 230, 0.20);
+    border-left: 4px solid #51B0E6;
+  }
+
+  .shadow-card {
+    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.04), 0 4px 16px rgba(15, 20, 25, 0.06);
   }
 
   .bg-drop-pattern {
-    background-color: rgba(255, 255, 255, 0.40);
+    background-color: #FFFFFF;
     background-image:
-      radial-gradient(circle at 16px 16px, rgba(81, 176, 230, 0.18) 0%, rgba(81, 176, 230, 0.18) 2px, transparent 3px),
-      radial-gradient(circle at 48px 48px, rgba(81, 176, 230, 0.18) 0%, rgba(81, 176, 230, 0.18) 2px, transparent 3px);
+      radial-gradient(circle at 16px 16px, rgba(81, 176, 230, 0.15) 0%, rgba(81, 176, 230, 0.15) 2px, transparent 3px),
+      radial-gradient(circle at 48px 48px, rgba(81, 176, 230, 0.15) 0%, rgba(81, 176, 230, 0.15) 2px, transparent 3px);
     background-size: 64px 64px;
   }
 }
 
 /* ===== Animations (preserved from v1) ===== */
-@keyframes critical-pulse {
-  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(184, 74, 74, 0.14); }
-  50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(184, 74, 74, 0.22); }
-}
-
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
