@@ -1,9 +1,5 @@
 // src/components/ds/BottomSheet.jsx
-// Modal sheet that slides up from the bottom of the viewport. Two tones:
-//   - "light" (default): heavy frosted glass over aluminum, dark text inside
-//   - "dark":            anodized graphite glass, light text inside
-//
-// Used for the Monthly Report modal (light) and Founder PIN entry (dark).
+// v3.0 - White frosted glass sheet over scrim. Same API as v2.1.
 
 import React, { useEffect } from 'react';
 
@@ -15,7 +11,6 @@ export default function BottomSheet({
   testId,
   children,
 }) {
-  // Lock body scroll while open. Restore on close.
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -23,7 +18,6 @@ export default function BottomSheet({
     return () => { document.body.style.overflow = prev; };
   }, [open]);
 
-  // Close on Escape key
   useEffect(() => {
     if (!open) return;
     const handler = (e) => { if (e.key === 'Escape') onClose?.(); };
@@ -47,7 +41,7 @@ export default function BottomSheet({
       <style>{`
         @keyframes sheetFadeIn {
           from { background: rgba(0, 0, 0, 0); }
-          to   { background: rgba(0, 0, 0, 0.45); }
+          to   { background: rgba(0, 0, 0, 0.35); }
         }
         @keyframes sheetSlideUp {
           from { transform: translateY(100%); }
@@ -55,14 +49,14 @@ export default function BottomSheet({
         }
       `}</style>
 
-      {/* Scrim - tap to close */}
+      {/* Scrim */}
       <button
         type="button"
         aria-label="Close"
         onClick={onClose}
         className="absolute inset-0 cursor-default"
         style={{
-          background: 'rgba(15, 20, 25, 0.45)',
+          background: 'rgba(15, 20, 25, 0.35)',
           backdropFilter: 'blur(4px)',
           WebkitBackdropFilter: 'blur(4px)',
           border: 'none',
@@ -80,16 +74,16 @@ export default function BottomSheet({
           borderTopRightRadius: 24,
           animation: 'sheetSlideUp 0.32s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
           background: isDark
-            ? 'rgba(42, 44, 46, 0.85)'
-            : 'rgba(255, 255, 255, 0.85)',
-          backdropFilter: 'blur(60px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+            ? 'rgba(15, 20, 25, 0.92)'
+            : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(40px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           boxShadow: isDark
-            ? 'inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 -16px 48px rgba(0, 0, 0, 0.30)'
-            : 'inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 -16px 48px rgba(0, 0, 0, 0.15)',
+            ? '0 -16px 48px rgba(0, 0, 0, 0.30)'
+            : '0 -16px 48px rgba(15, 20, 25, 0.10), 0 -1px 0 rgba(15, 20, 25, 0.06)',
           borderTop: isDark
             ? '1px solid rgba(255, 255, 255, 0.12)'
-            : '1px solid rgba(255, 255, 255, 0.40)',
+            : '1px solid rgba(15, 20, 25, 0.06)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
@@ -102,7 +96,7 @@ export default function BottomSheet({
               borderRadius: 2,
               background: isDark
                 ? 'rgba(255, 255, 255, 0.20)'
-                : 'rgba(15, 20, 25, 0.18)',
+                : 'rgba(15, 20, 25, 0.16)',
             }}
           />
         </div>
@@ -120,7 +114,7 @@ export default function BottomSheet({
             height: 32,
             background: isDark
               ? 'rgba(255, 255, 255, 0.10)'
-              : 'rgba(15, 20, 25, 0.06)',
+              : 'rgba(15, 20, 25, 0.04)',
             border: 'none',
           }}
         >
