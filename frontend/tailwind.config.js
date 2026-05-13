@@ -1,187 +1,290 @@
-/** @type {import('tailwindcss').Config} */
+/* eslint-disable */
+// tailwind.config.js
+// Generosity WTR App - Aluminum + Glass design system v2.0
+//
+// Background anchor: aluminum unibody Cool Gray family.
+// Cards: real frosted glass material (backdrop-filter + saturate).
+// Accent: brand blue used as emitted light, not paint.
+//
+// Brand color rules locked:
+//   - Primary Blue: #51B0E6 (Pantone 2915 U)
+//   - Brand Gray: #A6A8AB (Pantone Cool Gray 6) - background reference anchor
+//   - White: #FFFFFF (on-glass content surfaces)
+//
+// Typography: Barlow Condensed for display, Montserrat for body.
+
 module.exports = {
-  darkMode: ["class"],
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html",
   ],
   theme: {
     extend: {
       colors: {
-        // Surfaces
+        /* ========== ALUMINUM BACKGROUND PALETTE ========== */
+        /* Evolution of locked Cool Gray (#A6A8AB) toward deeper aluminum tones */
+        /* so frosted glass cards have substrate to refract against.            */
+        aluminum: {
+          50:  '#F0F1F3',  /* lightest - matches locked light gray */
+          100: '#DCDFE2',  /* very light aluminum */
+          200: '#C4C7CB',  /* light aluminum */
+          300: '#A6A8AB',  /* LOCKED brand gray - Pantone Cool Gray 6 */
+          400: '#8A8D90',  /* mid aluminum */
+          500: '#6E7174',  /* deep aluminum (primary app background) */
+          600: '#54575A',  /* darker aluminum */
+          700: '#3D4043',  /* anodized graphite */
+          800: '#2A2C2E',  /* deep anodized */
+          900: '#1A1B1D',  /* near-black anodized */
+        },
+
+        /* ========== SURFACES (renamed for glass aesthetic) ========== */
         surface: {
-          base: '#F7F8FA',           // app background, every screen
-          card: '#FFFFFF',           // standard cards on top of base
-          inset: '#F0F1F3',          // inset wells, secondary containers
-          divider: '#E8EAED',        // hairline dividers when needed
+          base:    '#6E7174',  /* aluminum 500 - primary app background */
+          baseAlt: '#54575A',  /* aluminum 600 - bottom gradient stop */
+          card:    'rgba(255, 255, 255, 0.45)',  /* frosted glass card */
+          cardSolid: 'rgba(255, 255, 255, 0.85)', /* solid fallback for content */
+          inset:   'rgba(255, 255, 255, 0.20)',  /* deeper glass for inset zones */
+          chrome:  'rgba(255, 255, 255, 0.55)',  /* nav/header chrome glass */
         },
 
-        // Brand accent (used sparingly, one per screen ideally)
-        brand: {
-          DEFAULT: '#51B0E6',        // primary CTAs, hero numerals, active states
-          hover: '#3DA0DA',          // hover/press on primary
-          subtle: '#E8F4FB',         // tinted backgrounds for active rows
-          // LED glow opacity controlled via boxShadow tokens, not color
-        },
-
-        // Text
+        /* ========== TEXT COLORS ========== */
+        /* Dark text on glass cards (cards are translucent white-tinted,        */
+        /* so text stays dark for legibility, same as Apple Pro apps).          */
         text: {
-          primary: '#0F1419',        // headlines, hero numerals, body emphasis
-          secondary: '#4A4F56',      // body copy, secondary information
-          tertiary: '#8A8E93',       // metadata, timestamps, supporting labels
-          quaternary: '#A6A8AB',     // disabled, scale labels
-          onAccent: '#FFFFFF',       // text on filled blue surfaces
+          primary:    '#0F1419',  /* on glass cards */
+          secondary:  '#3D4043',
+          tertiary:   '#6E7174',
+          quaternary: '#8A8D90',
+          onAccent:   '#FFFFFF',
+          onDark:     'rgba(255, 255, 255, 0.95)',  /* for chrome over aluminum */
+          onDarkMuted:'rgba(255, 255, 255, 0.65)',
         },
 
-        // Semantic states (muted by design, never decorative)
+        /* ========== BRAND ========== */
+        brand: {
+          DEFAULT: '#51B0E6',  /* Pantone 2915 U */
+          hover:   '#3DA0DA',
+          pressed: '#2B8FC9',
+          tint:    'rgba(81, 176, 230, 0.15)',  /* glass tinted background */
+          glow:    'rgba(81, 176, 230, 0.35)',  /* light-source glow */
+          deep:    'rgba(81, 176, 230, 0.85)',  /* saturated tinted glass */
+        },
+
+        /* ========== STATE COLORS (muted for refinement) ========== */
         state: {
-          positive: '#4A8A6F',       // optimal, verified, system healthy
-          attention: '#C89B3C',      // developing, low confidence
-          critical: '#B84A4A',       // critical alerts only
+          positive: '#4A8A6F',
+          attention:'#C89B3C',
+          critical: '#B84A4A',
+          neutral:  '#6E7174',
         },
-
-        // Confidence tiers (paired with dot indicators, not color casts on data)
-        confidence: {
-          verified: '#4A8A6F',
-          corroborated: '#51B0E6',
-          developing: '#C89B3C',
-          hypothesis: '#8A8E93',
-        },
-
-        // shadcn/ui semantic aliases — these map shadcn's expected tokens
-        // to our brand system so any shadcn component continues to work.
-        // Direct hex values, not HSL variables, since the existing config
-        // pattern used direct hex.
-        background: '#F7F8FA',
-        foreground: '#0F1419',
-        card: {
-          DEFAULT: '#FFFFFF',
-          foreground: '#0F1419',
-        },
-        popover: {
-          DEFAULT: '#FFFFFF',
-          foreground: '#0F1419',
-        },
-        primary: {
-          DEFAULT: '#51B0E6',
-          foreground: '#FFFFFF',
-        },
-        secondary: {
-          DEFAULT: '#F0F1F3',
-          foreground: '#0F1419',
-        },
-        muted: {
-          DEFAULT: '#F0F1F3',
-          foreground: '#8A8E93',
-        },
-        accent: {
-          DEFAULT: '#E8F4FB',
-          foreground: '#0F1419',
-        },
-        destructive: {
-          DEFAULT: '#B84A4A',
-          foreground: '#FFFFFF',
-        },
-        border: '#E8EAED',
-        input: '#E8EAED',
-        ring: '#51B0E6',
       },
 
       fontFamily: {
-        // Barlow Condensed for display, hero numerals, screen titles
         display: ['"Barlow Condensed"', 'sans-serif'],
-        // Montserrat for body, UI, captions, micro labels
-        sans: ['Montserrat', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        body: ['Montserrat', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        sans:    ['Montserrat', 'sans-serif'],
+        body:    ['Montserrat', 'sans-serif'],
       },
 
       fontSize: {
-        // Type scale matches design system spec exactly.
-        // Format: [size, { lineHeight, letterSpacing }]
-        'hero':         ['96px', { lineHeight: '100%', letterSpacing: '-0.02em' }],
-        'display':      ['56px', { lineHeight: '110%', letterSpacing: '-0.01em' }],
-        'h1':           ['32px', { lineHeight: '120%', letterSpacing: '0' }],
-        'h2':           ['20px', { lineHeight: '130%', letterSpacing: '-0.01em' }],
-        'h3':           ['16px', { lineHeight: '140%', letterSpacing: '-0.01em' }],
-        'body':         ['15px', { lineHeight: '150%', letterSpacing: '0' }],
-        'caption':      ['13px', { lineHeight: '140%', letterSpacing: '0.01em' }],
-        'micro':        ['11px', { lineHeight: '130%', letterSpacing: '0.08em' }],
-      },
-
-      spacing: {
-        // 4px base unit. Standard Tailwind multiples are kept (1=4px, 2=8px, etc.)
-        // but extending with explicit semantic spacing for the design system.
-        '0.5': '2px',
-        '18': '72px',
+        micro:   ['10px', { lineHeight: '1.4', letterSpacing: '0.08em' }],
+        caption: ['12px', { lineHeight: '1.45' }],
+        body:    ['14px', { lineHeight: '1.5' }],
+        h3:      ['18px', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
+        h2:      ['22px', { lineHeight: '1.25', letterSpacing: '-0.015em' }],
+        h1:      ['28px', { lineHeight: '1.15', letterSpacing: '-0.02em' }],
+        hero:    ['36px', { lineHeight: '1.05', letterSpacing: '-0.025em' }],
+        display: ['44px', { lineHeight: '1.0', letterSpacing: '-0.03em' }],
       },
 
       borderRadius: {
-        // shadcn convention preserved
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-        // Design system specific radii
-        'card': '16px',
-        'card-hero': '20px',
-        'pill': '9999px',
+        pill:  '999px',
+        card:  '16px',    /* tighter than v1 (was 20px) for hardware feel */
+        sheet: '24px',
+        soft:  '12px',
       },
 
       boxShadow: {
-        // Card shadows. Double-layer for tactile depth.
-        'card': '0 1px 2px rgba(15, 20, 25, 0.04), 0 0 0 1px rgba(15, 20, 25, 0.03)',
-        'card-hero': '0 4px 16px rgba(15, 20, 25, 0.06), 0 1px 2px rgba(15, 20, 25, 0.04)',
-        'card-hover': '0 2px 4px rgba(15, 20, 25, 0.06), 0 0 0 1px rgba(15, 20, 25, 0.04)',
+        /* ===== Glass material shadows ===== */
+        /* Drop shadow gives cards weight on aluminum substrate.                */
+        glass:      '0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
+        glassDeep:  '0 16px 48px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.06)',
+        glassHover: '0 12px 40px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.06)',
 
-        // LED glow — echoes PP02 CAP LED ring. Subtle, not Whoop-style.
-        // For live-data states only. 4px spread, low opacity.
-        'led-rest': '0 0 0 4px rgba(81, 176, 230, 0.20)',
-        'led-active': '0 0 0 4px rgba(81, 176, 230, 0.40)',
+        /* ===== Inset highlights (edge light catch) ===== */
+        /* These simulate the light line on aluminum bezel edges.               */
+        edge:       'inset 0 1px 0 rgba(255, 255, 255, 0.60)',
+        edgeStrong: 'inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(0, 0, 0, 0.06)',
 
-        // Focus ring for accessibility
-        'focus': '0 0 0 2px #FFFFFF, 0 0 0 4px #51B0E6',
+        /* ===== Combined: glass card with edge highlight ===== */
+        card:       'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
+        cardHover:  'inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 12px 40px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.06)',
+
+        /* ===== Brand light glow (active states) ===== */
+        glow:       '0 0 32px rgba(81, 176, 230, 0.30), 0 0 8px rgba(81, 176, 230, 0.20)',
+        glowSoft:   '0 0 24px rgba(81, 176, 230, 0.20)',
+
+        /* ===== Bottom nav specific (chrome over aluminum) ===== */
+        nav:        '0 -8px 32px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.50)',
+        header:     '0 4px 24px rgba(0, 0, 0, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.04)',
+      },
+
+      backdropBlur: {
+        xs: '8px',
+        sm: '16px',
+        md: '24px',
+        lg: '40px',
+        xl: '60px',
+        '2xl': '80px',
+      },
+
+      backdropSaturate: {
+        glass: '180%',
+        deep:  '200%',
       },
 
       transitionTimingFunction: {
-        // Design system motion: Material standard easing for default transitions
-        'standard': 'cubic-bezier(0.4, 0.0, 0.2, 1)',
-      },
-
-      transitionDuration: {
-        '200': '200ms',
-        '240': '240ms',
-        '600': '600ms',
-        '2400': '2400ms',
+        standard: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
+        decel:    'cubic-bezier(0.0, 0.0, 0.2, 1)',
+        accel:    'cubic-bezier(0.4, 0.0, 1, 1)',
+        spring:   'cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
 
       keyframes: {
-        // LED glow pulse — for live-data cards
-        'led-pulse': {
-          '0%, 100%': { boxShadow: '0 0 0 4px rgba(81, 176, 230, 0.20)' },
-          '50%':      { boxShadow: '0 0 0 4px rgba(81, 176, 230, 0.40)' },
+        'glow-pulse': {
+          '0%, 100%': { boxShadow: '0 0 24px rgba(81, 176, 230, 0.20)' },
+          '50%':      { boxShadow: '0 0 36px rgba(81, 176, 230, 0.35)' },
         },
-        // Subtle fade-in for card mounts
-        'fade-in': {
-          '0%':   { opacity: '0', transform: 'translateY(8px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        // Skeleton shimmer for loading states
         'shimmer': {
           '0%':   { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
-        // Scan line for bottle scan UX
-        'scan': {
-          '0%, 100%': { transform: 'translateY(-100%)', opacity: '0' },
-          '50%':      { opacity: '1' },
-        },
       },
-
       animation: {
-        'led-pulse': 'led-pulse 2400ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite',
-        'fade-in': 'fade-in 200ms cubic-bezier(0.4, 0.0, 0.2, 1) both',
-        'shimmer': 'shimmer 2s linear infinite',
-        'scan': 'scan 2s ease-in-out infinite',
+        'glow-pulse': 'glow-pulse 2.4s ease-in-out infinite',
+        'shimmer':    'shimmer 2s linear infinite',
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-}
+  plugins: [
+    /* Custom utilities for glass material treatment.                          */
+    /* These are first-class so the design system can be applied with one      */
+    /* class name on any element.                                              */
+    function ({ addUtilities }) {
+      addUtilities({
+        /* ===== Frosted glass card material ===== */
+        '.glass-card': {
+          'background': 'rgba(255, 255, 255, 0.45)',
+          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
+          'backdrop-filter': 'blur(40px) saturate(180%)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
+          'border': '1px solid rgba(255, 255, 255, 0.30)',
+        },
+        '.glass-card-solid': {
+          'background': 'rgba(255, 255, 255, 0.85)',
+          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
+          'backdrop-filter': 'blur(20px) saturate(160%)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)',
+          'border': '1px solid rgba(255, 255, 255, 0.40)',
+        },
+        '.glass-chrome': {
+          'background': 'rgba(255, 255, 255, 0.55)',
+          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
+          'backdrop-filter': 'blur(60px) saturate(180%)',
+          'border-bottom': '1px solid rgba(255, 255, 255, 0.30)',
+        },
+        '.glass-nav': {
+          'background': 'rgba(255, 255, 255, 0.60)',
+          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
+          'backdrop-filter': 'blur(60px) saturate(180%)',
+          'border-top': '1px solid rgba(255, 255, 255, 0.40)',
+          'box-shadow': '0 -8px 32px rgba(0, 0, 0, 0.08)',
+        },
+        '.glass-inset': {
+          'background': 'rgba(255, 255, 255, 0.25)',
+          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
+          'backdrop-filter': 'blur(20px) saturate(160%)',
+          'box-shadow': 'inset 0 1px 2px rgba(0, 0, 0, 0.04)',
+        },
+
+        /* ===== Brand blue glass (CTAs) ===== */
+        '.glass-brand': {
+          'background': 'rgba(81, 176, 230, 0.85)',
+          '-webkit-backdrop-filter': 'blur(20px) saturate(180%)',
+          'backdrop-filter': 'blur(20px) saturate(180%)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.30), 0 8px 24px rgba(81, 176, 230, 0.30), 0 1px 2px rgba(81, 176, 230, 0.20)',
+          'color': '#FFFFFF',
+        },
+        '.glass-brand-subtle': {
+          'background': 'rgba(81, 176, 230, 0.18)',
+          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
+          'backdrop-filter': 'blur(20px) saturate(160%)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.30)',
+          'border': '1px solid rgba(81, 176, 230, 0.30)',
+          'color': '#1F6FA0',
+        },
+
+        /* ===== State-tinted glass (risk pills, alerts) ===== */
+        '.glass-critical': {
+          'background': 'rgba(184, 74, 74, 0.18)',
+          '-webkit-backdrop-filter': 'blur(16px) saturate(160%)',
+          'backdrop-filter': 'blur(16px) saturate(160%)',
+          'border': '1px solid rgba(184, 74, 74, 0.30)',
+          'color': '#7A2A2A',
+        },
+        '.glass-attention': {
+          'background': 'rgba(200, 155, 60, 0.18)',
+          '-webkit-backdrop-filter': 'blur(16px) saturate(160%)',
+          'backdrop-filter': 'blur(16px) saturate(160%)',
+          'border': '1px solid rgba(200, 155, 60, 0.30)',
+          'color': '#7A5E1F',
+        },
+        '.glass-positive': {
+          'background': 'rgba(74, 138, 111, 0.18)',
+          '-webkit-backdrop-filter': 'blur(16px) saturate(160%)',
+          'backdrop-filter': 'blur(16px) saturate(160%)',
+          'border': '1px solid rgba(74, 138, 111, 0.30)',
+          'color': '#2C5A45',
+        },
+
+        /* ===== Edge highlight (aluminum bezel light catch) ===== */
+        '.edge-light': {
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60)',
+        },
+        '.edge-light-strong': {
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(0, 0, 0, 0.06)',
+        },
+
+        /* ===== Risk-tier left-edge light bleed (for contaminant cards) ===== */
+        '.bleed-critical': {
+          'background': 'linear-gradient(90deg, rgba(184, 74, 74, 0.20) 0%, rgba(255, 255, 255, 0) 12%), rgba(255, 255, 255, 0.45)',
+          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
+          'backdrop-filter': 'blur(40px) saturate(180%)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
+          'border': '1px solid rgba(255, 255, 255, 0.30)',
+        },
+        '.bleed-attention': {
+          'background': 'linear-gradient(90deg, rgba(200, 155, 60, 0.20) 0%, rgba(255, 255, 255, 0) 12%), rgba(255, 255, 255, 0.45)',
+          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
+          'backdrop-filter': 'blur(40px) saturate(180%)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
+          'border': '1px solid rgba(255, 255, 255, 0.30)',
+        },
+        '.bleed-positive': {
+          'background': 'linear-gradient(90deg, rgba(74, 138, 111, 0.20) 0%, rgba(255, 255, 255, 0) 12%), rgba(255, 255, 255, 0.45)',
+          '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
+          'backdrop-filter': 'blur(40px) saturate(180%)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
+          'border': '1px solid rgba(255, 255, 255, 0.30)',
+        },
+
+        /* ===== Brand glow (active nav, focused buttons) ===== */
+        '.brand-glow': {
+          'box-shadow': '0 0 24px rgba(81, 176, 230, 0.30)',
+        },
+        '.brand-glow-strong': {
+          'box-shadow': '0 0 40px rgba(81, 176, 230, 0.45), 0 0 12px rgba(81, 176, 230, 0.30)',
+        },
+      });
+    },
+  ],
+};
