@@ -39,8 +39,8 @@ module.exports = {
         surface: {
           base:     '#FFFFFF',
           baseAlt:  '#FAFBFC',
-          /* v3.2: cards are smoky-mirror translucent white */
-          card:     'rgba(255, 255, 255, 0.55)',
+          /* v3.3: cards more translucent - 0.55 to 0.35 (very see-through, almost transparent) */
+          card:     'rgba(255, 255, 255, 0.35)',
           cardSolid:'#FFFFFF',
           /* v3.2: chrome stays opaque white (from v3.1) */
           chrome:   '#FFFFFF',
@@ -154,10 +154,10 @@ module.exports = {
       addUtilities({
         /* ===== DEFAULT CARD: smoky mirror, NO left edge, floating feel ===== */
         '.card-default': {
-          'background': 'rgba(255, 255, 255, 0.55)',
+          'background': 'rgba(255, 255, 255, 0.35)',
           '-webkit-backdrop-filter': 'blur(50px) saturate(180%)',
           'backdrop-filter': 'blur(50px) saturate(180%)',
-          'border': '1px solid rgba(255, 255, 255, 0.65)',
+          'border': '1px solid rgba(255, 255, 255, 0.55)',
           'border-radius': '16px',
           'box-shadow': '0 1px 3px rgba(15, 20, 25, 0.04), 0 8px 24px rgba(15, 20, 25, 0.06), 0 16px 48px rgba(15, 20, 25, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.85)',
         },
@@ -172,10 +172,10 @@ module.exports = {
 
         /* ===== HERO CARD: stronger floating mirror, slight blue bottom glow ===== */
         '.card-hero': {
-          'background': 'linear-gradient(180deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.50) 70%, rgba(81, 176, 230, 0.06) 100%)',
+          'background': 'linear-gradient(180deg, rgba(255, 255, 255, 0.50) 0%, rgba(255, 255, 255, 0.30) 70%, rgba(81, 176, 230, 0.06) 100%)',
           '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
           'backdrop-filter': 'blur(60px) saturate(180%)',
-          'border': '1px solid rgba(255, 255, 255, 0.75)',
+          'border': '1px solid rgba(255, 255, 255, 0.60)',
           'border-radius': '16px',
           'box-shadow': '0 2px 4px rgba(15, 20, 25, 0.04), 0 12px 32px rgba(15, 20, 25, 0.06), 0 24px 64px rgba(15, 20, 25, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
         },
