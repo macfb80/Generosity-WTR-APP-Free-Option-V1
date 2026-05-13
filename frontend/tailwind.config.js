@@ -1,15 +1,19 @@
 /* eslint-disable */
 // tailwind.config.js
-// Generosity WTR App - Aluminum + Glass design system v2.0
+// Generosity WTR App - Aluminum + Glass design system v2.1
 //
-// Background anchor: aluminum unibody Cool Gray family.
-// Cards: real frosted glass material (backdrop-filter + saturate).
-// Accent: brand blue used as emitted light, not paint.
+// v2.1 dial-in changes:
+//   - Aluminum substrate deepened from #6E7174 to #5A5E62 (more graphite)
+//   - Card opacity 45% to 60% (more presence, less ghost)
+//   - Edge highlight alpha 0.60 to 0.85 (visible bezel light catch)
+//   - Brushed-metal texture added via index.css (vertical line grain)
+//   - Brand-blue glow repositioned (handled in index.css)
+//   - FOUNDER pill quieter (handled in TrustButVerify.js if you want it, optional)
 //
 // Brand color rules locked:
 //   - Primary Blue: #51B0E6 (Pantone 2915 U)
-//   - Brand Gray: #A6A8AB (Pantone Cool Gray 6) - background reference anchor
-//   - White: #FFFFFF (on-glass content surfaces)
+//   - Brand Gray: #A6A8AB (Pantone Cool Gray 6)
+//   - White: #FFFFFF
 //
 // Typography: Barlow Condensed for display, Montserrat for body.
 
@@ -21,56 +25,50 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        /* ========== ALUMINUM BACKGROUND PALETTE ========== */
-        /* Evolution of locked Cool Gray (#A6A8AB) toward deeper aluminum tones */
-        /* so frosted glass cards have substrate to refract against.            */
+        /* ========== ALUMINUM BACKGROUND PALETTE (v2.1: deepened) ========== */
         aluminum: {
-          50:  '#F0F1F3',  /* lightest - matches locked light gray */
-          100: '#DCDFE2',  /* very light aluminum */
-          200: '#C4C7CB',  /* light aluminum */
-          300: '#A6A8AB',  /* LOCKED brand gray - Pantone Cool Gray 6 */
-          400: '#8A8D90',  /* mid aluminum */
-          500: '#6E7174',  /* deep aluminum (primary app background) */
-          600: '#54575A',  /* darker aluminum */
-          700: '#3D4043',  /* anodized graphite */
-          800: '#2A2C2E',  /* deep anodized */
-          900: '#1A1B1D',  /* near-black anodized */
+          50:  '#F0F1F3',
+          100: '#DCDFE2',
+          200: '#C4C7CB',
+          300: '#A6A8AB',  /* LOCKED Pantone Cool Gray 6 */
+          400: '#8A8D90',
+          500: '#6E7174',
+          550: '#5A5E62',  /* NEW v2.1 - primary background */
+          600: '#54575A',
+          700: '#3D4043',
+          800: '#2A2C2E',
+          900: '#1A1B1D',
         },
 
-        /* ========== SURFACES (renamed for glass aesthetic) ========== */
+        /* ========== SURFACES (v2.1: higher opacity glass) ========== */
         surface: {
-          base:    '#6E7174',  /* aluminum 500 - primary app background */
-          baseAlt: '#54575A',  /* aluminum 600 - bottom gradient stop */
-          card:    'rgba(255, 255, 255, 0.45)',  /* frosted glass card */
-          cardSolid: 'rgba(255, 255, 255, 0.85)', /* solid fallback for content */
-          inset:   'rgba(255, 255, 255, 0.20)',  /* deeper glass for inset zones */
-          chrome:  'rgba(255, 255, 255, 0.55)',  /* nav/header chrome glass */
+          base:    '#5A5E62',                          /* v2.1: deeper */
+          baseAlt: '#3D4043',                          /* bottom gradient stop deeper */
+          card:    'rgba(255, 255, 255, 0.60)',        /* v2.1: 0.45 -> 0.60 */
+          cardSolid: 'rgba(255, 255, 255, 0.90)',
+          inset:   'rgba(255, 255, 255, 0.25)',
+          chrome:  'rgba(255, 255, 255, 0.65)',        /* v2.1: 0.55 -> 0.65 */
         },
 
-        /* ========== TEXT COLORS ========== */
-        /* Dark text on glass cards (cards are translucent white-tinted,        */
-        /* so text stays dark for legibility, same as Apple Pro apps).          */
         text: {
-          primary:    '#0F1419',  /* on glass cards */
+          primary:    '#0F1419',
           secondary:  '#3D4043',
           tertiary:   '#6E7174',
           quaternary: '#8A8D90',
           onAccent:   '#FFFFFF',
-          onDark:     'rgba(255, 255, 255, 0.95)',  /* for chrome over aluminum */
+          onDark:     'rgba(255, 255, 255, 0.95)',
           onDarkMuted:'rgba(255, 255, 255, 0.65)',
         },
 
-        /* ========== BRAND ========== */
         brand: {
-          DEFAULT: '#51B0E6',  /* Pantone 2915 U */
+          DEFAULT: '#51B0E6',
           hover:   '#3DA0DA',
           pressed: '#2B8FC9',
-          tint:    'rgba(81, 176, 230, 0.15)',  /* glass tinted background */
-          glow:    'rgba(81, 176, 230, 0.35)',  /* light-source glow */
-          deep:    'rgba(81, 176, 230, 0.85)',  /* saturated tinted glass */
+          tint:    'rgba(81, 176, 230, 0.15)',
+          glow:    'rgba(81, 176, 230, 0.35)',
+          deep:    'rgba(81, 176, 230, 0.85)',
         },
 
-        /* ========== STATE COLORS (muted for refinement) ========== */
         state: {
           positive: '#4A8A6F',
           attention:'#C89B3C',
@@ -98,34 +96,28 @@ module.exports = {
 
       borderRadius: {
         pill:  '999px',
-        card:  '16px',    /* tighter than v1 (was 20px) for hardware feel */
+        card:  '16px',
         sheet: '24px',
         soft:  '12px',
       },
 
       boxShadow: {
-        /* ===== Glass material shadows ===== */
-        /* Drop shadow gives cards weight on aluminum substrate.                */
-        glass:      '0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
-        glassDeep:  '0 16px 48px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.06)',
-        glassHover: '0 12px 40px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.06)',
+        /* v2.1: stronger edge highlights, more present cards */
+        glass:      '0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        glassDeep:  '0 16px 48px rgba(0, 0, 0, 0.18), 0 2px 4px rgba(0, 0, 0, 0.08)',
+        glassHover: '0 12px 40px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.08)',
 
-        /* ===== Inset highlights (edge light catch) ===== */
-        /* These simulate the light line on aluminum bezel edges.               */
-        edge:       'inset 0 1px 0 rgba(255, 255, 255, 0.60)',
-        edgeStrong: 'inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(0, 0, 0, 0.06)',
+        edge:       'inset 0 1px 0 rgba(255, 255, 255, 0.85)',          /* v2.1: 0.60 -> 0.85 */
+        edgeStrong: 'inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.08)',
 
-        /* ===== Combined: glass card with edge highlight ===== */
-        card:       'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
-        cardHover:  'inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 12px 40px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.06)',
+        card:       'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        cardHover:  'inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 12px 40px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.08)',
 
-        /* ===== Brand light glow (active states) ===== */
         glow:       '0 0 32px rgba(81, 176, 230, 0.30), 0 0 8px rgba(81, 176, 230, 0.20)',
         glowSoft:   '0 0 24px rgba(81, 176, 230, 0.20)',
 
-        /* ===== Bottom nav specific (chrome over aluminum) ===== */
-        nav:        '0 -8px 32px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.50)',
-        header:     '0 4px 24px rgba(0, 0, 0, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.04)',
+        nav:        '0 -8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.65)',
+        header:     '0 4px 24px rgba(0, 0, 0, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.04)',
       },
 
       backdropBlur: {
@@ -166,64 +158,59 @@ module.exports = {
     },
   },
   plugins: [
-    /* Custom utilities for glass material treatment.                          */
-    /* These are first-class so the design system can be applied with one      */
-    /* class name on any element.                                              */
     function ({ addUtilities }) {
       addUtilities({
-        /* ===== Frosted glass card material ===== */
+        /* ===== Frosted glass card material (v2.1: 60% opacity) ===== */
         '.glass-card': {
-          'background': 'rgba(255, 255, 255, 0.45)',
+          'background': 'rgba(255, 255, 255, 0.60)',
           '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
           'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
-          'border': '1px solid rgba(255, 255, 255, 0.30)',
-        },
-        '.glass-card-solid': {
-          'background': 'rgba(255, 255, 255, 0.85)',
-          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
-          'backdrop-filter': 'blur(20px) saturate(160%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
           'border': '1px solid rgba(255, 255, 255, 0.40)',
         },
-        '.glass-chrome': {
-          'background': 'rgba(255, 255, 255, 0.55)',
-          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
-          'backdrop-filter': 'blur(60px) saturate(180%)',
-          'border-bottom': '1px solid rgba(255, 255, 255, 0.30)',
-        },
-        '.glass-nav': {
-          'background': 'rgba(255, 255, 255, 0.60)',
-          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
-          'backdrop-filter': 'blur(60px) saturate(180%)',
-          'border-top': '1px solid rgba(255, 255, 255, 0.40)',
-          'box-shadow': '0 -8px 32px rgba(0, 0, 0, 0.08)',
-        },
-        '.glass-inset': {
-          'background': 'rgba(255, 255, 255, 0.25)',
+        '.glass-card-solid': {
+          'background': 'rgba(255, 255, 255, 0.90)',
           '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
           'backdrop-filter': 'blur(20px) saturate(160%)',
-          'box-shadow': 'inset 0 1px 2px rgba(0, 0, 0, 0.04)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06)',
+          'border': '1px solid rgba(255, 255, 255, 0.50)',
+        },
+        '.glass-chrome': {
+          'background': 'rgba(255, 255, 255, 0.65)',
+          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
+          'backdrop-filter': 'blur(60px) saturate(180%)',
+          'border-bottom': '1px solid rgba(255, 255, 255, 0.40)',
+        },
+        '.glass-nav': {
+          'background': 'rgba(255, 255, 255, 0.70)',
+          '-webkit-backdrop-filter': 'blur(60px) saturate(180%)',
+          'backdrop-filter': 'blur(60px) saturate(180%)',
+          'border-top': '1px solid rgba(255, 255, 255, 0.50)',
+          'box-shadow': '0 -8px 32px rgba(0, 0, 0, 0.12)',
+        },
+        '.glass-inset': {
+          'background': 'rgba(255, 255, 255, 0.30)',
+          '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
+          'backdrop-filter': 'blur(20px) saturate(160%)',
+          'box-shadow': 'inset 0 1px 2px rgba(0, 0, 0, 0.06)',
         },
 
-        /* ===== Brand blue glass (CTAs) ===== */
         '.glass-brand': {
           'background': 'rgba(81, 176, 230, 0.85)',
           '-webkit-backdrop-filter': 'blur(20px) saturate(180%)',
           'backdrop-filter': 'blur(20px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.30), 0 8px 24px rgba(81, 176, 230, 0.30), 0 1px 2px rgba(81, 176, 230, 0.20)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.40), 0 8px 24px rgba(81, 176, 230, 0.30), 0 1px 2px rgba(81, 176, 230, 0.20)',
           'color': '#FFFFFF',
         },
         '.glass-brand-subtle': {
           'background': 'rgba(81, 176, 230, 0.18)',
           '-webkit-backdrop-filter': 'blur(20px) saturate(160%)',
           'backdrop-filter': 'blur(20px) saturate(160%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.30)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.40)',
           'border': '1px solid rgba(81, 176, 230, 0.30)',
           'color': '#1F6FA0',
         },
 
-        /* ===== State-tinted glass (risk pills, alerts) ===== */
         '.glass-critical': {
           'background': 'rgba(184, 74, 74, 0.18)',
           '-webkit-backdrop-filter': 'blur(16px) saturate(160%)',
@@ -246,38 +233,35 @@ module.exports = {
           'color': '#2C5A45',
         },
 
-        /* ===== Edge highlight (aluminum bezel light catch) ===== */
         '.edge-light': {
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85)',
         },
         '.edge-light-strong': {
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(0, 0, 0, 0.06)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.08)',
         },
 
-        /* ===== Risk-tier left-edge light bleed (for contaminant cards) ===== */
         '.bleed-critical': {
-          'background': 'linear-gradient(90deg, rgba(184, 74, 74, 0.20) 0%, rgba(255, 255, 255, 0) 12%), rgba(255, 255, 255, 0.45)',
+          'background': 'linear-gradient(90deg, rgba(184, 74, 74, 0.22) 0%, rgba(255, 255, 255, 0) 14%), rgba(255, 255, 255, 0.60)',
           '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
           'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
-          'border': '1px solid rgba(255, 255, 255, 0.30)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
+          'border': '1px solid rgba(255, 255, 255, 0.40)',
         },
         '.bleed-attention': {
-          'background': 'linear-gradient(90deg, rgba(200, 155, 60, 0.20) 0%, rgba(255, 255, 255, 0) 12%), rgba(255, 255, 255, 0.45)',
+          'background': 'linear-gradient(90deg, rgba(200, 155, 60, 0.22) 0%, rgba(255, 255, 255, 0) 14%), rgba(255, 255, 255, 0.60)',
           '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
           'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
-          'border': '1px solid rgba(255, 255, 255, 0.30)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
+          'border': '1px solid rgba(255, 255, 255, 0.40)',
         },
         '.bleed-positive': {
-          'background': 'linear-gradient(90deg, rgba(74, 138, 111, 0.20) 0%, rgba(255, 255, 255, 0) 12%), rgba(255, 255, 255, 0.45)',
+          'background': 'linear-gradient(90deg, rgba(74, 138, 111, 0.22) 0%, rgba(255, 255, 255, 0) 14%), rgba(255, 255, 255, 0.60)',
           '-webkit-backdrop-filter': 'blur(40px) saturate(180%)',
           'backdrop-filter': 'blur(40px) saturate(180%)',
-          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.60), 0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04)',
-          'border': '1px solid rgba(255, 255, 255, 0.30)',
+          'box-shadow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06)',
+          'border': '1px solid rgba(255, 255, 255, 0.40)',
         },
 
-        /* ===== Brand glow (active nav, focused buttons) ===== */
         '.brand-glow': {
           'box-shadow': '0 0 24px rgba(81, 176, 230, 0.30)',
         },
