@@ -186,27 +186,28 @@ const MOCK_USAGE = {
   total_liters_lifetime: 250.0, session_ml: 1_500, session_bottles: 6.0,
   tds_current: 3, tds_avg_1h: 3.2, tds_min_1h: 2, tds_max_1h: 7,
   lowest_filter_life: 89, filter_status: "s0",
-  water_quality_label: "Pure", water_quality_color: "#1E8A4C",
+  water_quality_label: "Pure", water_quality_color: "#4A8A6F",
 };
 
-// ─── BRAND COLORS (Apple Health light mode) ─────────────────────────────────
+// ─── v3.3 BRAND COLORS (muted Generosity palette) ───────────────────────────
 const C = {
-  navy: "#1A1A1A",
-  bg: "#F7F8F9",
-  card: "#FFFFFF",
-  border: "#F0F0F5",
-  borderMed: "#E8ECF0",
+  navy: "#0F1419",
+  bg: "#FFFFFF",
+  card: "rgba(255, 255, 255, 0.35)",
+  cardSolid: "#FFFFFF",
+  border: "rgba(15, 20, 25, 0.06)",
+  borderMed: "rgba(15, 20, 25, 0.08)",
   blue: "#51B0E6",
-  blueDark: "#2A8FCA",
-  gray: "#8E8E93",
-  textPrimary: "#1A1A1A",
-  textSecondary: "#8E8E93",
-  muted: "#8E8E93",
-  green: "#51B0E6",
-  yellow: "#FF9500",
-  orange: "#E07020",
-  red: "#FF3B30",
-  deepRed: "#D93025",
+  blueDark: "#1F6FA0",
+  gray: "#A6A8AB",
+  textPrimary: "#0F1419",
+  textSecondary: "#3D4043",
+  muted: "#A6A8AB",
+  green: "#4A8A6F",
+  yellow: "#C89B3C",
+  orange: "#C89B3C",
+  red: "#B84A4A",
+  deepRed: "#B84A4A",
 };
 
 // ─── NUMBER FORMATTING UTILITIES ────────────────────────────────────────────
@@ -252,7 +253,7 @@ function tdsScore(p) {
   if (p <= 500) return 25;
   return 10;
 }
-function filterColor(p) { return p >= 76 ? "#51B0E6" : p >= 40 ? "#F29423" : "#D93025"; }
+function filterColor(p) { return p >= 76 ? "#51B0E6" : p >= 40 ? "#C89B3C" : "#B84A4A"; }
 function filterStatus(p) { return p >= 76 ? "Healthy" : p >= 40 ? "Monitor" : "Replace Soon"; }
 
 // ─── FILTER METADATA (from MCU SDK — Product Key: btu00aae5ktjhacq) ─────────
@@ -263,12 +264,12 @@ const FILTERS = [
   { key: "cbpa_filtertime", slot: "cbpa", model: "GAF-100",      name: "Alkaline Filter", stage: "Stage 4", tag: "Ionic Alkaline", desc: "Ocean bioceramic beads add Ca, Mg, K, Na. Adds Ca, Mg, K, Na for optimal mineral absorption.", life: "12\u201318 mo \u00B7 900\u20131,000 gal",   chartKey: "cbpa", chartColor: C.gray  },
 ];
 
-// ─── CHART TOOLTIP (light mode) ─────────────────────────────────────────────
+// ─── CHART TOOLTIP (v3.3) ───────────────────────────────────────────────────
 function ChartTip({ active, payload, label, unit = "", extraFn }) {
   if (!active || !payload?.length) return null;
   const fmtLabel = (ts) => { try { return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch { return ts; } };
   return (
-    <div style={{ background: "#FFFFFF", border: `1px solid ${C.border}`, borderRadius: 12, padding: "8px 14px", fontSize: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+    <div style={{ background: "rgba(255, 255, 255, 0.95)", backdropFilter: "blur(30px) saturate(180%)", WebkitBackdropFilter: "blur(30px) saturate(180%)", border: `1px solid ${C.border}`, borderRadius: 12, padding: "8px 14px", fontSize: 12, boxShadow: "0 4px 16px rgba(15, 20, 25, 0.10)" }}>
       <div style={{ color: C.muted, marginBottom: 4, fontFamily: "DM Mono,monospace" }}>{fmtLabel(label)}</div>
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color || C.blue, fontWeight: 700 }}>
@@ -399,7 +400,7 @@ function ScoreRing({ score = 0, label = "WATER RETENTION", size = 200, color = "
   return (
     <div style={{ position: "relative", width: size, height: size, margin: "0 auto" }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={CX} cy={CY} r={R} fill="none" stroke="#E8ECF0" strokeWidth="12" />
+        <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth="12" />
         <circle
           cx={CX} cy={CY} r={R}
           fill="none" stroke={color} strokeWidth="12"
@@ -437,13 +438,11 @@ function ScoreRing({ score = 0, label = "WATER RETENTION", size = 200, color = "
   );
 }
 
-// ─── METRIC CARD (light mode, Oura style) ──────────────────────────────────
+// ─── METRIC CARD (v3.3 smoky mirror) ────────────────────────────────────────
 function MetricCard({ icon, label, value, sub, color = C.blue, sparkData }) {
   return (
-    <div style={{
-      background: C.card, borderRadius: 20, padding: "16px 14px",
-      boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-      border: `1px solid ${C.border}`,
+    <div className="card-default" style={{
+      padding: "16px 14px",
       position: "relative", overflow: "hidden",
     }}>
       <div style={{ position: "absolute", top: -12, right: -12, width: 50, height: 50, borderRadius: "50%", background: `${color}10`, pointerEvents: "none" }} />
@@ -474,7 +473,7 @@ function Sparkline({ data = [], color = "#51B0E6", w = 80, h = 28 }) {
   );
 }
 
-// ─── CHART SECTION (light mode) ─────────────────────────────────────────────
+// ─── CHART SECTION (v3.3) ───────────────────────────────────────────────────
 function ChartSection({ hist, chartWin, setChartWin }) {
   const [tab, setTab] = useState("tds");
   const fmtTime = ts => { try { return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch { return ""; } };
@@ -483,7 +482,7 @@ function ChartSection({ hist, chartWin, setChartWin }) {
   const tdsCol = tdsColor(lastTds);
 
   return (
-    <div style={{ background: C.card, borderRadius: 24, padding: "20px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
+    <div className="card-default" style={{ padding: "20px 16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 2 }}>Recent Readings</div>
@@ -493,7 +492,7 @@ function ChartSection({ hist, chartWin, setChartWin }) {
           {[{ v: 30, l: "30m" }, { v: 60, l: "1h" }, { v: 360, l: "6h" }].map(({ v, l }) => (
             <button key={v} onClick={() => setChartWin(v)} data-testid={`chart-win-${v}`} style={{
               padding: "5px 12px", borderRadius: 20,
-              border: `1px solid ${chartWin === v ? C.blue : C.borderMed}`,
+              border: `1px solid ${chartWin === v ? C.blue : C.border}`,
               background: chartWin === v ? `${C.blue}12` : "transparent",
               color: chartWin === v ? C.blue : C.muted,
               fontSize: 10, fontWeight: 700, cursor: "pointer", transition: "all 0.2s",
@@ -502,21 +501,21 @@ function ChartSection({ hist, chartWin, setChartWin }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", background: "#F4F5F7", borderRadius: 12, padding: 3, marginBottom: 16 }}>
+      <div style={{ display: "flex", background: "rgba(15, 20, 25, 0.04)", borderRadius: 12, padding: 3, marginBottom: 16 }}>
         {[{ id: "tds", l: "TDS Quality" }, { id: "water", l: "Water Output" }, { id: "filter", l: "Filter Life" }].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} data-testid={`chart-tab-${t.id}`} style={{
             flex: 1, padding: "8px 0", borderRadius: 10, border: "none",
-            background: tab === t.id ? C.card : "transparent",
+            background: tab === t.id ? C.cardSolid : "transparent",
             color: tab === t.id ? C.blue : C.muted,
             fontSize: 11, fontWeight: tab === t.id ? 700 : 500, cursor: "pointer",
             transition: "all 0.2s",
-            boxShadow: tab === t.id ? "0 1px 4px rgba(0,0,0,0.06)" : "none",
+            boxShadow: tab === t.id ? "0 1px 4px rgba(15, 20, 25, 0.08)" : "none",
           }}>{t.l}</button>
         ))}
       </div>
 
       {tab === "tds" && (
-        <div style={{ background: "#FAFBFC", borderRadius: 14, padding: "12px 4px 8px" }}>
+        <div style={{ background: "rgba(255, 255, 255, 0.45)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderRadius: 14, padding: "12px 4px 8px" }}>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={hist?.tds || []} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <defs>
@@ -543,7 +542,7 @@ function ChartSection({ hist, chartWin, setChartWin }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
             <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8, paddingLeft: 4 }}>Dispensed per Period (mL)</div>
-            <div style={{ background: "#FAFBFC", borderRadius: 14, padding: "12px 4px 8px" }}>
+            <div style={{ background: "rgba(255, 255, 255, 0.45)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderRadius: 14, padding: "12px 4px 8px" }}>
               <ResponsiveContainer width="100%" height={130}>
                 <BarChart data={hist?.water_per_bucket || []} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                   <XAxis dataKey="ts" tickFormatter={fmtTime} tick={axStyle} axisLine={false} tickLine={false} interval="preserveStartEnd" />
@@ -556,7 +555,7 @@ function ChartSection({ hist, chartWin, setChartWin }) {
           </div>
           <div>
             <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8, paddingLeft: 4 }}>Cumulative Total (mL)</div>
-            <div style={{ background: "#FAFBFC", borderRadius: 14, padding: "12px 4px 8px" }}>
+            <div style={{ background: "rgba(255, 255, 255, 0.45)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderRadius: 14, padding: "12px 4px 8px" }}>
               <ResponsiveContainer width="100%" height={130}>
                 <AreaChart data={hist?.water_total || []} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                   <defs>
@@ -577,7 +576,7 @@ function ChartSection({ hist, chartWin, setChartWin }) {
       )}
 
       {tab === "filter" && (
-        <div style={{ background: "#FAFBFC", borderRadius: 14, padding: "12px 4px 8px" }}>
+        <div style={{ background: "rgba(255, 255, 255, 0.45)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderRadius: 14, padding: "12px 4px 8px" }}>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <XAxis dataKey="ts" tickFormatter={fmtTime} tick={axStyle} axisLine={false} tickLine={false} interval="preserveStartEnd" />
@@ -604,19 +603,15 @@ function FilterCard({ filter, life, expanded, onToggle, onReset }) {
   const pct  = Math.min(100, life);
 
   return (
-    <div data-testid={`filter-card-${filter.model}`} style={{
-      background: C.card,
-      border: `1px solid ${expanded ? col + "40" : C.border}`,
-      borderRadius: 20, padding: 16, cursor: "pointer",
+    <div data-testid={`filter-card-${filter.model}`} className="card-default" style={{
+      padding: 16, cursor: "pointer",
       transition: "border-color 0.3s, box-shadow 0.3s",
-      boxShadow: expanded ? `0 4px 20px ${col}15` : "0 2px 12px rgba(0,0,0,0.04)",
       WebkitTapHighlightColor: "transparent",
     }}>
       <div onClick={onToggle} style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        {/* Progress ring */}
         <div style={{ position: "relative", width: 56, height: 56, flexShrink: 0 }}>
           <svg width={56} height={56} viewBox="0 0 56 56">
-            <circle cx={28} cy={28} r={22} fill="none" stroke="#E8ECF0" strokeWidth={6} />
+            <circle cx={28} cy={28} r={22} fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth={6} />
             <circle cx={28} cy={28} r={22} fill="none" stroke={col} strokeWidth={6}
               strokeLinecap="round"
               strokeDasharray={`${(pct / 100) * (2 * Math.PI * 22)} ${2 * Math.PI * 22}`}
@@ -628,15 +623,13 @@ function FilterCard({ filter, life, expanded, onToggle, onReset }) {
             <div style={{ fontSize: 14, fontWeight: 800, color: col, fontVariantNumeric: "tabular-nums" }}>{life}%</div>
           </div>
         </div>
-        {/* Labels */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
             <span style={{ fontSize: 14, fontWeight: 800, color: C.navy }}>{filter.name}</span>
             <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 10, background: `${col}12`, color: col, border: `1px solid ${col}25`, letterSpacing: 0.8, textTransform: "uppercase" }}>{stat}</span>
           </div>
           <div style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{filter.model} {"\u00B7"} {filter.tag}</div>
-          {/* Progress bar */}
-          <div style={{ marginTop: 6, height: 4, borderRadius: 2, background: "#E8ECF0", overflow: "hidden" }}>
+          <div style={{ marginTop: 6, height: 4, borderRadius: 2, background: "rgba(15, 20, 25, 0.06)", overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: col, transition: "width 1s ease, background 0.5s" }} />
           </div>
         </div>
@@ -650,7 +643,7 @@ function FilterCard({ filter, life, expanded, onToggle, onReset }) {
           </div>
           <div style={{ fontSize: 11, color: C.muted, marginBottom: 14 }}>Expected life: {filter.life}</div>
           {life < 40 && (
-            <div style={{ padding: "10px 14px", background: "#FFF0F0", border: "1px solid #FECACA", borderRadius: 12, color: C.red, fontSize: 12, fontWeight: 700, marginBottom: 12 }}>
+            <div className="card-critical" style={{ padding: "10px 14px", color: C.red, fontSize: 12, fontWeight: 700, marginBottom: 12 }}>
               {"\u26A0"} Replacement recommended
             </div>
           )}
@@ -667,11 +660,11 @@ function FilterCard({ filter, life, expanded, onToggle, onReset }) {
   );
 }
 
-// ─── OFFLINE MODAL (light mode) ──────────────────────────────────────────────
+// ─── OFFLINE MODAL (v3.3) ───────────────────────────────────────────────────
 function OfflineModal({ onDismiss }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 0 20px", zIndex: 200, backdropFilter: "blur(10px)" }}>
-      <div style={{ width: "100%", maxWidth: 480, background: C.card, borderRadius: "24px 24px 20px 20px", padding: "28px 24px 32px", border: `1px solid ${C.border}`, boxShadow: "0 -10px 40px rgba(0,0,0,0.1)" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(15, 20, 25, 0.30)", display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 0 20px", zIndex: 200, backdropFilter: "blur(10px)" }}>
+      <div className="card-default" style={{ width: "100%", maxWidth: 480, borderRadius: "24px 24px 20px 20px", padding: "28px 24px 32px", boxShadow: "0 -10px 40px rgba(15, 20, 25, 0.15)" }}>
         <div style={{ marginBottom: 8 }}><HubIcon name="signal" size={32} color={C.blue} /></div>
         <div style={{ fontSize: 20, fontWeight: 800, color: C.navy, marginBottom: 8 }}>Device Offline</div>
         <div style={{ fontSize: 13, color: C.textSecondary, lineHeight: 1.7, marginBottom: 20 }}>Your Home WTR Hub Gen-2 is not reachable. Please check:</div>
@@ -681,7 +674,7 @@ function OfflineModal({ onDismiss }) {
             <div style={{ fontSize: 13, color: C.textSecondary, lineHeight: 1.6 }}>{item}</div>
           </div>
         ))}
-        <button onClick={onDismiss} data-testid="hub-offline-dismiss" style={{ width: "100%", marginTop: 16, padding: "16px 0", background: C.blue, color: "#FFFFFF", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: `0 4px 16px ${C.blue}40` }}>
+        <button onClick={onDismiss} data-testid="hub-offline-dismiss" className="btn-brand" style={{ width: "100%", marginTop: 16, padding: "16px 0", borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>
           Got It
         </button>
       </div>
@@ -689,24 +682,21 @@ function OfflineModal({ onDismiss }) {
   );
 }
 
-// ─── CARBON IMPACT MODULE (production-ready, NaN-safe) ───────────────────────
+// ─── CARBON IMPACT MODULE (v3.3 muted greens) ───────────────────────────────
 
-// Safe number: never returns NaN/null/undefined — always a finite number
 function safeNum(val, fallback = 0) {
   const n = Number(val);
   return Number.isFinite(n) ? n : fallback;
 }
 
-// Core carbon calculation utilities
 const CARBON = {
   ML_PER_BOTTLE: 500,
-  KG_CO2_PER_BOTTLE: 0.082,  // IFEU 2022: production 0.042 + transport 0.028 + disposal 0.012
-  KG_CO2_PER_CREDIT: 1000,   // 1 Verified Carbon Credit = 1 metric ton CO2
-  KG_CO2_PER_TREE_YEAR: 21.77, // US Forest Service: avg urban tree sequesters 21.77 kg/yr
+  KG_CO2_PER_BOTTLE: 0.082,
+  KG_CO2_PER_CREDIT: 1000,
+  KG_CO2_PER_TREE_YEAR: 21.77,
   ANNUAL_GOAL_KG: 500,
 
   fromUsage(usage) {
-    // Extract total mL from multiple possible fields, NaN-safe
     const totalMl = safeNum(usage?.total_ml_lifetime)
       || safeNum(usage?.total_liters_lifetime, 0) * 1000
       || safeNum(usage?.totalGal, 0) * 3785.41;
@@ -721,7 +711,6 @@ const CARBON = {
   }
 };
 
-// Animated count-up hook
 function useCountUp(target, duration = 1200, enabled = true) {
   const [value, setValue] = useState(0);
   const prevRef = useRef(0);
@@ -737,7 +726,6 @@ function useCountUp(target, duration = 1200, enabled = true) {
     const animate = (now) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = start + diff * eased;
       setValue(Math.round(current * 10) / 10);
@@ -751,16 +739,15 @@ function useCountUp(target, duration = 1200, enabled = true) {
   return value;
 }
 
-// Animated SVG ring for carbon progress
 function CarbonRing({ pct = 0, size = 100, strokeWidth = 6 }) {
   const r = (size - strokeWidth) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (safeNum(pct) / 100) * circ;
-  const green = pct >= 50 ? "#2E7D32" : pct >= 20 ? "#66BB6A" : "#A5D6A7";
+  const green = pct >= 50 ? "#3D7058" : pct >= 20 ? "#4A8A6F" : "#7DA994";
 
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F0F1F3" strokeWidth={strokeWidth} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth={strokeWidth} />
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={green} strokeWidth={strokeWidth}
         strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
         style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)" }} />
@@ -768,7 +755,6 @@ function CarbonRing({ pct = 0, size = 100, strokeWidth = 6 }) {
   );
 }
 
-// Bottle elimination animation (shows bottles fading as count increases)
 function BottleViz({ eliminated = 0 }) {
   const maxShow = 8;
   const filled = Math.min(maxShow, eliminated);
@@ -777,17 +763,16 @@ function BottleViz({ eliminated = 0 }) {
       {Array.from({ length: maxShow }).map((_, i) => (
         <div key={i} style={{
           width: 12, height: 28, borderRadius: "3px 3px 6px 6px",
-          background: i < filled ? "#2E7D32" : "#E8ECF0",
+          background: i < filled ? "#4A8A6F" : "rgba(15, 20, 25, 0.08)",
           opacity: i < filled ? 1 : 0.3,
           transition: `all 0.4s ease ${i * 0.08}s`,
           transform: i < filled ? "scale(1)" : "scale(0.85)",
           position: "relative",
         }}>
-          {/* Cap */}
           <div style={{
             position: "absolute", top: -3, left: 2, right: 2, height: 4,
             borderRadius: "2px 2px 0 0",
-            background: i < filled ? "#1B5E20" : "#D0D4DA",
+            background: i < filled ? "#3D7058" : "rgba(15, 20, 25, 0.10)",
             transition: `all 0.4s ease ${i * 0.08}s`,
           }} />
         </div>
@@ -800,101 +785,93 @@ function CarbonImpactCard({ usage, C: colors }) {
   const data = CARBON.fromUsage(usage);
   const animBottles = useCountUp(data.bottles, 1500, data.hasData);
   const animCo2 = useCountUp(data.co2Kg, 1500, data.hasData);
-  const animCredits = useCountUp(data.credits * 10000, 1500, data.hasData); // animate in 10000ths
-  const animTrees = useCountUp(data.trees * 10, 1500, data.hasData); // animate in 10ths
+  const animCredits = useCountUp(data.credits * 10000, 1500, data.hasData);
+  const animTrees = useCountUp(data.trees * 10, 1500, data.hasData);
 
-  // Format helpers — never return NaN
   const fmtInt = (v) => String(Math.round(safeNum(v)));
   const fmtDec1 = (v) => safeNum(v).toFixed(1);
   const fmtDec4 = (v) => (safeNum(v) / 10000).toFixed(4);
   const fmtTree = (v) => (safeNum(v) / 10).toFixed(1);
 
   return (
-    <div style={{ background: colors.card, borderRadius: 24, padding: 20, marginBottom: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${colors.border}` }}>
-      {/* Header */}
+    <div className="card-default" style={{ padding: 20, marginBottom: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A8A6F" strokeWidth="2">
             <path d="M12 22V8" strokeLinecap="round"/>
-            <path d="M5 12C5 8 8 4 12 4C16 4 19 8 19 12" fill="#2E7D3220"/>
+            <path d="M5 12C5 8 8 4 12 4C16 4 19 8 19 12" fill="#4A8A6F20"/>
             <path d="M8 22H16" strokeLinecap="round"/>
           </svg>
           <span style={{ fontSize: 10, fontWeight: 700, color: colors.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>Carbon Impact</span>
         </div>
-        <div style={{ background: "#E8F5E9", color: "#2E7D32", padding: "3px 10px", borderRadius: 12, fontSize: 9, fontWeight: 700 }}>
+        <div style={{ background: "rgba(74, 138, 111, 0.10)", color: "#4A8A6F", padding: "3px 10px", borderRadius: 12, fontSize: 9, fontWeight: 700, border: "1px solid rgba(74, 138, 111, 0.20)" }}>
           {fmtDec4(animCredits)} Credits
         </div>
       </div>
 
       {!data.hasData ? (
-        /* Zero State */
         <div style={{ textAlign: "center", padding: "20px 0" }}>
           <BottleViz eliminated={0} />
           <div style={{ fontSize: 15, fontWeight: 800, color: colors.navy, marginBottom: 6 }}>Your impact starts with your first refill</div>
           <div style={{ fontSize: 11, color: colors.muted, lineHeight: 1.6, marginBottom: 16 }}>
             Every 500mL of filtered water you dispense eliminates one single-use plastic bottle and offsets 82g of CO\u2082.
           </div>
-          <div style={{ background: "#F0FFF4", borderRadius: 14, padding: "14px 16px", textAlign: "left" }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "#2E7D32", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Projected Impact</div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569", marginBottom: 4 }}>
-              <span>3 refills/day for 1 year</span><span style={{ fontWeight: 800, color: "#2E7D32" }}>1,095 bottles saved</span>
+          <div style={{ background: "rgba(74, 138, 111, 0.08)", borderRadius: 14, padding: "14px 16px", textAlign: "left", border: "1px solid rgba(74, 138, 111, 0.18)" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: "#4A8A6F", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Projected Impact</div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#3D4043", marginBottom: 4 }}>
+              <span>3 refills/day for 1 year</span><span style={{ fontWeight: 800, color: "#4A8A6F" }}>1,095 bottles saved</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569", marginBottom: 4 }}>
-              <span>CO\u2082 offset</span><span style={{ fontWeight: 800, color: "#2E7D32" }}>89.8 kg</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#3D4043", marginBottom: 4 }}>
+              <span>CO\u2082 offset</span><span style={{ fontWeight: 800, color: "#4A8A6F" }}>89.8 kg</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569" }}>
-              <span>Tree equivalent</span><span style={{ fontWeight: 800, color: "#2E7D32" }}>4.1 trees/year</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#3D4043" }}>
+              <span>Tree equivalent</span><span style={{ fontWeight: 800, color: "#4A8A6F" }}>4.1 trees/year</span>
             </div>
           </div>
         </div>
       ) : (
-        /* Active State */
         <>
-          {/* Bottle viz */}
           <BottleViz eliminated={data.bottles} />
 
-          {/* Ring + CO2 display */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: 16 }}>
             <div style={{ position: "relative" }}>
               <CarbonRing pct={data.goalPct} size={100} />
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ fontSize: 20, fontWeight: 900, color: "#2E7D32", lineHeight: 1 }}>{safeNum(data.goalPct)}%</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: "#4A8A6F", lineHeight: 1 }}>{safeNum(data.goalPct)}%</div>
                 <div style={{ fontSize: 7, color: colors.muted, marginTop: 2 }}>of goal</div>
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 32, fontWeight: 900, color: "#2E7D32", lineHeight: 1 }}>{fmtDec1(animCo2)}</div>
+              <div style={{ fontSize: 32, fontWeight: 900, color: "#4A8A6F", lineHeight: 1 }}>{fmtDec1(animCo2)}</div>
               <div style={{ fontSize: 10, color: colors.muted, marginTop: 2 }}>kg CO\u2082 saved</div>
-              <div style={{ fontSize: 9, color: "#66BB6A", marginTop: 4 }}>Annual goal: {CARBON.ANNUAL_GOAL_KG} kg</div>
+              <div style={{ fontSize: 9, color: "#7DA994", marginTop: 4 }}>Annual goal: {CARBON.ANNUAL_GOAL_KG} kg</div>
             </div>
           </div>
 
-          {/* 3-up impact cards */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
             {[
-              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="8" y="2" width="8" height="20" rx="3" fill="#2E7D3220" stroke="#2E7D32" strokeWidth="1.5"/><rect x="10" y="0" width="4" height="3" rx="1" fill="#1B5E20"/></svg>,
+              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="8" y="2" width="8" height="20" rx="3" fill="#4A8A6F20" stroke="#4A8A6F" strokeWidth="1.5"/><rect x="10" y="0" width="4" height="3" rx="1" fill="#3D7058"/></svg>,
                 value: fmtInt(animBottles), label: "Bottles Eliminated" },
-              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3L20 7V17L12 21L4 17V7L12 3Z" fill="#2E7D3220" stroke="#2E7D32" strokeWidth="1.5"/><path d="M12 12L20 7M12 12V21M12 12L4 7" stroke="#2E7D32" strokeWidth="1" strokeLinecap="round"/></svg>,
+              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3L20 7V17L12 21L4 17V7L12 3Z" fill="#4A8A6F20" stroke="#4A8A6F" strokeWidth="1.5"/><path d="M12 12L20 7M12 12V21M12 12L4 7" stroke="#4A8A6F" strokeWidth="1" strokeLinecap="round"/></svg>,
                 value: fmtDec1(animCo2), label: "kg CO\u2082 Offset" },
-              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#2E7D3220" stroke="#2E7D32" strokeWidth="1.5"/><path d="M8 12L11 15L16 9" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+              { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#4A8A6F20" stroke="#4A8A6F" strokeWidth="1.5"/><path d="M8 12L11 15L16 9" stroke="#4A8A6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
                 value: fmtDec4(animCredits), label: "Carbon Credits" },
             ].map(card => (
-              <div key={card.label} style={{ background: "#F0FFF4", borderRadius: 12, padding: "12px 8px", textAlign: "center" }}>
+              <div key={card.label} style={{ background: "rgba(74, 138, 111, 0.08)", borderRadius: 12, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(74, 138, 111, 0.15)" }}>
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>{card.icon}</div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: "#2E7D32" }}>{card.value}</div>
-                <div style={{ fontSize: 7, color: "#66BB6A", marginTop: 2 }}>{card.label}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: "#4A8A6F" }}>{card.value}</div>
+                <div style={{ fontSize: 7, color: "#7DA994", marginTop: 2 }}>{card.label}</div>
               </div>
             ))}
           </div>
 
-          {/* Tree equivalence */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 0", borderTop: `1px solid ${colors.border}` }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M12 22V14" stroke="#8B6914" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M7 14C7 10 9 6 12 4C15 6 17 10 17 14H7Z" fill="#2E7D3240" stroke="#2E7D32" strokeWidth="1.5"/>
+              <path d="M7 14C7 10 9 6 12 4C15 6 17 10 17 14H7Z" fill="#4A8A6F40" stroke="#4A8A6F" strokeWidth="1.5"/>
             </svg>
             <span style={{ fontSize: 10, color: colors.muted }}>
-              Equivalent to <span style={{ fontWeight: 800, color: "#2E7D32" }}>{fmtTree(animTrees)} trees</span> planted for one year
+              Equivalent to <span style={{ fontWeight: 800, color: "#4A8A6F" }}>{fmtTree(animTrees)} trees</span> planted for one year
             </span>
           </div>
         </>
@@ -903,13 +880,13 @@ function CarbonImpactCard({ usage, C: colors }) {
   );
 }
 
-// ─── WATER RETENTION STATE ENGINE ────────────────────────────────────────────
+// ─── WATER RETENTION STATE ENGINE (v3.3 muted) ──────────────────────────────
 function retentionState(score, filteredTds) {
   if (score >= 85 && filteredTds < 20) {
     return {
       label: "Optimal",
-      color: "#34C759",
-      colorDark: "#1A8C3A",
+      color: "#4A8A6F",
+      colorDark: "#3D7058",
       nudge: "Your filtered water is at peak purity for cellular absorption.",
     };
   }
@@ -917,14 +894,14 @@ function retentionState(score, filteredTds) {
     return {
       label: "Efficient",
       color: "#51B0E6",
-      colorDark: "#1A6FA0",
+      colorDark: "#1F6FA0",
       nudge: "Your filtered water supports efficient cellular absorption.",
     };
   }
   return {
     label: "Inefficient",
-    color: "#FF9F0A",
-    colorDark: "#A36000",
+    color: "#C89B3C",
+    colorDark: "#8F6E26",
     nudge: "Improve filter output for better cellular absorption support.",
   };
 }
@@ -934,7 +911,7 @@ export default function WTRHubScreen() {
   const { tele, usage, hist, loading, isMock, wsStatus, flushing, chartWin, setChartWin, forceWash, resetFilter } = useWtrHub();
   const [expandedFilter, setExpandedFilter] = useState(null);
   const [showOffline,    setShowOffline]    = useState(false);
-  const [openSheet,      setOpenSheet]      = useState(null); // 'incoming' | 'filtered' | 'protection' | null
+  const [openSheet,      setOpenSheet]      = useState(null);
 
   useEffect(() => {
     if (tele && !tele.online) setShowOffline(true);
@@ -946,38 +923,37 @@ export default function WTRHubScreen() {
   const score     = tdsScore(tds);
   const scoreCol  = tdsColor(tds);
 
-  // Alerts: filters below 40%
   const filterAlerts = FILTERS.filter(f => (tele?.[f.key] ?? 100) < 40);
-
-  // Sparkline data from history
   const tdsSparkData = (hist?.tds || []).slice(-20).map(p => p.value);
 
-  // Carbon impact (hooks MUST be called before any early return)
   const carbon = CARBON.fromUsage(usage);
   const animBottles = useCountUp(carbon.bottles, 1500, carbon.hasData);
   const animCo2 = useCountUp(carbon.co2Kg, 1500, carbon.hasData);
   const animTrees = useCountUp(carbon.trees * 10, 1500, carbon.hasData);
 
-  // Loading skeleton
+  // v3.3 substrate — applied to outer container so cards have something to float over
+  const v33Substrate = {
+    background: "#FFFFFF",
+    backgroundImage: "radial-gradient(ellipse 80% 60% at 80% 100%, rgba(81, 176, 230, 0.10), transparent 60%), radial-gradient(ellipse 60% 50% at 10% 0%, rgba(81, 176, 230, 0.05), transparent 60%)",
+    backgroundAttachment: "fixed",
+  };
+
   if (loading) {
     return (
-      <div data-testid="wtr-hub-screen" style={{ fontFamily: "DM Sans,-apple-system,sans-serif", background: C.bg, minHeight: "100vh", padding: "20px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
-        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&display=swap" rel="stylesheet" />
+      <div data-testid="wtr-hub-screen" style={{ fontFamily: "Montserrat, -apple-system, sans-serif", ...v33Substrate, minHeight: "100vh", padding: "20px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
         {[260, 80, 200, 100, 100, 100, 100].map((h, i) => (
-          <div key={i} style={{ height: h, background: "#E8ECF0", borderRadius: 20, animation: "hubShimmer 1.5s ease-in-out infinite", animationDelay: `${i * 0.1}s` }} />
+          <div key={i} style={{ height: h, background: "rgba(15, 20, 25, 0.06)", borderRadius: 20, animation: "hubShimmer 1.5s ease-in-out infinite", animationDelay: `${i * 0.1}s` }} />
         ))}
         <style>{`@keyframes hubShimmer { 0%,100%{opacity:.4} 50%{opacity:.7} }`}</style>
       </div>
     );
   }
 
-  // Today's liters
   const todayMl = safeNum(usage?.session_ml);
   const todayL = safeDivide(todayMl, 1000);
   const todayBottles = safeDivide(todayMl, 500);
 
-  // Dual ring shared values
-  const inTds = 342; // Demo incoming TDS — in production from WTR-ORACLE by ZIP
+  const inTds = 342;
   const outTds = tds ?? 3;
   const outScore = score;
   const outLabel = tdsLabel(outTds);
@@ -990,36 +966,26 @@ export default function WTRHubScreen() {
   const innerOff = IC * (1 - inPct);
   const reductionPct = inTds > 0 ? Math.round(((inTds - outTds) / inTds) * 1000) / 10 : 0;
 
-  // Water Retention state
   const retState = retentionState(outScore, outTds);
 
-  // Today's goal data
   const goalL = 20;
-  const currentL = todayL > 0 ? Math.min(todayL, goalL) : 15.2; // fallback demo
+  const currentL = todayL > 0 ? Math.min(todayL, goalL) : 15.2;
   const remainingL = Math.max(0, goalL - currentL);
   const goalPct = Math.round((currentL / goalL) * 100);
 
-  // Hourly TDS chart data (12 bars: 6AM through Now)
   const hourlyBars = [
-    { hour: "6AM", tds: 4 },
-    { hour: "7AM", tds: 3 },
-    { hour: "8AM", tds: 5 },
-    { hour: "9AM", tds: 4 },
-    { hour: "10AM", tds: 3 },
-    { hour: "11AM", tds: 4 },
-    { hour: "12PM", tds: 3 },
-    { hour: "1PM", tds: 5 },
-    { hour: "2PM", tds: 4 },
-    { hour: "3PM", tds: 3 },
-    { hour: "4PM", tds: 4 },
+    { hour: "6AM", tds: 4 }, { hour: "7AM", tds: 3 }, { hour: "8AM", tds: 5 },
+    { hour: "9AM", tds: 4 }, { hour: "10AM", tds: 3 }, { hour: "11AM", tds: 4 },
+    { hour: "12PM", tds: 3 }, { hour: "1PM", tds: 5 }, { hour: "2PM", tds: 4 },
+    { hour: "3PM", tds: 3 }, { hour: "4PM", tds: 4 },
     { hour: "Now", tds: outTds > 0 ? outTds : 3 },
   ];
   const maxBarTds = Math.max(...hourlyBars.map(b => b.tds), 1);
 
   return (
     <div data-testid="wtr-hub-screen" style={{
-      fontFamily: "-apple-system, SF Pro Display, Inter, sans-serif",
-      background: C.bg,
+      fontFamily: "Montserrat, -apple-system, SF Pro Display, Inter, sans-serif",
+      ...v33Substrate,
       color: C.navy,
       display: "flex",
       flexDirection: "column",
@@ -1033,37 +999,16 @@ export default function WTRHubScreen() {
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
       `}</style>
 
-      {/* ── SECTION 1: HERO ── */}
-      <div style={{
-        position: "relative",
-        width: "100%",
-        height: 280,
-        overflow: "hidden",
-      }}>
-        <img
-          src="/hwh-system-full.jpg"
-          alt="Generosity Home WTR Hub"
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-        />
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(247,248,249,0) 20%, rgba(247,248,249,0.5) 60%, #F7F8F9 100%)",
-        }} />
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(10,26,46,0.4) 0%, rgba(10,26,46,0.05) 60%, transparent 100%)",
-        }} />
+      {/* HERO — UNCHANGED per spec */}
+      <div style={{ position: "relative", width: "100%", height: 280, overflow: "hidden" }}>
+        <img src="/hwh-system-full.jpg" alt="Generosity Home WTR Hub" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0) 20%, rgba(255,255,255,0.5) 60%, #FFFFFF 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(15,20,25,0.4) 0%, rgba(15,20,25,0.05) 60%, transparent 100%)" }} />
 
-        <div style={{
-          position: "absolute", top: 0, left: 0, right: 0,
-          padding: "20px 20px 0", zIndex: 2,
-        }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "20px 20px 0", zIndex: 2 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>
-                Home WTR Hub
-              </div>
-              {/* Address line */}
+              <div style={{ fontSize: 24, fontWeight: 700, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>Home WTR Hub</div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="rgba(200,220,240,0.75)" strokeWidth="1.5">
                   <path d="M7 1C4.8 1 3 2.8 3 5c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z"/>
@@ -1071,7 +1016,6 @@ export default function WTRHubScreen() {
                 </svg>
                 <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(200,220,240,0.85)" }}>1234 Crestview Dr, Palm Desert, CA</span>
               </div>
-              {/* Stat pills */}
               <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
                 {[
                   { val: `${fmt(tds ?? 3)} ppm`, lbl: "Output TDS" },
@@ -1084,27 +1028,16 @@ export default function WTRHubScreen() {
                   </div>
                 ))}
               </div>
-              {/* Active status */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: connected || isMock ? "#1E8A4C" : "#FF9500", boxShadow: connected || isMock ? "0 0 8px rgba(30,138,76,0.8)" : "0 0 8px rgba(255,149,0,0.6)" }} />
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: connected || isMock ? "#4A8A6F" : "#C89B3C", boxShadow: connected || isMock ? "0 0 8px rgba(74,138,111,0.6)" : "0 0 8px rgba(200,155,60,0.6)" }} />
                 <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.65)" }}>
                   {connected || isMock ? 'System active' : 'System offline'}
                 </span>
               </div>
             </div>
 
-            <div style={{
-              display: "flex", alignItems: "center", gap: 5,
-              background: "rgba(255,255,255,0.15)",
-              backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-              borderRadius: 20, padding: "5px 11px",
-              border: "1px solid rgba(255,255,255,0.12)",
-            }}>
-              <div style={{
-                width: 6, height: 6, borderRadius: "50%",
-                background: isMock ? C.blue : connected ? C.green : C.muted,
-                animation: isMock ? "blinkDot 1s ease-in-out infinite" : "none",
-              }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 20, padding: "5px 11px", border: "1px solid rgba(255,255,255,0.12)" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: isMock ? C.blue : connected ? C.green : C.muted, animation: isMock ? "blinkDot 1s ease-in-out infinite" : "none" }} />
               <span style={{ fontSize: 10, fontWeight: 600, color: "#FFFFFF", letterSpacing: 0.5, textTransform: "uppercase" }}>
                 {isMock ? "DEMO MODE" : connected ? "CONNECTED" : "OFFLINE"}
               </span>
@@ -1113,64 +1046,50 @@ export default function WTRHubScreen() {
         </div>
       </div>
 
-      {/* ── CARDS ── */}
+      {/* CARDS */}
       <div style={{ padding: "0 16px 48px", display: "flex", flexDirection: "column", gap: 12, animation: "fadeInUp 0.3s ease" }}>
 
-        {/* ── CARD 1: WATER RETENTION DUAL-RING ── */}
-        <div style={{ background: C.card, borderRadius: 24, overflow: "hidden", boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
-          {/* Header */}
+        {/* CARD 1: WATER RETENTION DUAL-RING */}
+        <div className="card-default" style={{ overflow: "hidden", padding: 0 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 0" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.2, textTransform: "uppercase" }}>Water Retention</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(30,138,76,0.12)", borderRadius: 20, padding: "4px 10px" }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1E8A4C", animation: "blinkDot 1.4s ease-in-out infinite" }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#166938" }}>Live</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase" }}>Water Retention</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(74, 138, 111, 0.10)", borderRadius: 20, padding: "4px 10px", border: "1px solid rgba(74, 138, 111, 0.20)" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4A8A6F", animation: "blinkDot 1.4s ease-in-out infinite" }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#3D7058" }}>Live</span>
             </div>
           </div>
 
-          {/* Dual ring SVG */}
           <div style={{ display: "flex", justifyContent: "center", padding: "24px 20px 8px" }}>
             <div style={{ position: "relative", width: 240, height: 240 }}>
-              {/* Glow layer behind rings */}
-              <div style={{
-                position: "absolute", inset: 0,
-                background: `radial-gradient(circle at center, ${retState.color}18 0%, transparent 70%)`,
-                borderRadius: "50%",
-                pointerEvents: "none",
-              }} />
+              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at center, ${retState.color}18 0%, transparent 70%)`, borderRadius: "50%", pointerEvents: "none" }} />
               <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: "rotate(-90deg)" }}>
                 <defs>
                   <linearGradient id="outerRetG" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#51B0E6"/>
-                    <stop offset="50%" stopColor="#34C759"/>
-                    <stop offset="100%" stopColor="#1A8C3A"/>
+                    <stop offset="50%" stopColor="#4A8A6F"/>
+                    <stop offset="100%" stopColor="#3D7058"/>
                   </linearGradient>
                   <linearGradient id="innerRetG" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#FF9F0A"/>
-                    <stop offset="100%" stopColor="#FFD60A"/>
+                    <stop offset="0%" stopColor="#C89B3C"/>
+                    <stop offset="100%" stopColor="#D4B560"/>
                   </linearGradient>
                   <filter id="ringGlow">
                     <feGaussianBlur stdDeviation="3" result="blur"/>
                     <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                   </filter>
                 </defs>
-                {/* Outer track */}
-                <circle cx="120" cy="120" r={OR} fill="none" stroke="#F0F1F3" strokeWidth="18"/>
-                {/* Outer ring (filtered output) — blue to green */}
+                <circle cx="120" cy="120" r={OR} fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth="18"/>
                 <circle cx="120" cy="120" r={OR} fill="none" stroke="url(#outerRetG)" strokeWidth="18" strokeLinecap="round" strokeDasharray={OC} strokeDashoffset={outerOff} style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(0.34,1.56,0.64,1)" }} filter="url(#ringGlow)"/>
-                {/* Inner track */}
-                <circle cx="120" cy="120" r={IR} fill="none" stroke="#F0F1F3" strokeWidth="16"/>
-                {/* Inner ring (incoming source) — amber to gold */}
+                <circle cx="120" cy="120" r={IR} fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth="16"/>
                 <circle cx="120" cy="120" r={IR} fill="none" stroke="url(#innerRetG)" strokeWidth="16" strokeLinecap="round" strokeDasharray={IC} strokeDashoffset={innerOff} style={{ transition: "stroke-dashoffset 1.8s cubic-bezier(0.34,1.56,0.64,1) 0.2s" }}/>
               </svg>
-              {/* Center content */}
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ fontSize: 52, fontWeight: 800, color: "#0A1A2E", letterSpacing: -2, lineHeight: 1, fontFamily: "inherit" }}>{fmt(outScore)}</div>
+                <div style={{ fontSize: 52, fontWeight: 800, color: "#0F1419", letterSpacing: -2, lineHeight: 1, fontFamily: "inherit" }}>{fmt(outScore)}</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: retState.color, marginTop: 4, letterSpacing: 0.5 }}>{retState.label}</div>
               </div>
             </div>
           </div>
 
-          {/* Behavioral nudge */}
           <div style={{ textAlign: "center", padding: "0 24px 4px" }}>
             <span style={{ fontSize: 13, fontWeight: 500, color: C.textSecondary, lineHeight: 1.5 }}>
               {retState.label === "Efficient"
@@ -1182,51 +1101,35 @@ export default function WTRHubScreen() {
             </span>
           </div>
 
-          {/* Tappable label cards */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "12px 20px 20px" }}>
-            <button onClick={() => setOpenSheet('incoming')} style={{ backgroundColor: "rgba(174,174,178,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+            <button onClick={() => setOpenSheet('incoming')} style={{ backgroundColor: "rgba(15, 20, 25, 0.04)", borderRadius: 16, padding: "14px 16px", border: "1px solid rgba(15, 20, 25, 0.06)", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Incoming Water</span>
-                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(166,168,171,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#A6A8AB" }}>i</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: C.muted }}>Incoming Water</span>
+                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(166,168,171,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: C.muted }}>i</span>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#0A1A2E", letterSpacing: -1, lineHeight: 1 }}>{inTds}</div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
-              <div style={{ marginTop: 6 }}><span style={{ fontSize: 10, fontWeight: 700, color: "#FF9500", background: "rgba(255,149,0,0.10)", padding: "3px 8px", borderRadius: 20 }}>Moderate</span></div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#0F1419", letterSpacing: -1, lineHeight: 1 }}>{inTds}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: C.muted, marginTop: 3 }}>TDS ppm</div>
+              <div style={{ marginTop: 6 }}><span style={{ fontSize: 10, fontWeight: 700, color: "#C89B3C", background: "rgba(200, 155, 60, 0.10)", padding: "3px 8px", borderRadius: 20, border: "1px solid rgba(200, 155, 60, 0.20)" }}>Moderate</span></div>
             </button>
-            <button onClick={() => setOpenSheet('filtered')} style={{ backgroundColor: "rgba(30,138,76,0.10)", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+            <button onClick={() => setOpenSheet('filtered')} style={{ backgroundColor: "rgba(74, 138, 111, 0.08)", borderRadius: 16, padding: "14px 16px", border: "1px solid rgba(74, 138, 111, 0.18)", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#A6A8AB" }}>Filtered Output</span>
-                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(30,138,76,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#166938" }}>i</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: C.muted }}>Filtered Output</span>
+                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(74,138,111,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#3D7058" }}>i</span>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#166938", letterSpacing: -1, lineHeight: 1 }}>{fmt(outTds)}</div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: "#A6A8AB", marginTop: 3 }}>TDS ppm</div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#166938", display: "flex", alignItems: "center", gap: 3, marginTop: 6 }}><span>&#x2193;</span> {reductionPct}% reduction</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#3D7058", letterSpacing: -1, lineHeight: 1 }}>{fmt(outTds)}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: C.muted, marginTop: 3 }}>TDS ppm</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#3D7058", display: "flex", alignItems: "center", gap: 3, marginTop: 6 }}><span>&#x2193;</span> {reductionPct}% reduction</div>
             </button>
           </div>
         </div>
 
-        {/* Bottom Sheets — Incoming + Filtered */}
         <WaterInfoSheet type="incoming" isOpen={openSheet==='incoming'} onClose={() => setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={() => window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
         <WaterInfoSheet type="filtered" isOpen={openSheet==='filtered'} onClose={() => setOpenSheet(null)} incomingTds={342} filteredTds={tds ?? 3} address="1234 Crestview Dr, Palm Desert, CA" zip="92203" onNavigateToReport={() => window.dispatchEvent(new CustomEvent('wtr-navigate',{detail:{tab:'wtr-intel',scan:'92203'}}))} />
 
-        {/* ── CARD 2: DAILY PROTECTION ── */}
-        <button
-          data-testid="hub-protection-card"
-          onClick={() => setOpenSheet('protection')}
-          style={{
-            background: C.card, borderRadius: 20, padding: "18px 20px",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)", border: `1px solid ${C.border}`,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            cursor: "pointer", width: "100%", fontFamily: "inherit", textAlign: "left",
-          }}
-        >
+        {/* CARD 2: DAILY PROTECTION */}
+        <button data-testid="hub-protection-card" onClick={() => setOpenSheet('protection')} className="card-default" style={{ padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", width: "100%", fontFamily: "inherit", textAlign: "left" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 14,
-              background: "linear-gradient(135deg, #51B0E6 0%, #1A6FA0 100%)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0,
-            }}>
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg, #51B0E6 0%, #1F6FA0 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <HubIcon name="shield" size={22} color="#FFFFFF" />
             </div>
             <div>
@@ -1235,105 +1138,65 @@ export default function WTRHubScreen() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* Small protection ring — 94% */}
             <div style={{ position: "relative", width: 44, height: 44 }}>
               <svg width="44" height="44" viewBox="0 0 44 44" style={{ transform: "rotate(-90deg)" }}>
-                <circle cx="22" cy="22" r="18" fill="none" stroke="#F0F1F3" strokeWidth="5"/>
-                <circle cx="22" cy="22" r="18" fill="none" stroke="#34C759" strokeWidth="5"
-                  strokeLinecap="round"
-                  strokeDasharray={`${(94 / 100) * (2 * Math.PI * 18)} ${2 * Math.PI * 18}`}
-                  style={{ transition: "stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)" }}
-                />
+                <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth="5"/>
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#4A8A6F" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${(94 / 100) * (2 * Math.PI * 18)} ${2 * Math.PI * 18}`} style={{ transition: "stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)" }} />
               </svg>
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: "#1A8C3A" }}>94%</div>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: "#3D7058" }}>94%</div>
             </div>
             <div style={{ fontSize: 18, color: C.muted }}>{"\u203A"}</div>
           </div>
         </button>
 
-        {/* Protection Bottom Sheet */}
         {openSheet === 'protection' && (
-          <div
-            style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
-            onClick={(e) => { if (e.target === e.currentTarget) setOpenSheet(null); }}
-          >
-            <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)" }} onClick={() => setOpenSheet(null)} />
-            <div style={{
-              position: "relative", zIndex: 1,
-              width: "100%", maxWidth: 480,
-              background: C.card,
-              borderRadius: "28px 28px 0 0",
-              padding: "0 0 40px",
-              boxShadow: "0 -16px 60px rgba(0,0,0,0.18)",
-              animation: "fadeInUp 0.28s cubic-bezier(0.34,1.56,0.64,1)",
-            }}>
-              {/* Pull handle */}
+          <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={(e) => { if (e.target === e.currentTarget) setOpenSheet(null); }}>
+            <div style={{ position: "absolute", inset: 0, background: "rgba(15, 20, 25, 0.35)", backdropFilter: "blur(8px)" }} onClick={() => setOpenSheet(null)} />
+            <div className="card-default" style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480, borderRadius: "28px 28px 0 0", padding: "0 0 40px", boxShadow: "0 -16px 60px rgba(15, 20, 25, 0.20)", animation: "fadeInUp 0.28s cubic-bezier(0.34,1.56,0.64,1)" }}>
               <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 0" }}>
-                <div style={{ width: 36, height: 4, borderRadius: 2, background: "#E0E0E0" }} />
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(15, 20, 25, 0.10)" }} />
               </div>
-
-              {/* Sheet header */}
               <div style={{ padding: "20px 24px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Daily Protection Score</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: C.navy }}>Home Protected</div>
                 </div>
-                <button onClick={() => setOpenSheet(null)} style={{ background: "#F0F1F3", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, color: C.muted, fontWeight: 700 }}>
+                <button onClick={() => setOpenSheet(null)} style={{ background: "rgba(15, 20, 25, 0.06)", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 14, color: C.muted, fontWeight: 700 }}>
                   &#x2715;
                 </button>
               </div>
 
-              {/* Big score ring */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 24px 12px" }}>
                 <div style={{ position: "relative", width: 120, height: 120 }}>
                   <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#F0F1F3" strokeWidth="12"/>
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#34C759" strokeWidth="12"
-                      strokeLinecap="round"
-                      strokeDasharray={`${(94 / 100) * (2 * Math.PI * 50)} ${2 * Math.PI * 50}`}
-                      style={{ transition: "stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)" }}
-                    />
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#34C75930" strokeWidth="20"
-                      strokeLinecap="round"
-                      strokeDasharray={`${(94 / 100) * (2 * Math.PI * 50)} ${2 * Math.PI * 50}`}
-                      style={{ filter: "blur(6px)" }}
-                    />
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth="12"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#4A8A6F" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${(94 / 100) * (2 * Math.PI * 50)} ${2 * Math.PI * 50}`} style={{ transition: "stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)" }} />
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#4A8A6F30" strokeWidth="20" strokeLinecap="round" strokeDasharray={`${(94 / 100) * (2 * Math.PI * 50)} ${2 * Math.PI * 50}`} style={{ filter: "blur(6px)" }} />
                   </svg>
                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ fontSize: 34, fontWeight: 800, color: "#1A8C3A", lineHeight: 1 }}>94%</div>
+                    <div style={{ fontSize: 34, fontWeight: 800, color: "#3D7058", lineHeight: 1 }}>94%</div>
                     <div style={{ fontSize: 9, fontWeight: 600, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginTop: 3 }}>Protected</div>
                   </div>
                 </div>
               </div>
 
-              {/* Score breakdown */}
               <div style={{ padding: "0 24px" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 12 }}>Score Breakdown</div>
                 {[
-                  { label: "System Uptime", value: "100%", color: "#34C759" },
+                  { label: "System Uptime", value: "100%", color: "#4A8A6F" },
                   { label: "Filter Capacity", value: "94%", color: "#51B0E6" },
-                  { label: "Output Consistency", value: "Stable", color: "#34C759" },
-                  { label: "Contaminants Blocked", value: "14", color: "#34C759" },
+                  { label: "Output Consistency", value: "Stable", color: "#4A8A6F" },
+                  { label: "Contaminants Blocked", value: "14", color: "#4A8A6F" },
                 ].map(item => (
-                  <div key={item.label} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "13px 0", borderBottom: `1px solid ${C.border}`,
-                  }}>
+                  <div key={item.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 0", borderBottom: `1px solid ${C.border}` }}>
                     <span style={{ fontSize: 14, fontWeight: 500, color: C.navy }}>{item.label}</span>
                     <span style={{ fontSize: 14, fontWeight: 800, color: item.color }}>{item.value}</span>
                   </div>
                 ))}
               </div>
 
-              {/* CTA */}
               <div style={{ padding: "20px 24px 0" }}>
-                <button style={{
-                  width: "100%", padding: "15px 0",
-                  background: "linear-gradient(135deg, #51B0E6 0%, #1A6FA0 100%)",
-                  color: "#FFFFFF", border: "none", borderRadius: 14,
-                  fontSize: 15, fontWeight: 800, cursor: "pointer",
-                  boxShadow: "0 4px 16px rgba(81,176,230,0.35)",
-                }}>
+                <button className="btn-brand" style={{ width: "100%", padding: "15px 0", borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>
                   View Protection History
                 </button>
               </div>
@@ -1341,18 +1204,14 @@ export default function WTRHubScreen() {
           </div>
         )}
 
-        {/* ── CARD 3: OUTPUT QUALITY CHART (simple div bars) ── */}
-        <div style={{ background: C.card, borderRadius: 20, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
+        {/* CARD 3: OUTPUT QUALITY CHART */}
+        <div className="card-default" style={{ padding: "18px 20px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 3 }}>Output Quality Today</div>
               <div style={{ fontSize: 15, fontWeight: 800, color: C.navy }}>Hourly TDS consistently retained</div>
             </div>
-            <div style={{
-              background: `${C.blue}12`, border: `1px solid ${C.blue}30`,
-              borderRadius: 20, padding: "5px 12px",
-              fontSize: 10, fontWeight: 700, color: C.blue,
-            }}>24h</div>
+            <div style={{ background: `${C.blue}12`, border: `1px solid ${C.blue}30`, borderRadius: 20, padding: "5px 12px", fontSize: 10, fontWeight: 700, color: C.blue }}>24h</div>
           </div>
           <div style={{ marginTop: 18, display: "flex", alignItems: "flex-end", gap: 5, height: 72 }}>
             {hourlyBars.map((bar, i) => {
@@ -1360,22 +1219,15 @@ export default function WTRHubScreen() {
               const barHeight = Math.max(20, Math.round((bar.tds / (maxBarTds + 2)) * 64));
               return (
                 <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <div style={{
-                    width: "100%", height: barHeight, borderRadius: 4,
-                    background: isNow
-                      ? "linear-gradient(180deg, #34C759 0%, #1A8C3A 100%)"
-                      : `${C.blue}60`,
-                    transition: "height 0.8s cubic-bezier(0.34,1.56,0.64,1)",
-                    boxShadow: isNow ? "0 2px 8px rgba(52,199,89,0.4)" : "none",
-                  }} />
-                  <div style={{ fontSize: 7, fontWeight: isNow ? 800 : 500, color: isNow ? "#1A8C3A" : C.muted, letterSpacing: 0, whiteSpace: "nowrap" }}>{bar.hour}</div>
+                  <div style={{ width: "100%", height: barHeight, borderRadius: 4, background: isNow ? "linear-gradient(180deg, #4A8A6F 0%, #3D7058 100%)" : `${C.blue}60`, transition: "height 0.8s cubic-bezier(0.34,1.56,0.64,1)", boxShadow: isNow ? "0 2px 8px rgba(74,138,111,0.4)" : "none" }} />
+                  <div style={{ fontSize: 7, fontWeight: isNow ? 800 : 500, color: isNow ? "#3D7058" : C.muted, letterSpacing: 0, whiteSpace: "nowrap" }}>{bar.hour}</div>
                 </div>
               );
             })}
           </div>
           <div style={{ marginTop: 10, display: "flex", gap: 14, alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <div style={{ width: 8, height: 8, borderRadius: 2, background: "#34C759" }} />
+              <div style={{ width: 8, height: 8, borderRadius: 2, background: "#4A8A6F" }} />
               <span style={{ fontSize: 10, color: C.muted }}>Now ({outTds > 0 ? outTds : 3} ppm)</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -1385,143 +1237,82 @@ export default function WTRHubScreen() {
           </div>
         </div>
 
-        {/* ── CARD 4: TODAY'S FILTERED WATER GOAL ── */}
-        <div style={{ background: C.card, borderRadius: 20, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: `1px solid ${C.border}` }}>
+        {/* CARD 4: TODAY'S FILTERED WATER GOAL */}
+        <div className="card-default" style={{ padding: "18px 20px" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 12 }}>Today's Filtered Water</div>
-
-          {/* Large number */}
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 44, fontWeight: 800, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1.5, lineHeight: 1 }}>
-              {currentL.toFixed(1)}
-            </span>
+            <span style={{ fontSize: 44, fontWeight: 800, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1.5, lineHeight: 1 }}>{currentL.toFixed(1)}</span>
             <span style={{ fontSize: 20, fontWeight: 600, color: C.muted }}>/ {goalL} L</span>
           </div>
           <div style={{ fontSize: 13, color: C.muted, marginBottom: 16 }}>
             {remainingL > 0 ? `${remainingL.toFixed(1)} L to reach your daily goal` : "Daily goal reached!"}
           </div>
-
-          {/* Progress bar */}
-          <div style={{ height: 10, borderRadius: 5, background: "#F0F1F3", overflow: "hidden", marginBottom: 10 }}>
-            <div style={{
-              height: "100%", borderRadius: 5,
-              width: `${Math.min(100, goalPct)}%`,
-              background: "linear-gradient(90deg, #51B0E6 0%, #34C759 100%)",
-              transition: "width 1.2s cubic-bezier(0.34,1.56,0.64,1)",
-            }} />
+          <div style={{ height: 10, borderRadius: 5, background: "rgba(15, 20, 25, 0.06)", overflow: "hidden", marginBottom: 10 }}>
+            <div style={{ height: "100%", borderRadius: 5, width: `${Math.min(100, goalPct)}%`, background: "linear-gradient(90deg, #51B0E6 0%, #4A8A6F 100%)", transition: "width 1.2s cubic-bezier(0.34,1.56,0.64,1)" }} />
           </div>
-
-          {/* Footer scale */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, color: C.muted, fontWeight: 600 }}>
             <span>0 L</span>
-            <span style={{ color: "#34C759", fontWeight: 700 }}>{currentL.toFixed(1)} L now</span>
+            <span style={{ color: "#4A8A6F", fontWeight: 700 }}>{currentL.toFixed(1)} L now</span>
             <span>{goalL} L goal</span>
           </div>
         </div>
 
-        {/* ── CARD 5: TODAY ── */}
-        <div style={{
-          background: C.card, borderRadius: 20, padding: 20,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>
-            Today
-          </div>
-
+        {/* CARD 5: TODAY */}
+        <div className="card-default" style={{ padding: 20 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>Today</div>
           {todayMl > 0 ? (
             <>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 40, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>
-                  {fmt(todayL, 1)}
-                </span>
+                <span style={{ fontSize: 40, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>{fmt(todayL, 1)}</span>
                 <span style={{ fontSize: 18, fontWeight: 500, color: C.gray }}>L</span>
               </div>
-              <div style={{ fontSize: 13, color: C.gray, marginTop: 6 }}>
-                {fmt(todayBottles)} bottles
-              </div>
+              <div style={{ fontSize: 13, color: C.gray, marginTop: 6 }}>{fmt(todayBottles)} bottles</div>
             </>
           ) : (
             <>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 40, fontWeight: 700, color: "#D1D5DB", fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>
-                  0
-                </span>
-                <span style={{ fontSize: 18, fontWeight: 500, color: "#D1D5DB" }}>L</span>
+                <span style={{ fontSize: 40, fontWeight: 700, color: "rgba(15, 20, 25, 0.20)", fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>0</span>
+                <span style={{ fontSize: 18, fontWeight: 500, color: "rgba(15, 20, 25, 0.20)" }}>L</span>
               </div>
-              <div style={{ fontSize: 13, color: C.gray, marginTop: 6 }}>
-                Start dispensing to track
-              </div>
+              <div style={{ fontSize: 13, color: C.gray, marginTop: 6 }}>Start dispensing to track</div>
             </>
           )}
         </div>
 
-        {/* ── CARD 6: YOUR IMPACT ── */}
-        <div style={{
-          background: C.card, borderRadius: 20, padding: 20,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
-        }}>
-          {/* Header with mini ring */}
+        {/* CARD 6: YOUR IMPACT */}
+        <div className="card-default" style={{ padding: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase" }}>
-              Your Impact
-            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase" }}>Your Impact</div>
             <div style={{ position: "relative", width: 40, height: 40 }}>
               <CarbonRing pct={carbon.goalPct} size={40} strokeWidth={4} />
-              <div style={{
-                position: "absolute", inset: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 9, fontWeight: 700, color: "#2E7D32",
-              }}>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#4A8A6F" }}>
                 {fmt(carbon.goalPct)}%
               </div>
             </div>
           </div>
-
           {carbon.hasData ? (
             <>
-              {/* Hero number */}
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{ fontSize: 48, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>
-                  {fmt(animBottles)}
-                </div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 6 }}>
-                  Bottles Saved
-                </div>
+                <div style={{ fontSize: 48, fontWeight: 700, color: C.navy, fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1 }}>{fmt(animBottles)}</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 6 }}>Bottles Saved</div>
               </div>
-
-              {/* Secondary stats */}
               <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14, display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{ fontSize: 13, color: C.textSecondary }}>
-                  {fmt(safeNum(animCo2), 1)} kg CO{"\u2082"} avoided
-                </div>
-                <div style={{ fontSize: 13, color: C.textSecondary }}>
-                  {fmt(safeNum(animTrees) / 10, 1)} trees this year
-                </div>
+                <div style={{ fontSize: 13, color: C.textSecondary }}>{fmt(safeNum(animCo2), 1)} kg CO{"\u2082"} avoided</div>
+                <div style={{ fontSize: 13, color: C.textSecondary }}>{fmt(safeNum(animTrees) / 10, 1)} trees this year</div>
               </div>
             </>
           ) : (
             <div style={{ textAlign: "center", padding: "8px 0" }}>
-              <div style={{ fontSize: 48, fontWeight: 700, color: "#D1D5DB", letterSpacing: -1, lineHeight: 1 }}>
-                0
-              </div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 6 }}>
-                Bottles Saved
-              </div>
-              <div style={{ fontSize: 12, color: C.gray, marginTop: 12, lineHeight: 1.6 }}>
-                Every 500 mL of filtered water you dispense eliminates one single-use plastic bottle.
-              </div>
+              <div style={{ fontSize: 48, fontWeight: 700, color: "rgba(15, 20, 25, 0.20)", letterSpacing: -1, lineHeight: 1 }}>0</div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.gray, marginTop: 6 }}>Bottles Saved</div>
+              <div style={{ fontSize: 12, color: C.gray, marginTop: 12, lineHeight: 1.6 }}>Every 500 mL of filtered water you dispense eliminates one single-use plastic bottle.</div>
             </div>
           )}
         </div>
 
-        {/* ── CARD 7: FILTER HEALTH ── */}
-        <div data-testid="hub-filter-section" style={{
-          background: C.card, borderRadius: 20, padding: 20,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: `1px solid ${C.border}`,
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>
-            Filter Health
-          </div>
-
+        {/* CARD 7: FILTER HEALTH */}
+        <div data-testid="hub-filter-section" className="card-default" style={{ padding: 20 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.gray, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>Filter Health</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {FILTERS.map(f => {
               const life = safeNum(tele?.[f.key], 0);
@@ -1529,26 +1320,15 @@ export default function WTRHubScreen() {
               const col = filterColor(life);
               return (
                 <div key={f.key}>
-                  {/* Name + percentage + dot */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: C.navy }}>{f.name}</span>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: C.navy, fontVariantNumeric: "tabular-nums" }}>
-                        {fmt(life)}%
-                      </span>
-                      <div style={{
-                        width: 8, height: 8, borderRadius: "50%", background: col,
-                        transition: "background 0.5s",
-                      }} />
+                      <span style={{ fontSize: 14, fontWeight: 600, color: C.navy, fontVariantNumeric: "tabular-nums" }}>{fmt(life)}%</span>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: col, transition: "background 0.5s" }} />
                     </div>
                   </div>
-                  {/* Progress bar */}
-                  <div style={{ height: 6, borderRadius: 3, background: "#F0F0F5", overflow: "hidden" }}>
-                    <div style={{
-                      height: "100%", width: `${pct}%`, borderRadius: 3,
-                      background: col,
-                      transition: "width 1s ease, background 0.5s",
-                    }} />
+                  <div style={{ height: 6, borderRadius: 3, background: "rgba(15, 20, 25, 0.06)", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: col, transition: "width 1s ease, background 0.5s" }} />
                   </div>
                 </div>
               );
@@ -1556,15 +1336,12 @@ export default function WTRHubScreen() {
           </div>
         </div>
 
-        {/* ── CARD 8: WHAT GETS REMOVED ── */}
-        <div style={{ background: "#FFFFFF", borderRadius: 20, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)", border: "1px solid #F0F0F5" }}>
-          {/* Header */}
+        {/* CARD 8: WHAT GETS REMOVED — NAVY HEADER PRESERVED PER SPEC */}
+        <div className="card-default" style={{ overflow: "hidden", padding: 0 }}>
           <div style={{ background: "#0A1A2E", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF" }}>What Gets Removed</div>
             <div style={{ fontSize: 9, fontWeight: 600, color: "#51B0E6", letterSpacing: 0.5 }}>YOUR HOME WATER</div>
           </div>
-
-          {/* Contaminant rows */}
           <div style={{ padding: "0 18px" }}>
             {[
               { name: "PFAS (Total)", category: "Forever Chemicals", level: "2.1 ppt", removal: "99%+" },
@@ -1574,60 +1351,39 @@ export default function WTRHubScreen() {
               { name: "Arsenic", category: "Heavy Metal", level: "2.8 ppb", removal: "99%+" },
               { name: "Microplastics", category: "Emerging Contaminant", level: "Detected", removal: "99%+" },
             ].map((c, i, arr) => (
-              <div key={c.name} style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "14px 0",
-                borderBottom: i < arr.length - 1 ? "1px solid #F0F0F5" : "none",
-              }}>
+              <div key={c.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : "none" }}>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A1A" }}>{c.name}</div>
-                  <div style={{ fontSize: 10, color: "#8E8E93", marginTop: 2 }}>{c.category}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0F1419" }}>{c.name}</div>
+                  <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>{c.category}</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#FF6B6B" }}>{c.level}</span>
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, color: "#51B0E6",
-                    background: "#F0FFF4", padding: "3px 8px", borderRadius: 6,
-                  }}>&#x2713; {c.removal}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#B84A4A" }}>{c.level}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#3D7058", background: "rgba(74, 138, 111, 0.10)", padding: "3px 8px", borderRadius: 6, border: "1px solid rgba(74, 138, 111, 0.20)" }}>&#x2713; {c.removal}</span>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Filtration stage diagram */}
-          <div style={{ padding: "16px 18px", borderTop: "1px solid #F0F0F5", background: "#FAFBFC" }}>
+          <div style={{ padding: "16px 18px", borderTop: `1px solid ${C.border}`, background: "rgba(255, 255, 255, 0.35)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginBottom: 10 }}>
               {[
-                { label: "TAP", color: "#E8ECF0", text: "#8E8E93" },
+                { label: "TAP", color: "rgba(15, 20, 25, 0.10)", text: "#A6A8AB" },
                 { label: "CP", color: "#51B0E6", text: "#FFF" },
-                { label: "RO", color: "#2A8FCA", text: "#FFF" },
-                { label: "TC", color: "#FF9500", text: "#FFF" },
+                { label: "RO", color: "#1F6FA0", text: "#FFF" },
+                { label: "TC", color: "#C89B3C", text: "#FFF" },
                 { label: "ALK", color: "#8B6FC0", text: "#FFF" },
-                { label: "PURE", color: "#51B0E6", text: "#FFF" },
+                { label: "PURE", color: "#4A8A6F", text: "#FFF" },
               ].map((s, i, arr) => (
                 <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: "50%",
-                    background: s.color, display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 8, fontWeight: 800, color: s.text, letterSpacing: 0.3,
-                  }}>{s.label}</div>
-                  {i < arr.length - 1 && <span style={{ color: "#D0D4DA", fontSize: 10 }}>&#x2192;</span>}
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: s.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800, color: s.text, letterSpacing: 0.3 }}>{s.label}</div>
+                  {i < arr.length - 1 && <span style={{ color: "rgba(15, 20, 25, 0.20)", fontSize: 10 }}>&#x2192;</span>}
                 </div>
               ))}
             </div>
-            {/* Stats row */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6 }}>
-              {[
-                ["1,000+", "Contaminants"],
-                ["99%+", "PFAS"],
-                ["99%+", "Heavy Metals"],
-                ["Ca+Mg", "Remineralized"],
-              ].map(([val, label]) => (
-                <div key={label} style={{
-                  textAlign: "center", background: "#EFF8FF", borderRadius: 8, padding: "8px 4px",
-                }}>
+              {[["1,000+", "Contaminants"], ["99%+", "PFAS"], ["99%+", "Heavy Metals"], ["Ca+Mg", "Remineralized"]].map(([val, label]) => (
+                <div key={label} style={{ textAlign: "center", background: "rgba(81, 176, 230, 0.10)", borderRadius: 8, padding: "8px 4px", border: "1px solid rgba(81, 176, 230, 0.20)" }}>
                   <div style={{ fontSize: 13, fontWeight: 800, color: "#51B0E6" }}>{val}</div>
-                  <div style={{ fontSize: 7, color: "#8E8E93", marginTop: 2 }}>{label}</div>
+                  <div style={{ fontSize: 7, color: C.muted, marginTop: 2 }}>{label}</div>
                 </div>
               ))}
             </div>
@@ -1636,7 +1392,6 @@ export default function WTRHubScreen() {
 
       </div>
 
-      {/* Offline Modal */}
       {showOffline && <OfflineModal onDismiss={() => setShowOffline(false)} />}
     </div>
   );
