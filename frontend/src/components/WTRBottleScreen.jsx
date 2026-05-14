@@ -667,7 +667,10 @@ export default function WTRBottleScreen() {
   return (
     <div data-testid="wtr-btl-screen" style={{
       fontFamily:              "Montserrat, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
-      background:              "transparent",
+      // v3.3 substrate: white + radial brand-blue glow (matches body for cohesion when parent doesn't bleed through)
+      background:              "#FFFFFF",
+      backgroundImage:         "radial-gradient(ellipse 80% 60% at 80% 100%, rgba(81, 176, 230, 0.10), transparent 60%), radial-gradient(ellipse 60% 50% at 10% 0%, rgba(81, 176, 230, 0.05), transparent 60%)",
+      backgroundAttachment:    "fixed",
       minHeight:               "100%",
       color:                   "#0F1419",
       display:                 "flex",
