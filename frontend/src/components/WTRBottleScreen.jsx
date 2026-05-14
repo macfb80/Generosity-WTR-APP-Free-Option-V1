@@ -108,11 +108,11 @@ function parseInfo(buf) {
 
 function tdsColor(ppm) {
   if (ppm == null) return "#51B0E6";
-  if (ppm <=  35)  return "#34C759";
+  if (ppm <=  35)  return "#4A8A6F";
   if (ppm <= 150)  return "#51B0E6";
-  if (ppm <= 300)  return "#FF9500";
-  if (ppm <= 500)  return "#FF3B30";
-  return "#D93025";
+  if (ppm <= 300)  return "#C89B3C";
+  if (ppm <= 500)  return "#B84A4A";
+  return "#B84A4A";
 }
 
 function tdsLabel(ppm) {
@@ -176,7 +176,7 @@ function ScoreRing({ score = 0, label = "WATER QUALITY", size = 200, color = "#5
     <div style={{ position: "relative", width: size, height: size, margin: "0 auto" }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Track */}
-        <circle cx={CX} cy={CY} r={R} fill="none" stroke="#E8ECF0" strokeWidth="12" />
+        <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth="12" />
         {/* Fill */}
         <circle
           cx={CX} cy={CY} r={R}
@@ -210,7 +210,7 @@ function ScoreRing({ score = 0, label = "WATER QUALITY", size = 200, color = "#5
         <div style={{
           fontSize: size > 160 ? 52 : 36,
           fontWeight: 800,
-          color: "#0A1A2E",
+          color: "#0F1419",
           fontVariantNumeric: "tabular-nums",
           letterSpacing: -2,
           lineHeight: 1,
@@ -224,7 +224,7 @@ function ScoreRing({ score = 0, label = "WATER QUALITY", size = 200, color = "#5
           {label}
         </div>
         {subtitle && (
-          <div style={{ fontSize: 12, fontWeight: 500, color: "#6B7280", marginTop: 4 }}>
+          <div style={{ fontSize: 12, fontWeight: 500, color: "#3D4043", marginTop: 4 }}>
             {subtitle}
           </div>
         )}
@@ -247,11 +247,11 @@ function HydrationRing({ consumePct = 0, dailyML = 0, goalML = 2000 }) {
   return (
     <div style={{ position: "relative", width: SIZE, height: SIZE }}>
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
-        <circle cx={SIZE/2} cy={SIZE/2} r={R} fill="none" stroke="#E8ECF0" strokeWidth="9" />
+        <circle cx={SIZE/2} cy={SIZE/2} r={R} fill="none" stroke="rgba(15, 20, 25, 0.06)" strokeWidth="9" />
         <circle
           cx={SIZE/2} cy={SIZE/2} r={R}
           fill="none"
-          stroke={isDone ? "#34C759" : "#51B0E6"}
+          stroke={isDone ? "#4A8A6F" : "#51B0E6"}
           strokeWidth="9"
           strokeLinecap="round"
           strokeDasharray={`${fill} ${circ}`}
@@ -264,7 +264,7 @@ function HydrationRing({ consumePct = 0, dailyML = 0, goalML = 2000 }) {
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
       }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: isDone ? "#34C759" : "#51B0E6" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: isDone ? "#4A8A6F" : "#51B0E6" }}>
           {consumePct}%
         </div>
         <div style={{ fontSize: 9, color: "#A6A8AB", fontWeight: 500 }}>
@@ -307,13 +307,13 @@ function TimelineChart({ data = [], w = 320, h = 100 }) {
           x={pad} y={Math.min(yFor(35), yFor(0))}
           width={w - pad * 2}
           height={Math.abs(yFor(35) - yFor(Math.max(0, min)))}
-          fill="#34C75910" rx="4"
+          fill="rgba(74, 138, 111, 0.10)" rx="4"
         />
       )}
       {/* Grid lines */}
       {[0.25, 0.5, 0.75].map(pct => (
         <line key={pct} x1={pad} y1={pad + pct * (h - pad * 2)} x2={w - pad} y2={pad + pct * (h - pad * 2)}
-              stroke="#E8ECF0" strokeWidth="1" strokeDasharray="4 4" />
+              stroke="rgba(15, 20, 25, 0.06)" strokeWidth="1" strokeDasharray="4 4" />
       ))}
       {/* Area fill */}
       <polygon
@@ -349,7 +349,7 @@ function TimelineChart({ data = [], w = 320, h = 100 }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// METRIC CARD (light Oura style)
+// METRIC CARD (v3.3 smoky mirror)
 // ═══════════════════════════════════════════════════════════════
 
 function MetricCard({ icon, label, value, unit, color = "#51B0E6", sublabel, hist = [] }) {
@@ -357,23 +357,22 @@ function MetricCard({ icon, label, value, unit, color = "#51B0E6", sublabel, his
   const trendIcon = trend > 0.05 ? "\u2191" : trend < -0.05 ? "\u2193" : null;
 
   return (
-    <div style={{
-      background: "#FFFFFF",
-      borderRadius: 20,
-      padding: "18px 16px 14px",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03)",
-      border: "1px solid #F0F1F3",
-      display: "flex",
-      flexDirection: "column",
-      gap: 0,
-      position: "relative",
-      overflow: "hidden",
-    }}>
+    <div
+      className="card-default"
+      style={{
+        padding: "18px 16px 14px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 0,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* Subtle corner accent */}
       <div style={{
         position: "absolute", top: -20, right: -20,
         width: 60, height: 60, borderRadius: "50%",
-        background: `${color}08`, pointerEvents: "none",
+        background: `${color}10`, pointerEvents: "none",
       }} />
 
       {/* Label */}
@@ -385,7 +384,7 @@ function MetricCard({ icon, label, value, unit, color = "#51B0E6", sublabel, his
           </span>
         </div>
         {trendIcon && (
-          <span style={{ fontSize: 13, color: trend > 0 ? "#FF9500" : "#51B0E6", fontWeight: 700 }}>
+          <span style={{ fontSize: 13, color: trend > 0 ? "#C89B3C" : "#51B0E6", fontWeight: 700 }}>
             {trendIcon}
           </span>
         )}
@@ -394,7 +393,7 @@ function MetricCard({ icon, label, value, unit, color = "#51B0E6", sublabel, his
       {/* Value */}
       <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
         <span style={{
-          fontSize: 28, fontWeight: 800, color: value != null ? "#0A1A2E" : "#D1D5DB",
+          fontSize: 28, fontWeight: 800, color: value != null ? "#0F1419" : "#A6A8AB",
           fontVariantNumeric: "tabular-nums", letterSpacing: -1, lineHeight: 1,
           transition: "color 0.3s",
         }}>
@@ -409,7 +408,7 @@ function MetricCard({ icon, label, value, unit, color = "#51B0E6", sublabel, his
       {sublabel && (
         <div style={{
           fontSize: 10, fontWeight: 600, marginBottom: 4,
-          color: sublabel.startsWith("\u26A0") ? "#FF9500" : sublabel.startsWith("\u2713") ? "#34C759" : "#A6A8AB",
+          color: sublabel.startsWith("\u26A0") ? "#C89B3C" : sublabel.startsWith("\u2713") ? "#4A8A6F" : "#A6A8AB",
         }}>
           {sublabel}
         </div>
@@ -653,8 +652,8 @@ export default function WTRBottleScreen() {
   const volColor = () => {
     if (!volVal) return "#51B0E6";
     const v = parseFloat(volVal);
-    if (v < 100) return "#FF9500";
-    return "#34C759";
+    if (v < 100) return "#C89B3C";
+    return "#4A8A6F";
   };
 
   const isLive = ble === "connected" || tele !== null;
@@ -667,10 +666,10 @@ export default function WTRBottleScreen() {
 
   return (
     <div data-testid="wtr-btl-screen" style={{
-      fontFamily:              "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Nunito', 'Figtree', 'Manrope', sans-serif",
-      background:              "#F8F9FB",
+      fontFamily:              "Montserrat, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+      background:              "transparent",
       minHeight:               "100%",
-      color:                   "#0A1A2E",
+      color:                   "#0F1419",
       display:                 "flex",
       flexDirection:           "column",
       maxWidth:                480,
@@ -707,11 +706,11 @@ export default function WTRBottleScreen() {
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15, 20, 25, 0.10); border-radius: 2px; }
       `}</style>
 
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 1: HERO VISUAL
+          SECTION 1: HERO VISUAL (UNCHANGED per spec - keep brand moment)
           ═══════════════════════════════════════════════════════════ */}
       <div style={{
         position: "relative",
@@ -731,15 +730,15 @@ export default function WTRBottleScreen() {
             display: "block",
           }}
         />
-        {/* Gradient overlay to white */}
+        {/* Gradient overlay to white substrate */}
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(248,249,251,0) 30%, rgba(248,249,251,0.7) 70%, #F8F9FB 100%)",
+          background: "linear-gradient(180deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.7) 70%, #FFFFFF 100%)",
         }} />
         {/* Dark overlay for text readability */}
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(10,26,46,0.5) 0%, rgba(10,26,46,0.1) 50%, transparent 100%)",
+          background: "linear-gradient(180deg, rgba(15,20,25,0.5) 0%, rgba(15,20,25,0.1) 50%, transparent 100%)",
         }} />
 
         {/* Title overlay */}
@@ -761,7 +760,7 @@ export default function WTRBottleScreen() {
             {/* Status pill */}
             <div style={{
               display: "flex", alignItems: "center", gap: 6,
-              background: isDemo ? "rgba(81,176,230,0.2)" : ble === "connected" ? "rgba(52,199,89,0.2)" : "rgba(255,255,255,0.15)",
+              background: isDemo ? "rgba(81,176,230,0.2)" : ble === "connected" ? "rgba(74,138,111,0.2)" : "rgba(255,255,255,0.15)",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               borderRadius: 20, padding: "6px 12px",
@@ -769,7 +768,7 @@ export default function WTRBottleScreen() {
             }}>
               <div style={{
                 width: 6, height: 6, borderRadius: "50%",
-                background: isDemo ? "#51B0E6" : ble === "connected" ? "#34C759" : "#A6A8AB",
+                background: isDemo ? "#51B0E6" : ble === "connected" ? "#4A8A6F" : "#A6A8AB",
                 animation: (isDemo || ble === "scanning") ? "blinkDot 1s ease-in-out infinite" : "none",
               }} />
               <span style={{ fontSize: 10, fontWeight: 700, color: "#FFFFFF", letterSpacing: 0.5, textTransform: "uppercase" }}>
@@ -786,17 +785,17 @@ export default function WTRBottleScreen() {
         }}>
           {ble === "connected" ? (
             <button onClick={disconnect} data-testid="disconnect-btn" style={{
-              flex: 1, padding: "12px 0", background: "#FFFFFF", color: "#FF3B30",
-              border: "1px solid #FFE5E5", borderRadius: 14, fontSize: 13, fontWeight: 700,
-              cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              flex: 1, padding: "12px 0", background: "#FFFFFF", color: "#B84A4A",
+              border: "1px solid rgba(184, 74, 74, 0.18)", borderRadius: 14, fontSize: 13, fontWeight: 700,
+              cursor: "pointer", boxShadow: "0 2px 8px rgba(15, 20, 25, 0.08)",
             }}>
               Disconnect
             </button>
           ) : (
             <>
-              <button onClick={connect} disabled={ble === "scanning"} data-testid="connect-wtr-btl-btn" style={{
+              <button onClick={connect} disabled={ble === "scanning"} data-testid="connect-wtr-btl-btn" className="btn-brand" style={{
                 flex: 1, padding: "12px 0",
-                background: ble === "scanning" ? "#E8ECF0" : "#51B0E6",
+                background: ble === "scanning" ? "rgba(15, 20, 25, 0.06)" : "#51B0E6",
                 color: ble === "scanning" ? "#A6A8AB" : "#FFFFFF",
                 border: "none", borderRadius: 14, fontSize: 13, fontWeight: 700,
                 cursor: ble === "scanning" ? "not-allowed" : "pointer",
@@ -807,11 +806,11 @@ export default function WTRBottleScreen() {
               {!isLive && (
                 <button onClick={demoActive ? stopDemo : startDemo} style={{
                   padding: "12px 20px",
-                  background: demoActive ? "#FFF3E0" : "#FFFFFF",
-                  color: demoActive ? "#FF9500" : "#0A1A2E",
-                  border: demoActive ? "1px solid #FFD699" : "1px solid #E8ECF0",
+                  background: demoActive ? "rgba(200, 155, 60, 0.10)" : "#FFFFFF",
+                  color: demoActive ? "#C89B3C" : "#0F1419",
+                  border: demoActive ? "1px solid rgba(200, 155, 60, 0.25)" : "1px solid rgba(15, 20, 25, 0.06)",
                   borderRadius: 14, fontSize: 13, fontWeight: 700,
-                  cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  cursor: "pointer", boxShadow: "0 2px 8px rgba(15, 20, 25, 0.08)",
                 }}>
                   {demoActive ? "Stop Demo" : "Demo"}
                 </button>
@@ -823,11 +822,10 @@ export default function WTRBottleScreen() {
 
       {/* Error message */}
       {errMsg && (
-        <div data-testid="ble-error-msg" style={{
-          margin: "0 16px 8px", background: "#FFF0F0", border: "1px solid #FECACA",
-          borderRadius: 14, padding: "12px 16px", fontSize: 13, color: "#DC2626", lineHeight: 1.5,
+        <div data-testid="ble-error-msg" className="card-critical" style={{
+          margin: "0 16px 8px", padding: "12px 16px", fontSize: 13, color: "#B84A4A", lineHeight: 1.5,
         }}>
-          <BtlIcon name="hazard" size={13} color="#DC2626" /> {errMsg}
+          <BtlIcon name="hazard" size={13} color="#B84A4A" /> {errMsg}
         </div>
       )}
 
@@ -844,14 +842,14 @@ export default function WTRBottleScreen() {
           {/* Product lineup */}
           <div style={{
             width: "100%", borderRadius: 20, overflow: "hidden",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-            border: "1px solid #F0F1F3",
+            boxShadow: "0 4px 20px rgba(15, 20, 25, 0.08)",
+            border: "1px solid rgba(255, 255, 255, 0.55)",
           }}>
             <img src="/bottle-lineup-5colors.jpg" alt="Generosity WTR BTL lineup"
               style={{ width: "100%", height: "auto", objectFit: "contain", display: "block", maxHeight: 300 }} />
           </div>
 
-          <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.7, maxWidth: 300 }}>
+          <div style={{ fontSize: 14, color: "#3D4043", lineHeight: 1.7, maxWidth: 300 }}>
             Connect your Generosity{"\u2122"} Smart Cap to monitor live water quality, track daily intake, and receive real-time TDS readings.
           </div>
 
@@ -859,16 +857,15 @@ export default function WTRBottleScreen() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, width: "100%" }}>
             {[
               { icon: <BtlIcon name="droplet" size={20} color="#51B0E6" />, label: "TDS\nMonitoring" },
-              { icon: <BtlIcon name="ruler" size={20} color="#34C759" />, label: "Intake\nTracking" },
-              { icon: <BtlIcon name="thermometer" size={20} color="#FF9500" />, label: "Temp\nSensor" },
+              { icon: <BtlIcon name="ruler" size={20} color="#4A8A6F" />, label: "Intake\nTracking" },
+              { icon: <BtlIcon name="thermometer" size={20} color="#C89B3C" />, label: "Temp\nSensor" },
             ].map((f, i) => (
-              <div key={i} style={{
-                background: "#FFFFFF", borderRadius: 16, padding: "18px 8px",
-                textAlign: "center", border: "1px solid #F0F1F3",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.03)",
+              <div key={i} className="card-default" style={{
+                padding: "18px 8px",
+                textAlign: "center",
               }}>
                 <div style={{ marginBottom: 8 }}>{f.icon}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", lineHeight: 1.4, whiteSpace: "pre-line" }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#3D4043", lineHeight: 1.4, whiteSpace: "pre-line" }}>
                   {f.label}
                 </div>
               </div>
@@ -909,7 +906,7 @@ export default function WTRBottleScreen() {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#0A1A2E", marginBottom: 8 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#0F1419", marginBottom: 8 }}>
               Searching for Smart Cap
             </div>
             <div style={{ fontSize: 13, color: "#A6A8AB", lineHeight: 1.6 }}>
@@ -917,9 +914,12 @@ export default function WTRBottleScreen() {
             </div>
           </div>
           <button onClick={() => setBle("idle")} data-testid="cancel-scan-btn" style={{
-            background: "#FFFFFF", border: "1px solid #E8ECF0", borderRadius: 14,
-            color: "#6B7280", padding: "12px 32px", fontSize: 13, fontWeight: 600, cursor: "pointer",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+            background: "rgba(255, 255, 255, 0.55)",
+            backdropFilter: "blur(50px) saturate(180%)",
+            WebkitBackdropFilter: "blur(50px) saturate(180%)",
+            border: "1px solid rgba(15, 20, 25, 0.06)", borderRadius: 14,
+            color: "#3D4043", padding: "12px 32px", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            boxShadow: "0 1px 4px rgba(15, 20, 25, 0.04)",
           }}>
             Cancel
           </button>
@@ -933,13 +933,9 @@ export default function WTRBottleScreen() {
         <div style={{ padding: "0 16px 100px", animation: "fadeInUp 0.3s ease" }}>
 
           {/* ── SECTION 2: Score Ring ── */}
-          <div style={{
-            background: "#FFFFFF",
-            borderRadius: 24,
+          <div className="card-default" style={{
             padding: "28px 20px 24px",
             marginBottom: 14,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-            border: "1px solid #F0F1F3",
             textAlign: "center",
           }}>
             {/* Score ring only shows after first test */}
@@ -961,7 +957,7 @@ export default function WTRBottleScreen() {
             {testPhase === null && (
               <button onClick={runTest} style={{
                 margin: "12px auto 0", display: "flex", alignItems: "center", gap: 8,
-                background: "linear-gradient(135deg, #51B0E6, #2A8FCA)", color: "#fff",
+                background: "linear-gradient(135deg, #51B0E6, #2B8FC9)", color: "#fff",
                 border: "none", padding: "10px 24px", borderRadius: 30,
                 fontSize: 12, fontWeight: 800, cursor: "pointer",
                 boxShadow: "0 4px 16px rgba(81,176,230,0.35)",
@@ -975,19 +971,19 @@ export default function WTRBottleScreen() {
             <div style={{
               display: "flex", justifyContent: "center", gap: 24,
               marginTop: 20, paddingTop: 16,
-              borderTop: "1px solid #F0F1F3",
+              borderTop: "1px solid rgba(15, 20, 25, 0.06)",
             }}>
               {[
                 { label: "TDS", val: tdsRaw != null ? `${tdsRaw}` : "\u2014", unit: "ppm", c: col },
                 { label: "INTAKE", val: volVal ?? "\u2014", unit: "mL", c: volColor() },
-                { label: "Temp", val: tempF ?? "\u2014", unit: "\u00B0F", c: "#FF9500" },
+                { label: "Temp", val: tempF ?? "\u2014", unit: "\u00B0F", c: "#C89B3C" },
               ].map((m, i) => (
                 <div key={i} style={{ textAlign: "center", minWidth: 60 }}>
                   <div style={{ fontSize: 9, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>
                     {m.label}
                   </div>
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 2 }}>
-                    <span style={{ fontSize: 22, fontWeight: 800, color: "#0A1A2E", fontVariantNumeric: "tabular-nums" }}>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: "#0F1419", fontVariantNumeric: "tabular-nums" }}>
                       {m.val}
                     </span>
                     {m.unit && <span style={{ fontSize: 10, color: "#A6A8AB", fontWeight: 600 }}>{m.unit}</span>}
@@ -1018,27 +1014,27 @@ export default function WTRBottleScreen() {
               sublabel={volVal != null ? (parseFloat(volVal) >= 100 ? "\u2713 Good" : "\u26A0 Low") : null}
             />
             <MetricCard
-              icon={<BtlIcon name="thermometer" size={15} color="#FF9500" />}
+              icon={<BtlIcon name="thermometer" size={15} color="#C89B3C" />}
               label="Temp"
               value={tempF}
               unit={"\u00B0F"}
-              color="#FF9500"
+              color="#C89B3C"
               hist={histOf("waterTemp")}
               sublabel={tempVal != null ? (parseFloat(tempVal) > 30 ? "\u26A0 Warm" : "\u2713 Cool") : null}
             />
           </div>
 
           {/* ── SECTION 4: TDS Timeline ── */}
-          <div style={{
-            background: "#FFFFFF", borderRadius: 20, padding: "18px 16px",
-            marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.04)", border: "1px solid #F0F1F3",
+          <div className="card-default" style={{
+            padding: "18px 16px",
+            marginBottom: 14,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <div>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase" }}>
                   RECENT READINGS
                 </div>
-                <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "#3D4043", marginTop: 2 }}>
                   TDS over last {hist.length} samples
                 </div>
               </div>
@@ -1051,10 +1047,9 @@ export default function WTRBottleScreen() {
 
           {/* ── SECTION 5: Test Progress (only shows during/after test) ── */}
           {testPhase != null && (
-            <div style={{
-              background: "#FFFFFF", borderRadius: 20, padding: "24px 20px",
-              marginBottom: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-              border: "1px solid #F0F1F3",
+            <div className="card-default" style={{
+              padding: "24px 20px",
+              marginBottom: 14,
             }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 16 }}>
                 {testPhase === "done" ? "TEST COMPLETE" : "TESTING IN PROGRESS"}
@@ -1062,29 +1057,29 @@ export default function WTRBottleScreen() {
               {["tds", "vol", "temp"].map((phase, i) => {
                 const labels = { tds: "Analyzing TDS...", vol: "Measuring Intake...", temp: "Measuring temperature..." };
                 const doneLabels = { tds: `TDS: ${tdsRaw ?? 24} ppm`, vol: `Intake: ${volVal ?? "450"} mL`, temp: `Temp: ${tempF ?? "68"}\u00B0F` };
-                const icons = { tds: <BtlIcon name="droplet" size={16} color="#51B0E6" />, vol: <BtlIcon name="ruler" size={16} color="#34C759" />, temp: <BtlIcon name="thermometer" size={16} color="#FF9500" /> };
+                const icons = { tds: <BtlIcon name="droplet" size={16} color="#51B0E6" />, vol: <BtlIcon name="ruler" size={16} color="#4A8A6F" />, temp: <BtlIcon name="thermometer" size={16} color="#C89B3C" /> };
                 const isActive = testPhase === phase;
                 const isDone = testPhase === "done" || (phase === "tds" && (testPhase === "vol" || testPhase === "temp")) || (phase === "vol" && testPhase === "temp");
                 return (
                   <div key={phase} style={{
                     display: "flex", alignItems: "center", gap: 12,
                     padding: "10px 0",
-                    borderBottom: i < 2 ? "1px solid #F0F1F3" : "none",
+                    borderBottom: i < 2 ? "1px solid rgba(15, 20, 25, 0.06)" : "none",
                     opacity: isDone || isActive ? 1 : 0.4,
                   }}>
                     <div style={{
                       width: 32, height: 32, borderRadius: 10,
-                      background: isDone ? "#F0FFF4" : isActive ? "#EBF6FD" : "#F8F9FB",
+                      background: isDone ? "rgba(74, 138, 111, 0.10)" : isActive ? "rgba(81, 176, 230, 0.10)" : "rgba(15, 20, 25, 0.04)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
                       {isDone ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A8A6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       ) : isActive ? (
                         <div style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid transparent", borderTop: "2px solid #51B0E6", animation: "spin 0.8s linear infinite" }} />
                       ) : icons[phase]}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#0A1A2E" : "#A6A8AB" }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: isDone ? "#0F1419" : "#A6A8AB" }}>
                         {isDone ? doneLabels[phase] : isActive ? labels[phase] : labels[phase]}
                       </div>
                     </div>
@@ -1093,13 +1088,14 @@ export default function WTRBottleScreen() {
               })}
               {testPhase === "done" && (
                 <div style={{
-                  marginTop: 16, background: "#EBF6FD", borderRadius: 14, padding: "14px 16px",
+                  marginTop: 16, background: "rgba(81, 176, 230, 0.10)", borderRadius: 14, padding: "14px 16px",
                   display: "flex", alignItems: "center", gap: 10,
+                  border: "1px solid rgba(81, 176, 230, 0.20)",
                 }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#51B0E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                   </svg>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0A1A2E" }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0F1419" }}>
                     Water quality score: <span style={{ color: col, fontWeight: 800 }}>{score ?? 92}/100</span>
                   </div>
                 </div>
@@ -1109,24 +1105,27 @@ export default function WTRBottleScreen() {
 
           {/* ── SECTION 6: Contaminant Alerts ── */}
           {tdsRaw != null && tdsRaw > 150 && (
-            <div style={{
-              background: "#FFF8F0", borderRadius: 20, padding: "18px 16px",
-              marginBottom: 14, border: "1px solid #FFE8CC",
+            <div className="card-attention" style={{
+              padding: "18px 16px",
+              marginBottom: 14,
             }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#FF9500", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#C89B3C", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 12 }}>
                 DETECTED CONCERNS
               </div>
               <div style={{
                 display: "flex", alignItems: "center", gap: 12,
-                background: "#FFFFFF", borderRadius: 14, padding: "14px 16px",
-                border: "1px solid #FFF0E0",
+                background: "rgba(255, 255, 255, 0.55)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                borderRadius: 14, padding: "14px 16px",
+                border: "1px solid rgba(200, 155, 60, 0.18)",
               }}>
-                <BtlIcon name="hazard" size={20} color="#FF9500" />
+                <BtlIcon name="hazard" size={20} color="#C89B3C" />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0A1A2E" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0F1419" }}>
                     Elevated TDS ({tdsRaw} ppm)
                   </div>
-                  <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.4, marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: "#3D4043", lineHeight: 1.4, marginTop: 2 }}>
                     Consider using a reverse osmosis or activated carbon filter.
                   </div>
                 </div>
@@ -1136,9 +1135,9 @@ export default function WTRBottleScreen() {
 
           {/* ── SECTION 7: Device Info ── */}
           {tele && (
-            <div style={{
-              background: "#FFFFFF", borderRadius: 20, padding: "18px 16px",
-              marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.04)", border: "1px solid #F0F1F3",
+            <div className="card-default" style={{
+              padding: "18px 16px",
+              marginBottom: 14,
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase" }}>
@@ -1146,14 +1145,15 @@ export default function WTRBottleScreen() {
                 </div>
                 <div style={{
                   display: "flex", alignItems: "center", gap: 4,
-                  background: ble === "connected" ? "#F0FFF4" : isDemo ? "#EBF6FD" : "#F8F9FB",
+                  background: ble === "connected" ? "rgba(74, 138, 111, 0.10)" : "rgba(81, 176, 230, 0.10)",
                   borderRadius: 10, padding: "3px 10px",
+                  border: `1px solid ${ble === "connected" ? "rgba(74, 138, 111, 0.20)" : "rgba(81, 176, 230, 0.20)"}`,
                 }}>
                   <div style={{
                     width: 5, height: 5, borderRadius: "50%",
-                    background: ble === "connected" ? "#34C759" : "#51B0E6",
+                    background: ble === "connected" ? "#4A8A6F" : "#51B0E6",
                   }} />
-                  <span style={{ fontSize: 10, fontWeight: 600, color: ble === "connected" ? "#34C759" : "#51B0E6" }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: ble === "connected" ? "#4A8A6F" : "#51B0E6" }}>
                     {ble === "connected" ? "Connected" : "Demo"}
                   </span>
                 </div>
@@ -1161,15 +1161,19 @@ export default function WTRBottleScreen() {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                 {[
-                  { label: "Battery", value: `${battVal ?? "\u2014"}%`, icon: <BtlIcon name="battery" size={14} color={battVal > 50 ? "#34C759" : "#FF9500"} /> },
+                  { label: "Battery", value: `${battVal ?? "\u2014"}%`, icon: <BtlIcon name="battery" size={14} color={battVal > 50 ? "#4A8A6F" : "#C89B3C"} /> },
                   { label: "Firmware", value: `v${(tele.fw / 100).toFixed(1)}`, icon: <BtlIcon name="signal" size={14} color="#51B0E6" /> },
                   { label: "Last Sync", value: new Date(tele.ts).toLocaleTimeString().slice(0, 5), icon: <BtlIcon name="target" size={14} color="#A6A8AB" /> },
                 ].map((d, i) => (
                   <div key={i} style={{
-                    background: "#F8F9FB", borderRadius: 14, padding: "12px 10px", textAlign: "center",
+                    background: "rgba(255, 255, 255, 0.55)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    border: "1px solid rgba(255, 255, 255, 0.55)",
+                    borderRadius: 14, padding: "12px 10px", textAlign: "center",
                   }}>
                     <div style={{ marginBottom: 6 }}>{d.icon}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0A1A2E" }}>{d.value}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0F1419" }}>{d.value}</div>
                     <div style={{ fontSize: 9, fontWeight: 600, color: "#A6A8AB", letterSpacing: 0.5, textTransform: "uppercase", marginTop: 2 }}>
                       {d.label}
                     </div>
@@ -1179,9 +1183,10 @@ export default function WTRBottleScreen() {
 
               {tele.charging && (
                 <div style={{
-                  marginTop: 10, background: "#F0FFF4", borderRadius: 10, padding: "8px 14px",
-                  fontSize: 12, color: "#34C759", fontWeight: 600,
+                  marginTop: 10, background: "rgba(74, 138, 111, 0.10)", borderRadius: 10, padding: "8px 14px",
+                  fontSize: 12, color: "#4A8A6F", fontWeight: 600,
                   display: "flex", alignItems: "center", gap: 6,
+                  border: "1px solid rgba(74, 138, 111, 0.20)",
                 }}>
                   {"\u26A1"} Charging
                 </div>
@@ -1190,9 +1195,9 @@ export default function WTRBottleScreen() {
           )}
 
           {/* ── SECTION 8: Hydration Tracker ── */}
-          <div style={{
-            background: "#FFFFFF", borderRadius: 20, padding: "18px 20px",
-            marginBottom: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.04)", border: "1px solid #F0F1F3",
+          <div className="card-default" style={{
+            padding: "18px 20px",
+            marginBottom: 14,
           }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: "#A6A8AB", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>
               DAILY HYDRATION
@@ -1201,31 +1206,37 @@ export default function WTRBottleScreen() {
               <HydrationRing consumePct={consumePct} dailyML={intake} goalML={goalML} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                  <span style={{ fontSize: 28, fontWeight: 800, color: "#0A1A2E", fontVariantNumeric: "tabular-nums" }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: "#0F1419", fontVariantNumeric: "tabular-nums" }}>
                     {(intake / 1000).toFixed(1)}L
                   </span>
                   <span style={{ fontSize: 13, color: "#A6A8AB", fontWeight: 500 }}>/ {(goalML / 1000).toFixed(1)}L</span>
                 </div>
-                <div style={{ fontSize: 12, color: consumePct >= 100 ? "#34C759" : "#6B7280", fontWeight: 500, marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: consumePct >= 100 ? "#4A8A6F" : "#3D4043", fontWeight: 500, marginBottom: 12 }}>
                   {consumePct >= 100 ? "\u2713 Daily goal reached!" : `${consumePct}% of daily goal`}
                 </div>
                 {/* Progress bar */}
-                <div style={{ height: 6, background: "#E8ECF0", borderRadius: 3, overflow: "hidden", marginBottom: 10 }}>
+                <div style={{ height: 6, background: "rgba(15, 20, 25, 0.06)", borderRadius: 3, overflow: "hidden", marginBottom: 10 }}>
                   <div style={{
                     height: "100%", width: `${consumePct}%`,
-                    background: consumePct >= 100 ? "linear-gradient(90deg, #34C759, #30D158)" : "linear-gradient(90deg, #51B0E6, #2A8FCA)",
+                    background: consumePct >= 100 ? "linear-gradient(90deg, #4A8A6F, #5BA882)" : "linear-gradient(90deg, #51B0E6, #2B8FC9)",
                     borderRadius: 3, transition: "width 1s cubic-bezier(0.34,1.56,0.64,1)",
                   }} />
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => setShowGoal(v => !v)} data-testid="set-goal-btn" style={{
-                    background: "#F8F9FB", border: "1px solid #E8ECF0", borderRadius: 10,
-                    color: "#6B7280", padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                    background: "rgba(255, 255, 255, 0.55)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    border: "1px solid rgba(15, 20, 25, 0.06)", borderRadius: 10,
+                    color: "#3D4043", padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer",
                   }}>
                     {showGoal ? "Close" : "Set Goal"}
                   </button>
                   <button onClick={resetIntake} data-testid="reset-intake-btn" style={{
-                    background: "#F8F9FB", border: "1px solid #E8ECF0", borderRadius: 10,
+                    background: "rgba(255, 255, 255, 0.55)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    border: "1px solid rgba(15, 20, 25, 0.06)", borderRadius: 10,
                     color: "#A6A8AB", padding: "6px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer",
                   }}>
                     Reset
@@ -1236,20 +1247,23 @@ export default function WTRBottleScreen() {
 
             {/* Goal editor */}
             {showGoal && (
-              <div style={{ display: "flex", gap: 8, marginTop: 14, paddingTop: 14, borderTop: "1px solid #F0F1F3" }}>
+              <div style={{ display: "flex", gap: 8, marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(15, 20, 25, 0.06)" }}>
                 <input
                   value={goalInput}
                   onChange={e => setGoalInput(e.target.value)}
                   placeholder="Daily goal mL (250\u20135000)"
                   data-testid="goal-input"
                   style={{
-                    flex: 1, background: "#F8F9FB", border: "1px solid #E8ECF0",
-                    borderRadius: 12, color: "#0A1A2E", padding: "11px 14px",
+                    flex: 1,
+                    background: "rgba(255, 255, 255, 0.55)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    border: "1px solid rgba(15, 20, 25, 0.06)",
+                    borderRadius: 12, color: "#0F1419", padding: "11px 14px",
                     fontSize: 14, fontVariantNumeric: "tabular-nums", outline: "none",
                   }}
                 />
-                <button onClick={applyGoal} data-testid="apply-goal-btn" style={{
-                  background: "#51B0E6", color: "#FFFFFF", border: "none",
+                <button onClick={applyGoal} data-testid="apply-goal-btn" className="btn-brand" style={{
                   borderRadius: 12, padding: "11px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer",
                 }}>
                   Set
@@ -1261,14 +1275,14 @@ export default function WTRBottleScreen() {
           {/* ── SECTION: Cap Close-up ── */}
           <div style={{
             borderRadius: 20, overflow: "hidden", marginBottom: 14,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+            boxShadow: "0 2px 12px rgba(15, 20, 25, 0.08)",
           }}>
             <div style={{ position: "relative" }}>
               <img src="/bottle-cap-exploded.jpg" alt="Smart Cap Sensor"
                 style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
               <div style={{
                 position: "absolute", inset: 0,
-                background: "linear-gradient(180deg, transparent 40%, rgba(10,26,46,0.8) 100%)",
+                background: "linear-gradient(180deg, transparent 40%, rgba(15,20,25,0.8) 100%)",
               }} />
               <div style={{
                 position: "absolute", bottom: 14, left: 16,
@@ -1283,11 +1297,12 @@ export default function WTRBottleScreen() {
           </div>
 
           {/* ── Debug / Raw Sensors toggle ── */}
-          <div style={{
-            background: "#FFFFFF", borderRadius: 20, overflow: "hidden",
-            border: "1px solid #F0F1F3", marginBottom: 14,
+          <div className="card-default" style={{
+            overflow: "hidden",
+            marginBottom: 14,
+            padding: 0,
           }}>
-            <div style={{ display: "flex", borderBottom: "1px solid #F0F1F3" }}>
+            <div style={{ display: "flex", borderBottom: "1px solid rgba(15, 20, 25, 0.06)" }}>
               {["live", "sensors", "debug"].map(t => (
                 <button
                   key={t}
@@ -1315,15 +1330,15 @@ export default function WTRBottleScreen() {
                   ) : [...hist].reverse().slice(0, 20).map((h, i) => (
                     <div key={i} style={{
                       display: "grid", gridTemplateColumns: "60px 1fr 1fr 1fr",
-                      padding: "8px 0", borderBottom: "1px solid #F0F1F3",
-                      fontSize: 12, color: "#6B7280", alignItems: "center",
+                      padding: "8px 0", borderBottom: "1px solid rgba(15, 20, 25, 0.06)",
+                      fontSize: 12, color: "#3D4043", alignItems: "center",
                     }}>
                       <span style={{ fontSize: 10, color: "#A6A8AB", fontFamily: "monospace" }}>
                         {new Date(h.ts).toLocaleTimeString()}
                       </span>
                       <span>TDS: <b style={{ color: tdsColor(h.sensors?.tds?.raw) }}>{h.sensors?.tds?.val ?? "\u2014"}</b></span>
                       <span>pH: <b style={{ color: "#51B0E6" }}>{h.sensors?.ph?.val ?? "\u2014"}</b></span>
-                      <span>T: <b style={{ color: "#FF9500" }}>{h.sensors?.waterTemp?.val ?? "\u2014"}{"\u00B0"}</b></span>
+                      <span>T: <b style={{ color: "#C89B3C" }}>{h.sensors?.waterTemp?.val ?? "\u2014"}{"\u00B0"}</b></span>
                     </div>
                   ))}
                 </div>
@@ -1339,10 +1354,14 @@ export default function WTRBottleScreen() {
                   ) : Object.values(s).map((sensor, i) => (
                     <div key={i} style={{
                       display: "flex", justifyContent: "space-between", alignItems: "center",
-                      background: "#F8F9FB", borderRadius: 14, padding: "12px 16px",
+                      background: "rgba(255, 255, 255, 0.55)",
+                      backdropFilter: "blur(20px) saturate(180%)",
+                      WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                      border: "1px solid rgba(255, 255, 255, 0.55)",
+                      borderRadius: 14, padding: "12px 16px",
                     }}>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#0A1A2E", marginBottom: 2 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#0F1419", marginBottom: 2 }}>
                           {sensor.label}
                         </div>
                         <div style={{ fontSize: 10, color: "#A6A8AB", fontFamily: "monospace" }}>
@@ -1350,7 +1369,7 @@ export default function WTRBottleScreen() {
                         </div>
                       </div>
                       <div style={{ textAlign: "right" }}>
-                        <span style={{ fontSize: 22, fontWeight: 800, color: "#0A1A2E", fontVariantNumeric: "tabular-nums" }}>
+                        <span style={{ fontSize: 22, fontWeight: 800, color: "#0F1419", fontVariantNumeric: "tabular-nums" }}>
                           {sensor.val}
                         </span>
                         <span style={{ fontSize: 11, fontWeight: 500, color: "#A6A8AB", marginLeft: 3 }}>{sensor.unit}</span>
@@ -1366,14 +1385,14 @@ export default function WTRBottleScreen() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
                     {[
                       { label: "Poll", fn: () => send(CMD_INFO), color: "#51B0E6" },
-                      { label: "Activate", fn: () => send(CMD_ACTIVATE), color: "#2A8FCA" },
-                      { label: "Reset", fn: resetIntake, color: "#FF9500" },
+                      { label: "Activate", fn: () => send(CMD_ACTIVATE), color: "#2B8FC9" },
+                      { label: "Reset", fn: resetIntake, color: "#C89B3C" },
                     ].map(({ label, fn, color }) => (
                       <button key={label} onClick={fn} disabled={ble !== "connected"} style={{
                         padding: "10px 4px",
-                        background: ble === "connected" ? `${color}10` : "#F8F9FB",
-                        color: ble === "connected" ? color : "#D1D5DB",
-                        border: `1px solid ${ble === "connected" ? color + "30" : "#E8ECF0"}`,
+                        background: ble === "connected" ? `${color}10` : "rgba(15, 20, 25, 0.04)",
+                        color: ble === "connected" ? color : "#A6A8AB",
+                        border: `1px solid ${ble === "connected" ? color + "30" : "rgba(15, 20, 25, 0.06)"}`,
                         borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: ble === "connected" ? "pointer" : "not-allowed",
                         letterSpacing: 0.5, textTransform: "uppercase",
                       }}>
@@ -1382,22 +1401,25 @@ export default function WTRBottleScreen() {
                     ))}
                   </div>
                   <div style={{
-                    background: "#F8F9FB", borderRadius: 14, padding: "12px 14px",
+                    background: "rgba(255, 255, 255, 0.55)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    borderRadius: 14, padding: "12px 14px",
                     fontFamily: "monospace", fontSize: 10.5, maxHeight: 260, overflowY: "auto",
-                    border: "1px solid #E8ECF0", lineHeight: 1.7,
+                    border: "1px solid rgba(15, 20, 25, 0.06)", lineHeight: 1.7,
                   }}>
                     {log.length === 0 ? (
                       <div style={{ color: "#A6A8AB", textAlign: "center", padding: "16px 0" }}>
                         BLE packet log appears here
                       </div>
                     ) : log.slice(0, 50).map((entry, i) => (
-                      <div key={i} style={{ marginBottom: 4, paddingBottom: 4, borderBottom: "1px solid #F0F1F3" }}>
+                      <div key={i} style={{ marginBottom: 4, paddingBottom: 4, borderBottom: "1px solid rgba(15, 20, 25, 0.06)" }}>
                         <span style={{ color: "#A6A8AB" }}>{entry.t} </span>
-                        <span style={{ color: entry.msg.includes("RX") || entry.msg.includes("\u2190") ? "#34C759" : "#51B0E6", fontWeight: 600 }}>
+                        <span style={{ color: entry.msg.includes("RX") || entry.msg.includes("\u2190") ? "#4A8A6F" : "#51B0E6", fontWeight: 600 }}>
                           {entry.msg}
                         </span>
                         {entry.hex && (
-                          <div style={{ color: "#6B7280", marginTop: 2, wordBreak: "break-all" }}>
+                          <div style={{ color: "#3D4043", marginTop: 2, wordBreak: "break-all" }}>
                             {entry.hex}
                           </div>
                         )}
@@ -1405,7 +1427,10 @@ export default function WTRBottleScreen() {
                     ))}
                   </div>
                   <button onClick={() => setLog([])} data-testid="clear-log-btn" style={{
-                    background: "#F8F9FB", border: "1px solid #E8ECF0", borderRadius: 10,
+                    background: "rgba(255, 255, 255, 0.55)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    border: "1px solid rgba(15, 20, 25, 0.06)", borderRadius: 10,
                     color: "#A6A8AB", padding: "10px 0", fontSize: 12, fontWeight: 600, cursor: "pointer",
                   }}>
                     Clear Log
