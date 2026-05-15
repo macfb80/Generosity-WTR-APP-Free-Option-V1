@@ -854,7 +854,7 @@ export default function TrustButVerify(){
                     style={{
                       width: 80,
                       height: 80,
-                      background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)',
+                      background: 'linear-gradient(135deg, #51B0E6, #1F6FA0)',
                     }}
                   >
                     <Icon name="droplet" size={36} color="#FFFFFF" />
@@ -959,7 +959,7 @@ export default function TrustButVerify(){
                         type="button"
                         onClick={() => { setInput(city); setInputMode("city"); setPhase("landing"); setTimeout(() => startScan(city), 100); }}
                         className="font-semibold rounded-pill cursor-pointer"
-                        style={{ padding: '6px 12px', fontSize: 11, background: '#FFFFFF', color: '#51B0E6', border: '1px solid rgba(81, 176, 230, 0.25)' }}
+                        style={{ padding: '6px 12px', fontSize: 11, background: 'rgba(81, 176, 230, 0.10)', color: '#1F6FA0', border: '1px solid rgba(81, 176, 230, 0.25)' }}
                       >
                         {city}
                       </button>
@@ -971,17 +971,6 @@ export default function TrustButVerify(){
 
             {tbvView === "scan" && (
               <div data-testid="bottle-tab">
-                <div className="text-center" style={{ padding: '18px 20px' }}>
-                  <div className="text-micro uppercase tracking-widest font-semibold" style={{ marginBottom: 5, fontSize: 10, color: '#1F6FA0' }}>
-                    BOTTLE INTELLIGENCE
-                  </div>
-                  <h2 className="font-display font-semibold" style={{ fontSize: 22, marginBottom: 4, letterSpacing: '-0.01em', color: '#0F1419' }}>
-                    What's in your bottle?
-                  </h2>
-                  <p style={{ fontSize: 12, color: '#3D4043', maxWidth: 280, margin: '0 auto', lineHeight: 1.5 }}>
-                    Scan any plastic water bottle to see its full contamination profile.
-                  </p>
-                </div>
                 <BottleScanView onBridge={() => { setTbvView("home"); setPhase("landing"); }} />
               </div>
             )}
@@ -1192,7 +1181,7 @@ export default function TrustButVerify(){
                 {showHub && (
                   <div className="card-default mb-3" style={{ padding: 14 }} data-testid="wtr-hub-section">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <div className="rounded-card flex items-center justify-center" style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #51B0E6, #3DA0DA)', color: '#FFFFFF', fontSize: 14 }}>HUB</div>
+                      <div className="rounded-card flex items-center justify-center" style={{ width: 30, height: 30, background: 'linear-gradient(135deg, #51B0E6, #1F6FA0)', color: '#FFFFFF', fontSize: 14 }}>HUB</div>
                       <div>
                         <div className="font-semibold" style={{ fontSize: 12, color: '#0F1419' }}>Generosity{TRADEMARK} Home WTR Hub</div>
                         <div style={{ fontSize: 10, color: '#1F6FA0' }}>Active Alkaline Technology. Multi-Stage.</div>
@@ -1253,7 +1242,7 @@ export default function TrustButVerify(){
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-bold uppercase tracking-wider rounded-card no-underline whitespace-nowrap"
-                    style={{ padding: '8px 12px', fontSize: 10, background: '#FFFFFF', color: '#51B0E6', border: '1px solid rgba(81, 176, 230, 0.40)' }}
+                    style={{ padding: '8px 12px', fontSize: 10, background: 'rgba(81, 176, 230, 0.10)', color: '#1F6FA0', border: '1px solid rgba(81, 176, 230, 0.25)' }}
                   >
                     PARTNER PORTAL {ARROW}
                   </a>
