@@ -1005,7 +1005,7 @@ export default function WTRHubScreen() {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0) 20%, rgba(255,255,255,0.5) 60%, #FFFFFF 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(15,20,25,0.4) 0%, rgba(15,20,25,0.05) 60%, transparent 100%)" }} />
 
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "20px 20px 0", zIndex: 2 }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "32px 20px 0", zIndex: 2 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <div style={{ fontSize: 24, fontWeight: 700, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>Home WTR Hub</div>
@@ -1022,15 +1022,15 @@ export default function WTRHubScreen() {
                   { val: `${fmt(score)}`, lbl: "Retention" },
                   { val: `${currentL.toFixed(1)} L`, lbl: "Today" },
                 ].map(s => (
-                  <div key={s.lbl} style={{ background: "rgba(255,255,255,0.10)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "10px 14px" }}>
+                  <div key={s.lbl} style={{ background: "rgba(15, 20, 25, 0.35)", backdropFilter: "blur(14px) saturate(180%)", WebkitBackdropFilter: "blur(14px) saturate(180%)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 14, padding: "10px 14px" }}>
                     <div style={{ fontSize: 18, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: -0.5 }}>{s.val}</div>
-                    <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.55)", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 2 }}>{s.lbl}</div>
+                    <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.70)", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 2 }}>{s.lbl}</div>
                   </div>
                 ))}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: connected || isMock ? "#4A8A6F" : "#C89B3C", boxShadow: connected || isMock ? "0 0 8px rgba(74,138,111,0.6)" : "0 0 8px rgba(200,155,60,0.6)" }} />
-                <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.65)" }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.85)", textShadow: "0 1px 2px rgba(15,20,25,0.4)" }}>
                   {connected || isMock ? 'System active' : 'System offline'}
                 </span>
               </div>
