@@ -250,6 +250,21 @@ function trackEvent(eventName, properties = {}) {
   try { window.posthog?.capture(eventName, { ...base, ...properties }); } catch(e) {}
 }
 
+// Auto-detect input type from a freeform search string.
+// 5-digit number -> zip. Contains a comma or matches a known city -> city. Else -> address.
+function detectInputMode(raw) {
+  const s = (raw || '').trim();
+  if (!s) return 'address';
+  if (/^\d{5}$/.test(s)) return 'zip';
+  if (s.includes(',')) return 'city';
+  const lower = s.toLowerCase();
+  for (const k of Object.keys(CITY_DATA)) {
+    const cityName = k.split(',')[0].toLowerCase().trim();
+    if (lower === cityName || lower.startsWith(cityName + ' ')) return 'city';
+  }
+  return 'address';
+}
+
 const API_BASE = 'https://generosity-sales-engine-mvp-api.onrender.com';
 const API_BEARER = 'Bearer 3b56aff84e17fc6b369adb1906549f10af6d4776b392b2ec843aaba958ccd102';
 
@@ -424,15 +439,20 @@ export default function TrustButVerify(){
     const scanInput = (typeof directInput === 'string') ? directInput : input;
     setInputError("");
     if(!scanInput || !scanInput.trim()){
-      setInputError(inputMode === "address" ? "Enter your address to scan" : inputMode === "zip" ? "Enter a ZIP code to scan" : "Enter a city and state to scan");
+      setInputError("Enter your address, ZIP, or city to scan");
       inputRef.current?.classList.add('input-error');
       setTimeout(() => inputRef.current?.classList.remove('input-error'), 400);
       return;
     }
     if(isScanning) return;
+
+    // Auto-detect input mode from the raw input so downstream views and capture payload still work
+    const detectedMode = detectInputMode(scanInput);
+    if (detectedMode !== inputMode) setInputMode(detectedMode);
+
     setIsScanning(true);
     const cleanInput = scanInput.replace(/<[^>]*>/g, '').trim().slice(0, 100);
-    trackEvent('scan_started', { input_mode: inputMode, input_length: cleanInput.length });
+    trackEvent('scan_started', { input_mode: detectedMode, input_length: cleanInput.length });
     setPhase("scanning"); setScanStep(0);
     let step=0;
     const t=setInterval(()=>{
@@ -621,8 +641,9 @@ export default function TrustButVerify(){
       <div className="flex-1 overflow-y-auto" style={{ paddingBottom: 80 }}>
         {tab === "tbv" && (
           <div data-testid="tbv-tab">
-            {/* v3.1: On Google-homepage landing, NO segmented toggle at top.
-                Toggle returns when user is in scan/results states or bottle tab. */}
+            {/* Top-level Home Water / Bottle Scan toggle.
+                Visible on scan view, results, scanning, not_found — anywhere except the
+                Google-homepage landing screen (where it lives inline below the search bar). */}
             {!isGoogleLanding && (
               <div className="sticky top-0 z-[50]" style={{ padding: '14px 16px 0', background: '#FFFFFF' }}>
                 <SegmentedToggle
@@ -664,7 +685,7 @@ export default function TrustButVerify(){
                   />
                 </div>
 
-                {/* v3.3: Top group - logo, search, EPA, toggle */}
+                {/* v3.3: Top group - logo, search, EPA, mode toggle (Home Water / Bottle Scan) */}
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   {/* Search bar with magnifying glass inside */}
                   <div style={{ width: '100%', maxWidth: 380, marginBottom: 8 }}>
@@ -685,13 +706,7 @@ export default function TrustButVerify(){
                         value={input}
                         onChange={(e) => { setInput(e.target.value); if (inputError) setInputError(""); }}
                         onKeyDown={(e) => { if (e.key === "Enter") startScan(); }}
-                        placeholder={
-                          inputMode === "address"
-                            ? "Enter your address"
-                            : inputMode === "zip"
-                            ? "Enter ZIP code"
-                            : "Enter city, state"
-                        }
+                        placeholder="Enter your address, zip, or city"
                         style={{
                           flex: 1,
                           background: 'transparent',
@@ -733,17 +748,20 @@ export default function TrustButVerify(){
                     EPA SDWIS + UCMR 5 Report
                   </div>
 
-                  {/* Input mode toggle below EPA caption */}
+                  {/* Mode toggle: Home Water / Bottle Scan
+                      Replaces the prior Address/ZIP/City toggle. Input mode is auto-detected on scan. */}
                   <div style={{ width: '100%', maxWidth: 280, marginBottom: 28 }}>
                     <SegmentedToggle
-                      testId="input-mode-toggle"
+                      testId="mode-toggle-landing"
                       size="small"
-                      value={inputMode}
-                      onChange={(v) => { setInputMode(v); setInput(""); }}
+                      value={tbvView}
+                      onChange={(v) => {
+                        setTbvView(v);
+                        trackEvent('landing_mode_switched', { mode: v });
+                      }}
                       options={[
-                        { id: "address", label: "Address", icon: <Icon name="home" size={10} color={inputMode === "address" ? "#51B0E6" : "#A6A8AB"} /> },
-                        { id: "zip",     label: "ZIP",     icon: <Icon name="pin"  size={10} color={inputMode === "zip"     ? "#51B0E6" : "#A6A8AB"} /> },
-                        { id: "city",    label: "City",    icon: <Icon name="city" size={10} color={inputMode === "city"    ? "#51B0E6" : "#A6A8AB"} /> },
+                        { id: "home", label: "Home Water", icon: <Icon name="home" size={10} color={tbvView === "home" ? "#51B0E6" : "#A6A8AB"} /> },
+                        { id: "scan", label: "Bottle Scan", icon: <Icon name="scan" size={10} color={tbvView === "scan" ? "#51B0E6" : "#A6A8AB"} /> },
                       ]}
                     />
                   </div>
