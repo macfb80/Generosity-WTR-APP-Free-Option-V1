@@ -1,29 +1,43 @@
 import { useState, useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
-// ─── GENEROSITY™ OFFICIAL BRAND PALETTE ────────────────────────────────────────
+// ─── GENEROSITY™ v3.3 BRAND PALETTE (matches WTRHubScreen.jsx A-1) ────────────
 const B = {
   blue: "#51B0E6",
-  blueDark: "#2A8FCA",
-  blueLight: "#EDF6FC",
-  gray: "#A6A8AB",
-  grayDark: "#6E7073",
-  lightGray: "#F0F1F3",
+  blueDark: "#1F6FA0",
+  blueLight: "rgba(81, 176, 230, 0.08)",
+  blueTint: "rgba(81, 176, 230, 0.10)",
+
   white: "#FFFFFF",
-  navy: "#0A1A2E",
-  navyMid: "#0D2244",
-  border: "#C8E2F4",
-  borderLight: "#E4F1FA",
-  danger: "#D93025",
-  warning: "#F29423",
-  ok: "#1E8A4C",
-  dangerBg: "#FFF3F2",
-  warningBg: "#FFF8EE",
-  okBg: "#F0FAF4"
+  navy: "#0F1419",          // body text / headers
+  navyAnchor: "#0A1A2E",    // authority anchor (matches A-1 "What Gets Removed")
+  gray: "#A6A8AB",
+  grayDark: "#3D4043",
+  lightGray: "#F0F1F3",
+
+  border: "rgba(15, 20, 25, 0.06)",
+  borderMed: "rgba(15, 20, 25, 0.08)",
+
+  danger: "#B84A4A",
+  warning: "#C89B3C",
+  ok: "#4A8A6F",
+  okDark: "#3D7058",
+
+  dangerBg: "rgba(184, 74, 74, 0.06)",
+  dangerBgStrong: "rgba(184, 74, 74, 0.10)",
+  warningBg: "rgba(200, 155, 60, 0.06)",
+  warningBgStrong: "rgba(200, 155, 60, 0.10)",
+  okBg: "rgba(74, 138, 111, 0.08)",
+};
+
+// ─── v3.3 SUBSTRATE (matches A-1 WTRHubScreen.jsx) ────────────────────────────
+const v33Substrate = {
+  background: "#FFFFFF",
+  backgroundImage: "radial-gradient(ellipse 80% 60% at 80% 100%, rgba(81, 176, 230, 0.10), transparent 60%), radial-gradient(ellipse 60% 50% at 10% 0%, rgba(81, 176, 230, 0.05), transparent 60%)",
+  backgroundAttachment: "fixed",
 };
 
 // ─── COMPREHENSIVE BOTTLE BRANDS DATABASE ─────────────────────────────────────
-// Sourced from FDA quality reports, Consumer Reports testing, and EWG data
 const BOTTLE_BRANDS = {
   "Dasani": {
     parent: "Coca-Cola Company",
@@ -454,7 +468,6 @@ const BOTTLE_BRANDS = {
 };
 
 // ─── UPC TO BRAND LOOKUP TABLE ────────────────────────────────────────────────
-// Comprehensive UPC database with prefix matching support
 const UPC_TO_BRAND = {
   // Dasani
   "049000042566":"Dasani","049000028690":"Dasani","049000042573":"Dasani","049000006424":"Dasani","04900004":"Dasani",
@@ -516,16 +529,11 @@ const UPC_TO_BRAND = {
 };
 
 // ─── UPC LOOKUP FUNCTION ──────────────────────────────────────────────────────
-// Handles various barcode formats, leading zeros, and prefix matching
 function lookupBrandFromScan(scannedCode) {
   const clean = scannedCode.replace(/\D/g, "");
-  // Direct match
   if (UPC_TO_BRAND[clean]) return UPC_TO_BRAND[clean];
-  // Try without leading zero
   if (clean.startsWith("0") && UPC_TO_BRAND[clean.slice(1)]) return UPC_TO_BRAND[clean.slice(1)];
-  // Try with leading zero
   if (UPC_TO_BRAND["0" + clean]) return UPC_TO_BRAND["0" + clean];
-  // Prefix match (8-digit prefixes)
   const prefixMatch = Object.keys(UPC_TO_BRAND).find(k => k.length === 8 && clean.startsWith(k));
   if (prefixMatch) return UPC_TO_BRAND[prefixMatch];
   return null;
@@ -552,23 +560,23 @@ function getScoreColor(score) {
 
 function getEWGColor(grade) {
   if (grade === "A") return B.ok;
-  if (grade === "B") return "#0D9488"; // teal
+  if (grade === "B") return B.ok;
   if (grade === "C") return B.warning;
-  if (grade === "D") return "#EA580C"; // orange
+  if (grade === "D") return B.warning;
   return B.danger; // F
 }
 
 function getRiskColor(risk) {
   if (risk === "high") return B.danger;
   if (risk === "medium") return B.warning;
-  if (risk === "low") return "#0D9488";
+  if (risk === "low") return B.warning;
   return B.ok;
 }
 
 function getRiskBg(risk) {
   if (risk === "high") return B.dangerBg;
   if (risk === "medium") return B.warningBg;
-  if (risk === "low") return "#F0FDFA";
+  if (risk === "low") return B.warningBg;
   return B.okBg;
 }
 
@@ -642,10 +650,10 @@ function Icon({ name, size = 20, color = B.gray }) {
         <path d="M15 18L9 12L15 6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    settings: (
+    shield: (
       <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="3" stroke={color} strokeWidth="1.5" fill="none" />
-        <path d="M12 1V4M12 20V23M4.22 4.22L6.34 6.34M17.66 17.66L19.78 19.78M1 12H4M20 12H23M4.22 19.78L6.34 17.66M17.66 6.34L19.78 4.22" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M12 2L4 6V11C4 16.5 7.5 21.25 12 22.5C16.5 21.25 20 16.5 20 11V6L12 2Z" stroke={color} strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+        <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   };
@@ -655,17 +663,16 @@ function Icon({ name, size = 20, color = B.gray }) {
 // ─── CONTAMINANT ROW COMPONENT ────────────────────────────────────────────────
 function ContaminantRow({ c, index, expanded, onToggle }) {
   const riskColor = getRiskColor(c.risk);
-  const riskBg = getRiskBg(c.risk);
   const isHighRisk = c.risk === "high";
-  
+
   return (
     <div
       data-testid={`contaminant-row-${index}`}
       onClick={onToggle}
       style={{
-        background: isHighRisk && c.detected ? B.dangerBg : B.white,
+        background: isHighRisk && c.detected ? B.dangerBg : "transparent",
         borderLeft: isHighRisk && c.detected ? `3px solid ${B.danger}` : "3px solid transparent",
-        borderBottom: `1px solid ${B.borderLight}`,
+        borderBottom: `1px solid ${B.border}`,
         padding: "12px 14px",
         cursor: "pointer",
         animation: `slideIn 0.3s ease ${index * 60}ms both`,
@@ -673,7 +680,6 @@ function ContaminantRow({ c, index, expanded, onToggle }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {/* Status Icon */}
         <div style={{ flexShrink: 0 }}>
           {c.risk === "none" ? (
             <Icon name="check" size={20} color={B.ok} />
@@ -683,8 +689,7 @@ function ContaminantRow({ c, index, expanded, onToggle }) {
             <Icon name="alert" size={20} color={riskColor} />
           )}
         </div>
-        
-        {/* Name + Category */}
+
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: B.navy }}>{c.name}</span>
@@ -692,7 +697,7 @@ function ContaminantRow({ c, index, expanded, onToggle }) {
               fontSize: 8,
               fontWeight: 600,
               color: B.gray,
-              background: B.lightGray,
+              background: "rgba(15, 20, 25, 0.04)",
               padding: "2px 6px",
               borderRadius: 10,
               textTransform: "uppercase",
@@ -700,8 +705,7 @@ function ContaminantRow({ c, index, expanded, onToggle }) {
             }}>{c.category}</span>
           </div>
         </div>
-        
-        {/* Levels */}
+
         <div style={{ textAlign: "right", flexShrink: 0, minWidth: 70 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: c.detected ? riskColor : B.ok }}>
             {c.level}
@@ -710,8 +714,7 @@ function ContaminantRow({ c, index, expanded, onToggle }) {
             FDA: {c.fda_limit}
           </div>
         </div>
-        
-        {/* Risk Badge */}
+
         <div style={{
           fontSize: 8,
           fontWeight: 800,
@@ -725,12 +728,10 @@ function ContaminantRow({ c, index, expanded, onToggle }) {
         }}>
           {c.risk}
         </div>
-        
-        {/* Expand Icon */}
+
         <Icon name={expanded ? "chevronUp" : "chevronDown"} size={16} color={B.gray} />
       </div>
-      
-      {/* Expanded Health Info */}
+
       {expanded && (
         <div style={{
           marginTop: 10,
@@ -756,17 +757,16 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
   const scoreColor = getScoreColor(score);
   const ewgColor = getEWGColor(b.ewg_grade);
   const phInfo = getPhLabel(b.ph);
-  
+
   const toggleRow = (idx) => {
     setExpandedRows(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
-  
+
   const hasRegulatoryHistory = (b.recalls?.length > 0) || (b.lawsuits?.length > 0) || (b.violations?.length > 0);
   const detectedHighRisk = b.contaminants?.filter(c => c.detected && (c.risk === "high" || c.risk === "medium")).slice(0, 3) || [];
-  
+
   return (
-    <div style={{ animation: "slideUp 0.4s ease", fontFamily: "'Nunito', sans-serif" }} data-testid="water-quality-report">
-      {/* Back Button */}
+    <div style={{ animation: "slideUp 0.4s ease", fontFamily: "Montserrat, -apple-system, sans-serif" }} data-testid="water-quality-report">
       <button
         onClick={onBack}
         data-testid="report-back-btn"
@@ -787,82 +787,90 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
         <Icon name="back" size={16} color={B.gray} /> Back to brands
       </button>
 
-      {/* 1. REPORT HEADER */}
-      <div style={{
-        background: `linear-gradient(135deg, ${B.navy}, ${B.navyMid})`,
-        borderRadius: 16,
-        padding: "20px 16px",
-        marginBottom: 16,
-        color: B.white
+      {/* 1. REPORT HEADER — Authority anchor pattern matching A-1 "What Gets Removed" */}
+      <div className="card-default" style={{
+        overflow: "hidden",
+        padding: 0,
+        marginBottom: 14
       }} data-testid="report-header">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: B.blue, letterSpacing: "2px", marginBottom: 6 }}>
-              WATER QUALITY REPORT
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 4 }} data-testid="brand-name">
-              {b.name || brand.name}
-            </div>
-            <div style={{ fontSize: 11, color: B.gray, marginBottom: 4 }}>
-              {b.parent} • {b.sourceType}
-            </div>
-            <div style={{ fontSize: 10, color: B.blue, lineHeight: 1.5 }}>
-              {b.sourceName}
-            </div>
+        <div style={{
+          background: B.navyAnchor,
+          padding: "14px 18px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: B.blue, letterSpacing: "2px" }}>
+            WATER QUALITY REPORT
           </div>
-          
-          <div style={{ textAlign: "center", marginLeft: 16 }}>
-            <div style={{ fontSize: 42, fontWeight: 900, color: scoreColor, lineHeight: 1 }} data-testid="risk-score">
-              {score}
-            </div>
-            <div style={{ fontSize: 8, color: scoreColor, fontWeight: 700, letterSpacing: "1px", marginBottom: 8 }}>
-              RISK SCORE
-            </div>
-            <div style={{
-              background: ewgColor,
-              color: B.white,
-              fontSize: 14,
-              fontWeight: 900,
-              padding: "6px 14px",
-              borderRadius: 8,
-              display: "inline-block"
-            }} data-testid="ewg-grade">
-              EWG: {b.ewg_grade}
-            </div>
+          <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255, 255, 255, 0.65)", letterSpacing: "1px" }}>
+            {b.reportYear}
           </div>
         </div>
-        
-        <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${B.navyMid}`, fontSize: 9, color: B.gray }}>
-          Report: {b.reportYear} • Source: {b.reportSource}
+
+        <div style={{ padding: "18px 18px 14px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: B.navy, letterSpacing: -0.5, marginBottom: 4 }} data-testid="brand-name">
+                {b.name || brand.name}
+              </div>
+              <div style={{ fontSize: 11, color: B.grayDark, marginBottom: 4 }}>
+                {b.parent} {"\u00B7"} {b.sourceType}
+              </div>
+              <div style={{ fontSize: 10, color: B.gray, lineHeight: 1.5 }}>
+                {b.sourceName}
+              </div>
+            </div>
+
+            <div style={{ textAlign: "center", flexShrink: 0 }}>
+              <div style={{ fontSize: 42, fontWeight: 800, color: scoreColor, lineHeight: 1, letterSpacing: -2 }} data-testid="risk-score">
+                {score}
+              </div>
+              <div style={{ fontSize: 8, color: B.gray, fontWeight: 700, letterSpacing: "1px", marginTop: 4, marginBottom: 8 }}>
+                RISK SCORE
+              </div>
+              <div style={{
+                background: ewgColor,
+                color: B.white,
+                fontSize: 13,
+                fontWeight: 800,
+                padding: "5px 12px",
+                borderRadius: 8,
+                display: "inline-block"
+              }} data-testid="ewg-grade">
+                EWG: {b.ewg_grade}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${B.border}`, fontSize: 9, color: B.gray }}>
+            Source: {b.reportSource}
+          </div>
         </div>
       </div>
 
       {/* 2. WATER PROFILE GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }} data-testid="water-profile-grid">
-        {/* pH Tile */}
-        <div style={{ background: B.white, borderRadius: 12, padding: "14px", border: `1px solid ${B.borderLight}` }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: phInfo.color }}>{b.ph}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }} data-testid="water-profile-grid">
+        <div className="card-default" style={{ padding: "14px" }}>
+          <div style={{ fontSize: 24, fontWeight: 800, color: phInfo.color, letterSpacing: -1 }}>{b.ph}</div>
           <div style={{ fontSize: 10, fontWeight: 700, color: phInfo.color }}>{phInfo.text}</div>
           <div style={{ fontSize: 9, color: B.gray, marginTop: 2 }}>pH Level</div>
         </div>
-        
-        {/* TDS Tile */}
-        <div style={{ background: B.white, borderRadius: 12, padding: "14px", border: `1px solid ${B.borderLight}` }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: B.navy }}>{b.tds_ppm}</div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: B.blue }}>{getTdsLabel(b.tds_ppm)}</div>
+
+        <div className="card-default" style={{ padding: "14px" }}>
+          <div style={{ fontSize: 24, fontWeight: 800, color: B.navy, letterSpacing: -1 }}>{b.tds_ppm}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: B.blueDark }}>{getTdsLabel(b.tds_ppm)}</div>
           <div style={{ fontSize: 9, color: B.gray, marginTop: 2 }}>TDS (ppm)</div>
         </div>
-        
-        {/* Hardness Tile */}
-        <div style={{ background: B.white, borderRadius: 12, padding: "14px", border: `1px solid ${B.borderLight}` }}>
+
+        <div className="card-default" style={{ padding: "14px" }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: B.navy }}>{b.hardness}</div>
           <div style={{ fontSize: 9, color: B.gray, marginTop: 4 }}>Hardness</div>
         </div>
-        
-        {/* Treatment Tile */}
-        <div style={{ background: B.white, borderRadius: 12, padding: "14px", border: `1px solid ${B.borderLight}` }}>
+
+        <div className="card-default" style={{ padding: "14px" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: B.navy, lineHeight: 1.4 }}>
-            {b.treatment?.split("→")[0]?.trim() || "None"}
+            {b.treatment?.split("\u2192")[0]?.trim() || "None"}
           </div>
           <div style={{ fontSize: 9, color: B.gray, marginTop: 4 }}>Treatment</div>
         </div>
@@ -870,13 +878,13 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
 
       {/* 3. MINERALS CARD */}
       {b.minerals && (
-        <div style={{ background: B.white, borderRadius: 12, padding: "16px", marginBottom: 16, border: `1px solid ${B.borderLight}` }} data-testid="minerals-card">
-          <div style={{ fontSize: 10, fontWeight: 800, color: B.navy, letterSpacing: "1px", marginBottom: 12 }}>
-            MINERAL PROFILE
+        <div className="card-default" style={{ padding: "16px", marginBottom: 14 }} data-testid="minerals-card">
+          <div style={{ fontSize: 10, fontWeight: 800, color: B.gray, letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: 12 }}>
+            Mineral Profile
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
             {Object.entries(b.minerals).map(([name, value]) => (
-              <div key={name} style={{ background: B.blueLight, borderRadius: 8, padding: "8px", textAlign: "center" }}>
+              <div key={name} style={{ background: B.blueLight, borderRadius: 8, padding: "8px", textAlign: "center", border: `1px solid ${B.blueTint}` }}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: B.blueDark }}>{value}</div>
                 <div style={{ fontSize: 8, color: B.gray, textTransform: "capitalize" }}>{name}</div>
               </div>
@@ -884,9 +892,9 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
           </div>
         </div>
       )}
-      
+
       {b.tds_ppm < 15 && (
-        <div style={{ background: B.warningBg, borderRadius: 12, padding: "12px 16px", marginBottom: 16, border: `1px solid ${B.warning}33` }}>
+        <div className="card-attention" style={{ padding: "12px 16px", marginBottom: 14 }}>
           <div style={{ fontSize: 11, color: B.warning, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
             <Icon name="alert" size={16} color={B.warning} />
             No natural minerals detected (TDS {b.tds_ppm} ppm)
@@ -894,17 +902,17 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
         </div>
       )}
 
-      {/* 4. CONTAMINANT ANALYSIS TABLE */}
-      <div style={{ background: B.white, borderRadius: 12, overflow: "hidden", marginBottom: 16, border: `1px solid ${B.borderLight}` }} data-testid="contaminant-table">
-        <div style={{ background: B.navy, padding: "14px 16px" }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: B.white, letterSpacing: "0.5px" }}>
-            CONTAMINANT ANALYSIS — {b.reportYear} OFFICIAL DATA
+      {/* 4. CONTAMINANT ANALYSIS TABLE — Authority anchor header */}
+      <div className="card-default" style={{ overflow: "hidden", padding: 0, marginBottom: 14 }} data-testid="contaminant-table">
+        <div style={{ background: B.navyAnchor, padding: "14px 18px" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: B.white, letterSpacing: "0.5px" }}>
+            CONTAMINANT ANALYSIS {"\u00B7"} {b.reportYear}
           </div>
-          <div style={{ fontSize: 9, color: B.gray, marginTop: 4 }}>
+          <div style={{ fontSize: 9, color: "rgba(255, 255, 255, 0.65)", marginTop: 4 }}>
             Source: {b.reportSource}
           </div>
         </div>
-        
+
         <div>
           {b.contaminants?.map((c, idx) => (
             <ContaminantRow
@@ -918,34 +926,30 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
         </div>
       </div>
 
-      {/* 5. REGULATORY HISTORY CARD */}
+      {/* 5. REGULATORY HISTORY — Critical surface */}
       {hasRegulatoryHistory && (
-        <div style={{
-          background: B.dangerBg,
-          borderRadius: 12,
+        <div className="card-critical" style={{
           padding: "16px",
-          marginBottom: 16,
-          border: `1px solid ${B.danger}33`,
+          marginBottom: 14,
           animation: b.recalls?.length > 0 ? "pulse 2s ease-in-out 1" : "none"
         }} data-testid="regulatory-history">
-          <div style={{ fontSize: 12, fontWeight: 800, color: B.danger, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: B.danger, marginBottom: 12, display: "flex", alignItems: "center", gap: 6, letterSpacing: 0.5 }}>
             <Icon name="alert" size={18} color={B.danger} />
             REGULATORY HISTORY
           </div>
-          
-          {/* Recalls */}
+
           {b.recalls?.map((r, idx) => (
             <div key={`recall-${idx}`} style={{
               background: B.white,
-              borderLeft: `4px solid #EA580C`,
+              borderLeft: `4px solid ${B.danger}`,
               borderRadius: 8,
               padding: "12px",
               marginBottom: 8
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 10, fontWeight: 800, color: "#EA580C" }}>FDA RECALL — {r.year}</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: B.danger }}>FDA RECALL {"\u00B7"} {r.year}</span>
                 {r.fdaClass && (
-                  <span style={{ fontSize: 8, fontWeight: 700, color: B.white, background: "#EA580C", padding: "2px 6px", borderRadius: 4 }}>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: B.white, background: B.danger, padding: "2px 6px", borderRadius: 4 }}>
                     {r.fdaClass}
                   </span>
                 )}
@@ -954,8 +958,7 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
               <div style={{ fontSize: 11, color: B.navy, lineHeight: 1.5 }}>{r.description}</div>
             </div>
           ))}
-          
-          {/* Lawsuits */}
+
           {b.lawsuits?.map((l, idx) => (
             <div key={`lawsuit-${idx}`} style={{
               background: B.white,
@@ -964,12 +967,11 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
               padding: "12px",
               marginBottom: 8
             }}>
-              <div style={{ fontSize: 10, fontWeight: 800, color: B.warning, marginBottom: 4 }}>LAWSUIT — {l.year}</div>
+              <div style={{ fontSize: 10, fontWeight: 800, color: B.warning, marginBottom: 4 }}>LAWSUIT {"\u00B7"} {l.year}</div>
               <div style={{ fontSize: 11, color: B.navy, lineHeight: 1.5 }}>{l.description}</div>
             </div>
           ))}
-          
-          {/* Violations */}
+
           {b.violations?.map((v, idx) => (
             <div key={`violation-${idx}`} style={{
               background: B.white,
@@ -979,7 +981,7 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
               marginBottom: idx < b.violations.length - 1 ? 8 : 0
             }}>
               <div style={{ fontSize: 10, fontWeight: 800, color: B.danger, marginBottom: 4 }}>
-                {v.description?.includes("GUILTY") || v.description?.includes("CRIMINAL") ? "CRIMINAL CONVICTION" : "VIOLATION"} — {v.year}
+                {v.description?.includes("GUILTY") || v.description?.includes("CRIMINAL") ? "CRIMINAL CONVICTION" : "VIOLATION"} {"\u00B7"} {v.year}
               </div>
               <div style={{ fontSize: 11, color: B.navy, lineHeight: 1.5 }}>{v.description}</div>
             </div>
@@ -987,31 +989,25 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
         </div>
       )}
 
-      {/* 6. KEY CONCERN */}
-      <div style={{
-        background: B.dangerBg,
-        borderLeft: `4px solid ${B.danger}`,
-        borderRadius: 12,
-        padding: "14px 16px",
-        marginBottom: 16
-      }} data-testid="key-concern">
-        <div style={{ fontSize: 10, fontWeight: 800, color: B.danger, marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+      {/* 6. KEY CONCERN — Critical surface */}
+      <div className="card-critical" style={{ padding: "14px 16px", marginBottom: 14 }} data-testid="key-concern">
+        <div style={{ fontSize: 10, fontWeight: 800, color: B.danger, marginBottom: 6, display: "flex", alignItems: "center", gap: 6, letterSpacing: 0.5 }}>
           <Icon name="alert" size={16} color={B.danger} />
           KEY CONCERN
         </div>
-        <div style={{ fontSize: 12, color: "#742A2A", lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: B.navy, lineHeight: 1.6 }}>
           {b.key_concern}
         </div>
       </div>
 
       {/* 7. TRANSPARENCY RATING */}
-      <div style={{ background: B.white, borderRadius: 12, padding: "16px", marginBottom: 16, border: `1px solid ${B.borderLight}` }} data-testid="transparency-card">
+      <div className="card-default" style={{ padding: "16px", marginBottom: 14 }} data-testid="transparency-card">
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
           <div style={{
             background: ewgColor,
             color: B.white,
             fontSize: 20,
-            fontWeight: 900,
+            fontWeight: 800,
             width: 48,
             height: 48,
             borderRadius: 10,
@@ -1023,22 +1019,21 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
           </div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, color: B.navy }}>EWG Transparency Grade</div>
-            <div style={{ fontSize: 10, color: B.gray, marginTop: 2 }}>{b.transparency}</div>
+            <div style={{ fontSize: 10, color: B.gray, marginTop: 2, lineHeight: 1.5 }}>{b.transparency}</div>
           </div>
         </div>
-        
+
         {b.reportUrl && (
           <a
             href={b.reportUrl}
             target="_blank"
             rel="noopener noreferrer"
+            className="pill-brand"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: 6,
-              background: B.blueLight,
-              color: B.blueDark,
               padding: "10px",
               borderRadius: 8,
               fontSize: 11,
@@ -1048,37 +1043,39 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
             }}
           >
             <Icon name="link" size={14} color={B.blueDark} />
-            View Official Report →
+            View Official Report {"\u2192"}
           </a>
         )}
       </div>
 
-      {/* 8. WTR HUB BRIDGE */}
+      {/* 8. WTR HUB BRIDGE — Brand gradient matching A-1 protection card */}
       <div style={{
-        background: `linear-gradient(135deg, ${B.blue}, ${B.blueDark})`,
+        background: `linear-gradient(135deg, ${B.blue} 0%, ${B.blueDark} 100%)`,
         borderRadius: 16,
         padding: "20px 16px",
-        marginBottom: 16,
-        color: B.white
+        marginBottom: 14,
+        color: B.white,
+        boxShadow: "0 8px 24px rgba(81, 176, 230, 0.25), 0 1px 3px rgba(15, 20, 25, 0.06)"
       }} data-testid="wtr-hub-bridge">
-        <div style={{ fontSize: 11, fontWeight: 800, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{display:"inline-flex",verticalAlign:"middle"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg></span> Home WTR Hub removes:
+        <div style={{ fontSize: 11, fontWeight: 800, marginBottom: 12, display: "flex", alignItems: "center", gap: 8, letterSpacing: 0.5 }}>
+          <Icon name="shield" size={18} color={B.white} />
+          Home WTR Hub removes:
         </div>
-        
+
         <div style={{ marginBottom: 14 }}>
           {detectedHighRisk.map((c, idx) => (
             <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
               <Icon name="check" size={16} color={B.white} />
               <span style={{ fontSize: 11, fontWeight: 600 }}>{c.name}</span>
-              <span style={{ fontSize: 9, color: "rgba(255,255,255,0.7)" }}>— 99%+ removed</span>
+              <span style={{ fontSize: 9, color: "rgba(255,255,255,0.75)" }}>{"\u2014"} 99%+ removed</span>
             </div>
           ))}
         </div>
-        
-        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.85)", fontStyle: "italic", lineHeight: 1.6, marginBottom: 16 }}>
+
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.90)", fontStyle: "italic", lineHeight: 1.6, marginBottom: 16 }}>
           "{b.wtr_hub_statement}"
         </div>
-        
+
         <button
           onClick={onBridge}
           data-testid="test-tap-water-btn"
@@ -1088,13 +1085,15 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
             color: B.blueDark,
             border: "none",
             padding: "14px",
-            borderRadius: 10,
+            borderRadius: 12,
             fontSize: 13,
             fontWeight: 800,
-            cursor: "pointer"
+            cursor: "pointer",
+            letterSpacing: 0.5,
+            boxShadow: "0 1px 0 rgba(255, 255, 255, 0.30) inset"
           }}
         >
-          TEST MY TAP WATER →
+          TEST MY TAP WATER {"\u2192"}
         </button>
       </div>
 
@@ -1103,7 +1102,7 @@ function WaterQualityReport({ brand, onBack, onBridge }) {
         <div>Data source: {b.reportSource}</div>
         <div>Report year: {b.reportYear}</div>
         {b.reportUrl && (
-          <a href={b.reportUrl} target="_blank" rel="noopener noreferrer" style={{ color: B.blue, marginTop: 4, display: "inline-block" }}>
+          <a href={b.reportUrl} target="_blank" rel="noopener noreferrer" style={{ color: B.blueDark, marginTop: 4, display: "inline-block" }}>
             View source document
           </a>
         )}
@@ -1143,7 +1142,6 @@ export default function BottleScanView({ onBridge }) {
     "Generating water quality report..."
   ];
 
-  // Quick select brands for not found screen
   const QUICK_SELECT_BRANDS = ["Dasani", "Aquafina", "FIJI Water", "Poland Spring", "Topo Chico", "Essentia", "smartwater", "Crystal Geyser", "Icelandic Glacial", "VOSS"];
 
   // API-powered search with debounce
@@ -1164,10 +1162,8 @@ export default function BottleScanView({ onBridge }) {
     return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
   }, [searchQuery]);
 
-  // For backwards compat with the existing UI
   const filteredBrands = searchResults.map(r => r.brand_name);
 
-  // Not-found search also uses API
   const [notFoundResults, setNotFoundResults] = useState([]);
   useEffect(() => {
     if (!notFoundSearch || notFoundSearch.length < 2) { setNotFoundResults([]); return; }
@@ -1181,7 +1177,6 @@ export default function BottleScanView({ onBridge }) {
   }, [notFoundSearch]);
   const notFoundFilteredBrands = notFoundResults.map(r => r.brand_name);
 
-  // Camera permission handling
   useEffect(() => {
     checkCameraPermission();
   }, []);
@@ -1205,13 +1200,13 @@ export default function BottleScanView({ onBridge }) {
       return;
     }
     setMode("requesting");
-    
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
       stream.getTracks().forEach(track => track.stop());
       setPermissionState("granted");
       setMode("camera");
-      
+
       setTimeout(async () => {
         try {
           const html5QrCode = new Html5Qrcode("barcode-scanner");
@@ -1260,12 +1255,10 @@ export default function BottleScanView({ onBridge }) {
     setScanStep(0);
     const cleanCode = code.replace(/\D/g, '');
 
-    // Start the animation steps while API call runs in parallel
     let step = 0;
     let apiDone = false;
     let apiResult = null;
 
-    // Fire API call immediately
     fetch(`${API_BASE}/api/wtr/bottle/${cleanCode}`, { headers: AUTH_HEADER })
       .then(res => res.json())
       .then(data => { apiResult = data; apiDone = true; })
@@ -1276,15 +1269,12 @@ export default function BottleScanView({ onBridge }) {
       setScanStep(step);
       if (step >= SCAN_STEPS.length) {
         clearInterval(interval);
-        // Wait for API if it hasn't finished yet
         const checkApi = () => {
           if (!apiDone) { setTimeout(checkApi, 100); return; }
           if (apiResult && apiResult.found) {
-            // Convert API response to the brand format the WaterQualityReport expects
             setBrand(mapApiBrandToReport(apiResult));
             setMode("result");
           } else {
-            // Also try local fallback
             const brandName = lookupBrandFromScan(code);
             if (brandName && BOTTLE_BRANDS[brandName]) {
               setBrand({ name: brandName, ...BOTTLE_BRANDS[brandName] });
@@ -1299,9 +1289,7 @@ export default function BottleScanView({ onBridge }) {
     }, 400);
   }
 
-  // Map API response to the exact shape WaterQualityReport expects
   function mapApiBrandToReport(b) {
-    // Source type display name
     const sourceTypeDisplay = {
       spring: 'Natural Spring Water', artesian: 'Artesian Water',
       purified_municipal: 'Purified Water', purified_well: 'Purified Well Water',
@@ -1310,7 +1298,6 @@ export default function BottleScanView({ onBridge }) {
       sparkling_added: 'Sparkling Water', well: 'Well Water', unknown: 'Water',
     };
 
-    // Hardness label from ppm
     const hardnessLabel = (ppm) => {
       if (ppm == null) return 'Unknown';
       if (ppm <= 17) return 'Very soft';
@@ -1320,11 +1307,8 @@ export default function BottleScanView({ onBridge }) {
       return 'Very hard (' + ppm + ' mg/L)';
     };
 
-    // Build contaminants array matching the format WaterQualityReport expects:
-    // { name, detected, level, fda_limit, risk, category, health }
     const contaminants = [];
 
-    // PFAS
     if (b.pfas_result_category === 'not_disclosed' || b.pfas_result_category === 'not_tested') {
       contaminants.push({
         name: 'PFAS (Forever Chemicals)', detected: false, level: 'Not tested/disclosed',
@@ -1343,11 +1327,10 @@ export default function BottleScanView({ onBridge }) {
       contaminants.push({
         name: 'PFAS (Forever Chemicals)', detected: false, level: 'Not detected',
         fda_limit: 'No MCL', risk: 'none', category: 'Forever Chemicals',
-        health: b.pfas_notes || 'Tested and verified — no PFAS detected.',
+        health: b.pfas_notes || 'Tested and verified, no PFAS detected.',
       });
     }
 
-    // Antimony
     if (b.has_antimony_risk || b.primary_material === 'PET') {
       contaminants.push({
         name: 'Antimony (PET Leaching)', detected: b.has_antimony_risk,
@@ -1358,7 +1341,6 @@ export default function BottleScanView({ onBridge }) {
       });
     }
 
-    // Microplastics
     const mpRisk = b.microplastic_risk_level || (b.primary_material === 'PET' ? 'medium' : 'low');
     if (mpRisk === 'high' || mpRisk === 'medium' || b.primary_material === 'PET') {
       contaminants.push({
@@ -1370,7 +1352,6 @@ export default function BottleScanView({ onBridge }) {
       });
     }
 
-    // Add test results as additional contaminants if available
     if (b.test_results && b.test_results.length > 0) {
       for (const t of b.test_results) {
         if (t.is_health_concern) {
@@ -1386,7 +1367,6 @@ export default function BottleScanView({ onBridge }) {
       }
     }
 
-    // Hub removes list
     const hubRemoves = Array.isArray(b.hub_removes_concerns) ? b.hub_removes_concerns : [];
 
     return {
@@ -1431,13 +1411,11 @@ export default function BottleScanView({ onBridge }) {
     let apiDone = false;
     let apiResult = null;
 
-    // Search API for this brand name
     fetch(`${API_BASE}/api/wtr/bottle/search?q=${encodeURIComponent(brandName)}&limit=1`, { headers: AUTH_HEADER })
       .then(res => res.json())
       .then(data => {
         if (data.results && data.results.length > 0) {
           const r = data.results[0];
-          // If the search result has a barcode, fetch full details
           if (r.barcode_primary) {
             return fetch(`${API_BASE}/api/wtr/bottle/${r.barcode_primary}`, { headers: AUTH_HEADER }).then(res2 => res2.json());
           }
@@ -1459,7 +1437,6 @@ export default function BottleScanView({ onBridge }) {
             setBrand(mapApiBrandToReport(apiResult));
             setMode("result");
           } else if (BOTTLE_BRANDS[brandName]) {
-            // Local fallback
             setBrand({ name: brandName, ...BOTTLE_BRANDS[brandName] });
             setMode("result");
           } else {
@@ -1475,116 +1452,106 @@ export default function BottleScanView({ onBridge }) {
     return () => stopCameraScan();
   }, []);
 
+  const outerStyle = {
+    fontFamily: "Montserrat, -apple-system, sans-serif",
+    color: B.navy,
+    ...v33Substrate,
+    minHeight: "100vh",
+    WebkitFontSmoothing: "antialiased",
+  };
+
   // ─── INTRO VIEW ─────────────────────────────────────────────────────────────
   if (mode === "intro") return (
-    <div style={{ padding: "16px", fontFamily: "'Nunito', sans-serif" }} data-testid="bottle-scan-intro">
-      {/* Camera Scan CTA */}
-      <div style={{
-        background: B.blue,
-        borderRadius: 16,
-        padding: "24px 16px",
-        marginBottom: 16,
-        textAlign: "center"
-      }}>
+    <div style={outerStyle} data-testid="bottle-scan-intro">
+      <div style={{ padding: "16px" }}>
+        <style>{`
+          @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+          @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+          @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.04);opacity:0.85} }
+          @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        `}</style>
+
         <div style={{
-          width: 64,
-          height: 64,
-          borderRadius: "50%",
-          background: `linear-gradient(135deg, ${B.blue}, ${B.blueDark})`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          margin: "0 auto 12px",
-          boxShadow: `0 6px 24px ${B.blue}66`
+          background: `linear-gradient(135deg, ${B.blue} 0%, ${B.blueDark} 100%)`,
+          borderRadius: 16,
+          padding: "24px 16px",
+          marginBottom: 14,
+          textAlign: "center",
+          boxShadow: "0 8px 24px rgba(81, 176, 230, 0.25), 0 1px 3px rgba(15, 20, 25, 0.06)"
         }}>
-          <Icon name="camera" size={28} color={B.white} />
-        </div>
-        <h3 style={{ fontSize: 18, fontWeight: 900, color: B.white, marginBottom: 4 }}>Scan Any Water Bottle</h3>
-        <p style={{ fontSize: 11, color: "#1A2B3C", marginBottom: 16 }}>Point camera at barcode for instant quality analysis</p>
-        <button
-          onClick={() => requestCameraAndScan()}
-          data-testid="scan-camera-btn"
-          style={{
-            background: B.white,
-            color: B.navy,
-            border: "none",
-            padding: "12px 32px",
-            borderRadius: 10,
-            fontSize: 13,
-            fontWeight: 800,
-            cursor: "pointer"
-          }}
-        >
-          ENABLE CAMERA
-        </button>
-      </div>
-
-      {/* Search */}
-      <div style={{ position: "relative", marginBottom: 16 }}>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search any brand..."
-          data-testid="brand-search-input"
-          style={{
-            width: "100%",
-            padding: "12px 12px 12px 40px",
-            border: `2px solid ${B.border}`,
-            borderRadius: 10,
-            fontSize: 13,
-            fontFamily: "'Nunito', sans-serif",
-            boxSizing: "border-box",
-            position: "relative"
-          }}
-        />
-        <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}>
-          <Icon name="search" size={18} color={B.gray} />
-        </div>
-      </div>
-
-      {/* Filtered Results or Categories */}
-      {searchQuery ? (
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1px" }}>
-            RESULTS ({filteredBrands.length})
+          <div style={{
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            background: "rgba(255, 255, 255, 0.18)",
+            border: "1px solid rgba(255, 255, 255, 0.25)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 12px",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)"
+          }}>
+            <Icon name="camera" size={28} color={B.white} />
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {filteredBrands.map(name => (
-              <button
-                key={name}
-                onClick={() => selectBrand(name)}
-                data-testid={`brand-pill-${name.toLowerCase().replace(/\s+/g, '-')}`}
-                style={{
-                  background: B.white,
-                  border: `1px solid ${B.border}`,
-                  color: B.navy,
-                  padding: "8px 14px",
-                  borderRadius: 20,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  cursor: "pointer"
-                }}
-              >
-                {name}
-              </button>
-            ))}
+          <h3 style={{ fontSize: 18, fontWeight: 800, color: B.white, marginBottom: 4, letterSpacing: -0.3 }}>Scan Any Water Bottle</h3>
+          <p style={{ fontSize: 11, color: "rgba(255, 255, 255, 0.85)", marginBottom: 16 }}>Point camera at barcode for instant quality analysis</p>
+          <button
+            onClick={() => requestCameraAndScan()}
+            data-testid="scan-camera-btn"
+            style={{
+              background: B.white,
+              color: B.blueDark,
+              border: "none",
+              padding: "12px 32px",
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: "pointer",
+              letterSpacing: 0.5
+            }}
+          >
+            ENABLE CAMERA
+          </button>
+        </div>
+
+        <div style={{ position: "relative", marginBottom: 14 }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search any brand..."
+            data-testid="brand-search-input"
+            className="card-default"
+            style={{
+              width: "100%",
+              padding: "12px 12px 12px 40px",
+              fontSize: 13,
+              fontFamily: "Montserrat, -apple-system, sans-serif",
+              boxSizing: "border-box",
+              color: B.navy,
+              outline: "none"
+            }}
+          />
+          <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+            <Icon name="search" size={18} color={B.gray} />
           </div>
         </div>
-      ) : (
-        <>
-          {/* NATIONAL */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1px" }}>NATIONAL</div>
+
+        {searchQuery ? (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1.2px", textTransform: "uppercase" }}>
+              Results ({filteredBrands.length})
+            </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {BRAND_CATEGORIES.NATIONAL.map(name => (
+              {filteredBrands.map(name => (
                 <button
                   key={name}
                   onClick={() => selectBrand(name)}
                   data-testid={`brand-pill-${name.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="card-default"
                   style={{
-                    background: B.white,
-                    border: `1px solid ${B.border}`,
                     color: B.navy,
                     padding: "8px 14px",
                     borderRadius: 20,
@@ -1598,77 +1565,94 @@ export default function BottleScanView({ onBridge }) {
               ))}
             </div>
           </div>
-
-          {/* PREMIUM */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1px" }}>PREMIUM</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {BRAND_CATEGORIES.PREMIUM.map(name => (
-                <button
-                  key={name}
-                  onClick={() => selectBrand(name)}
-                  data-testid={`brand-pill-${name.toLowerCase().replace(/\s+/g, '-')}`}
-                  style={{
-                    background: B.blueLight,
-                    border: `1px solid ${B.blue}44`,
-                    color: B.blueDark,
-                    padding: "8px 14px",
-                    borderRadius: 20,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    cursor: "pointer"
-                  }}
-                >
-                  {name}
-                </button>
-              ))}
+        ) : (
+          <>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1.2px", textTransform: "uppercase" }}>National</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {BRAND_CATEGORIES.NATIONAL.map(name => (
+                  <button
+                    key={name}
+                    onClick={() => selectBrand(name)}
+                    data-testid={`brand-pill-${name.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="card-default"
+                    style={{
+                      color: B.navy,
+                      padding: "8px 14px",
+                      borderRadius: 20,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer"
+                    }}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1.2px", textTransform: "uppercase" }}>Premium</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {BRAND_CATEGORIES.PREMIUM.map(name => (
+                  <button
+                    key={name}
+                    onClick={() => selectBrand(name)}
+                    data-testid={`brand-pill-${name.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="pill-brand"
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: 20,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer"
+                    }}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1.2px", textTransform: "uppercase" }}>Wellness</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {BRAND_CATEGORIES.WELLNESS.map(name => (
+                  <button
+                    key={name}
+                    onClick={() => selectBrand(name)}
+                    data-testid={`brand-pill-${name.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="pill-positive"
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: 20,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer"
+                    }}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="card-default" style={{ padding: "12px 16px" }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1.2px", textTransform: "uppercase" }}>Data Sources</div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {["FDA Reports", "EWG Database", "Consumer Reports"].map(src => (
+              <div key={src} className="pill-positive" style={{
+                flex: 1,
+                borderRadius: 8,
+                padding: "8px",
+                textAlign: "center"
+              }}>
+                <div style={{ fontSize: 9, fontWeight: 700 }}>{src}</div>
+              </div>
+            ))}
           </div>
-
-          {/* WELLNESS */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1px" }}>WELLNESS</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {BRAND_CATEGORIES.WELLNESS.map(name => (
-                <button
-                  key={name}
-                  onClick={() => selectBrand(name)}
-                  data-testid={`brand-pill-${name.toLowerCase().replace(/\s+/g, '-')}`}
-                  style={{
-                    background: B.okBg,
-                    border: `1px solid ${B.ok}44`,
-                    color: B.ok,
-                    padding: "8px 14px",
-                    borderRadius: 20,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    cursor: "pointer"
-                  }}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Data Sources */}
-      <div style={{ background: B.lightGray, borderRadius: 12, padding: "12px 16px" }}>
-        <div style={{ fontSize: 9, fontWeight: 700, color: B.gray, marginBottom: 8, letterSpacing: "1px" }}>DATA SOURCES</div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {["FDA Reports", "EWG Database", "Consumer Reports"].map(src => (
-            <div key={src} style={{
-              flex: 1,
-              background: B.white,
-              borderRadius: 8,
-              padding: "8px",
-              textAlign: "center",
-              border: `1px solid ${B.borderLight}`
-            }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: B.ok }}>{src}</div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
@@ -1676,255 +1660,289 @@ export default function BottleScanView({ onBridge }) {
 
   // ─── REQUESTING PERMISSION VIEW ─────────────────────────────────────────────
   if (mode === "requesting") return (
-    <div style={{ padding: "40px 20px", textAlign: "center", fontFamily: "'Nunito', sans-serif" }}>
-      <div style={{
-        width: 60,
-        height: 60,
-        borderRadius: "50%",
-        border: `3px solid ${B.blue}`,
-        borderTopColor: "transparent",
-        animation: "spin 1s linear infinite",
-        margin: "0 auto 20px"
-      }} />
-      <h3 style={{ fontSize: 16, fontWeight: 800, color: B.navy }}>Requesting Camera Access</h3>
-      <p style={{ fontSize: 12, color: B.gray }}>Please tap "Allow" when prompted</p>
+    <div style={outerStyle}>
+      <div style={{ padding: "40px 20px", textAlign: "center" }}>
+        <style>{`@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }`}</style>
+        <div style={{
+          width: 60,
+          height: 60,
+          borderRadius: "50%",
+          border: `3px solid ${B.blue}`,
+          borderTopColor: "transparent",
+          animation: "spin 1s linear infinite",
+          margin: "0 auto 20px"
+        }} />
+        <h3 style={{ fontSize: 16, fontWeight: 800, color: B.navy }}>Requesting Camera Access</h3>
+        <p style={{ fontSize: 12, color: B.gray }}>Please tap "Allow" when prompted</p>
+      </div>
     </div>
   );
 
   // ─── PERMISSION DENIED VIEW ─────────────────────────────────────────────────
   if (mode === "permission_denied") return (
-    <div style={{ padding: "30px 20px", textAlign: "center", fontFamily: "'Nunito', sans-serif" }}>
-      <div style={{
-        width: 60,
-        height: 60,
-        borderRadius: "50%",
-        background: B.dangerBg,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        margin: "0 auto 16px"
-      }}>
-        <Icon name="camera" size={28} color={B.danger} />
-      </div>
-      <h3 style={{ fontSize: 16, fontWeight: 800, color: B.navy, marginBottom: 8 }}>Camera Access Required</h3>
-      <p style={{ fontSize: 12, color: B.gray, marginBottom: 16 }}>Enable camera in your browser settings</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 260, margin: "0 auto" }}>
-        <button
-          onClick={() => requestCameraAndScan(true)}
-          style={{ background: `linear-gradient(135deg, ${B.blue}, ${B.blueDark})`, color: B.white, border: "none", padding: "12px", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}
-        >
-          Try Again
-        </button>
-        <button
-          onClick={() => setMode("intro")}
-          style={{ background: B.lightGray, color: B.gray, border: "none", padding: "10px", borderRadius: 10, fontWeight: 600, cursor: "pointer" }}
-        >
-          Search Manually
-        </button>
+    <div style={outerStyle}>
+      <div style={{ padding: "30px 20px", textAlign: "center" }}>
+        <div style={{
+          width: 60,
+          height: 60,
+          borderRadius: "50%",
+          background: B.dangerBgStrong,
+          border: `1px solid rgba(184, 74, 74, 0.20)`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 16px"
+        }}>
+          <Icon name="camera" size={28} color={B.danger} />
+        </div>
+        <h3 style={{ fontSize: 16, fontWeight: 800, color: B.navy, marginBottom: 8 }}>Camera Access Required</h3>
+        <p style={{ fontSize: 12, color: B.gray, marginBottom: 16 }}>Enable camera in your browser settings</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 260, margin: "0 auto" }}>
+          <button
+            onClick={() => requestCameraAndScan(true)}
+            className="btn-brand"
+            style={{
+              padding: "12px",
+              borderRadius: 12,
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: "pointer"
+            }}
+          >
+            Try Again
+          </button>
+          <button
+            onClick={() => setMode("intro")}
+            className="card-default"
+            style={{
+              color: B.gray,
+              padding: "10px",
+              borderRadius: 12,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            Search Manually
+          </button>
+        </div>
       </div>
     </div>
   );
 
   // ─── CAMERA VIEW ────────────────────────────────────────────────────────────
   if (mode === "camera") return (
-    <div style={{ padding: "16px", fontFamily: "'Nunito', sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-        <button onClick={() => { stopCameraScan(); setMode("intro"); }} style={{ background: "none", border: "none", color: B.gray, fontSize: 12, cursor: "pointer" }}>
-          ← Cancel
-        </button>
-        <div style={{ background: B.okBg, padding: "4px 10px", borderRadius: 12, fontSize: 10, color: B.ok, fontWeight: 700 }}>
-          SCANNING
+    <div style={outerStyle}>
+      <div style={{ padding: "16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+          <button onClick={() => { stopCameraScan(); setMode("intro"); }} style={{ background: "none", border: "none", color: B.gray, fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
+            {"\u2190"} Cancel
+          </button>
+          <div className="pill-positive" style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }}>
+            SCANNING
+          </div>
         </div>
+        <div id="barcode-scanner" ref={scannerRef} style={{ borderRadius: 12, overflow: "hidden", background: B.navyAnchor, minHeight: 250 }} />
+        <p style={{ fontSize: 11, color: B.gray, textAlign: "center", marginTop: 12 }}>Align barcode within frame</p>
       </div>
-      <div id="barcode-scanner" ref={scannerRef} style={{ borderRadius: 12, overflow: "hidden", background: B.navy, minHeight: 250 }} />
-      <p style={{ fontSize: 11, color: B.gray, textAlign: "center", marginTop: 12 }}>Align barcode within frame</p>
     </div>
   );
 
   // ─── PROCESSING VIEW ────────────────────────────────────────────────────────
   if (mode === "processing") return (
-    <div style={{ padding: "40px 20px", textAlign: "center", fontFamily: "'Nunito', sans-serif" }}>
-      <div style={{
-        width: 60,
-        height: 60,
-        borderRadius: "50%",
-        background: `linear-gradient(135deg, ${B.blue}, ${B.blueDark})`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        margin: "0 auto 16px",
-        animation: "pulse 1.5s ease-in-out infinite"
-      }}>
-        <Icon name="search" size={28} color={B.white} />
-      </div>
-      <h3 style={{ fontSize: 16, fontWeight: 800, color: B.navy, marginBottom: 16 }}>Generating Report</h3>
-      <div style={{ background: B.white, borderRadius: 12, border: `1px solid ${B.borderLight}`, overflow: "hidden", maxWidth: 300, margin: "0 auto" }}>
-        {SCAN_STEPS.map((step, i) => (
-          <div key={i} style={{
-            padding: "10px 14px",
-            background: i < scanStep ? B.okBg : i === scanStep ? B.blueLight : "transparent",
-            borderBottom: i < SCAN_STEPS.length - 1 ? `1px solid ${B.borderLight}` : "none",
-            fontSize: 11,
-            color: i < scanStep ? B.ok : i === scanStep ? B.blue : B.gray,
-            fontWeight: i === scanStep ? 700 : 400,
-            display: "flex",
-            alignItems: "center",
-            gap: 8
-          }}>
-            {i < scanStep ? <Icon name="check" size={14} color={B.ok} /> : i === scanStep ? (
-              <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${B.blue}`, borderTopColor: "transparent", animation: "spin 1s linear infinite" }} />
-            ) : <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${B.border}` }} />}
-            {step}
-          </div>
-        ))}
+    <div style={outerStyle}>
+      <div style={{ padding: "40px 20px", textAlign: "center" }}>
+        <style>{`
+          @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.04);opacity:0.85} }
+          @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        `}</style>
+        <div style={{
+          width: 60,
+          height: 60,
+          borderRadius: "50%",
+          background: `linear-gradient(135deg, ${B.blue} 0%, ${B.blueDark} 100%)`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 16px",
+          animation: "pulse 1.5s ease-in-out infinite",
+          boxShadow: "0 8px 24px rgba(81, 176, 230, 0.25)"
+        }}>
+          <Icon name="search" size={28} color={B.white} />
+        </div>
+        <h3 style={{ fontSize: 16, fontWeight: 800, color: B.navy, marginBottom: 16 }}>Generating Report</h3>
+        <div className="card-default" style={{ overflow: "hidden", maxWidth: 300, margin: "0 auto", padding: 0 }}>
+          {SCAN_STEPS.map((step, i) => (
+            <div key={i} style={{
+              padding: "10px 14px",
+              background: i < scanStep ? B.okBg : i === scanStep ? B.blueLight : "transparent",
+              borderBottom: i < SCAN_STEPS.length - 1 ? `1px solid ${B.border}` : "none",
+              fontSize: 11,
+              color: i < scanStep ? B.ok : i === scanStep ? B.blueDark : B.gray,
+              fontWeight: i === scanStep ? 700 : 500,
+              display: "flex",
+              alignItems: "center",
+              gap: 8
+            }}>
+              {i < scanStep ? <Icon name="check" size={14} color={B.ok} /> : i === scanStep ? (
+                <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${B.blue}`, borderTopColor: "transparent", animation: "spin 1s linear infinite" }} />
+              ) : <div style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${B.border}` }} />}
+              {step}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 
   // ─── NOT FOUND VIEW ─────────────────────────────────────────────────────────
-  // ─── NOT FOUND VIEW ─────────────────────────────────────────────────────────
   if (mode === "not_found") return (
-    <div style={{ padding: "24px 16px", fontFamily: "'Nunito', sans-serif" }} data-testid="not-found-view">
-      <div style={{
-        width: 56,
-        height: 56,
-        borderRadius: "50%",
-        background: B.warningBg,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        margin: "0 auto 14px"
-      }}>
-        <Icon name="alert" size={26} color={B.warning} />
-      </div>
-      <h3 style={{ fontSize: 17, fontWeight: 800, color: B.navy, marginBottom: 6, textAlign: "center" }}>Brand Not Found</h3>
-      <p style={{ fontSize: 11, color: B.gray, marginBottom: 16, textAlign: "center" }}>
-        Scanned code: <strong style={{ color: B.navy }}>{scannedCode}</strong>
-      </p>
-      
-      {/* Search Input */}
-      <div style={{ position: "relative", marginBottom: 14 }}>
-        <input
-          ref={notFoundInputRef}
-          type="text"
-          value={notFoundSearch}
-          onChange={(e) => setNotFoundSearch(e.target.value)}
-          placeholder="Type brand name..."
-          autoFocus
-          data-testid="not-found-search-input"
-          style={{
-            width: "100%",
-            padding: "12px 12px 12px 40px",
-            border: `2px solid ${B.border}`,
-            borderRadius: 10,
-            fontSize: 13,
-            fontFamily: "'Nunito', sans-serif",
-            boxSizing: "border-box"
-          }}
-        />
-        <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}>
-          <Icon name="search" size={18} color={B.gray} />
-        </div>
-      </div>
-      
-      {/* Search Results */}
-      {notFoundSearch.length > 0 && notFoundFilteredBrands.length > 0 && (
-        <div style={{ 
-          background: B.white, 
-          border: `1px solid ${B.border}`, 
-          borderRadius: 10, 
-          marginBottom: 14,
-          maxHeight: 180,
-          overflowY: "auto"
-        }}>
-          {notFoundFilteredBrands.slice(0, 6).map(name => (
-            <button
-              key={name}
-              onClick={() => { setNotFoundSearch(""); selectBrand(name); }}
-              data-testid={`not-found-result-${name.toLowerCase().replace(/\s+/g, '-')}`}
-              style={{
-                width: "100%",
-                padding: "11px 14px",
-                background: "transparent",
-                border: "none",
-                borderBottom: `1px solid ${B.lightGray}`,
-                textAlign: "left",
-                fontSize: 12,
-                fontWeight: 600,
-                color: B.navy,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 8
-              }}
-            >
-              <Icon name="check" size={14} color={B.blue} />
-              {name}
-              <span style={{ fontSize: 10, color: B.gray, marginLeft: "auto" }}>{BOTTLE_BRANDS[name]?.sourceType}</span>
-            </button>
-          ))}
-        </div>
-      )}
-      
-      {/* Quick Select Pills */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, color: B.gray, letterSpacing: "1px", marginBottom: 8 }}>QUICK SELECT</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {QUICK_SELECT_BRANDS.map(name => (
-            <button
-              key={name}
-              onClick={() => selectBrand(name)}
-              data-testid={`quick-select-${name.toLowerCase().replace(/\s+/g, '-')}`}
-              style={{
-                background: B.white,
-                border: `1px solid ${B.border}`,
-                color: B.navy,
-                padding: "6px 10px",
-                borderRadius: 16,
-                fontSize: 10,
-                fontWeight: 600,
-                cursor: "pointer"
-              }}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
-      </div>
-      
-      {/* Try Again Button */}
-      <button
-        onClick={() => { setNotFoundSearch(""); requestCameraAndScan(true); }}
-        data-testid="try-again-btn"
-        style={{ 
-          width: "100%",
-          background: `linear-gradient(135deg, ${B.blue}, ${B.blueDark})`, 
-          color: B.white, 
-          border: "none", 
-          padding: "13px", 
-          borderRadius: 10, 
-          fontWeight: 700, 
-          cursor: "pointer",
+    <div style={outerStyle} data-testid="not-found-view">
+      <div style={{ padding: "24px 16px" }}>
+        <div style={{
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: B.warningBgStrong,
+          border: "1px solid rgba(200, 155, 60, 0.20)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 8
-        }}
-      >
-        <Icon name="camera" size={18} color={B.white} />
-        Try Again
-      </button>
+          margin: "0 auto 14px"
+        }}>
+          <Icon name="alert" size={26} color={B.warning} />
+        </div>
+        <h3 style={{ fontSize: 17, fontWeight: 800, color: B.navy, marginBottom: 6, textAlign: "center" }}>Brand Not Found</h3>
+        <p style={{ fontSize: 11, color: B.gray, marginBottom: 16, textAlign: "center" }}>
+          Scanned code: <strong style={{ color: B.navy }}>{scannedCode}</strong>
+        </p>
+
+        <div style={{ position: "relative", marginBottom: 14 }}>
+          <input
+            ref={notFoundInputRef}
+            type="text"
+            value={notFoundSearch}
+            onChange={(e) => setNotFoundSearch(e.target.value)}
+            placeholder="Type brand name..."
+            autoFocus
+            data-testid="not-found-search-input"
+            className="card-default"
+            style={{
+              width: "100%",
+              padding: "12px 12px 12px 40px",
+              fontSize: 13,
+              fontFamily: "Montserrat, -apple-system, sans-serif",
+              boxSizing: "border-box",
+              color: B.navy,
+              outline: "none"
+            }}
+          />
+          <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+            <Icon name="search" size={18} color={B.gray} />
+          </div>
+        </div>
+
+        {notFoundSearch.length > 0 && notFoundFilteredBrands.length > 0 && (
+          <div className="card-default" style={{
+            marginBottom: 14,
+            maxHeight: 180,
+            overflowY: "auto",
+            padding: 0
+          }}>
+            {notFoundFilteredBrands.slice(0, 6).map(name => (
+              <button
+                key={name}
+                onClick={() => { setNotFoundSearch(""); selectBrand(name); }}
+                data-testid={`not-found-result-${name.toLowerCase().replace(/\s+/g, '-')}`}
+                style={{
+                  width: "100%",
+                  padding: "11px 14px",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: `1px solid ${B.border}`,
+                  textAlign: "left",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: B.navy,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8
+                }}
+              >
+                <Icon name="check" size={14} color={B.blue} />
+                {name}
+                <span style={{ fontSize: 10, color: B.gray, marginLeft: "auto" }}>{BOTTLE_BRANDS[name]?.sourceType}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: B.gray, letterSpacing: "1.2px", marginBottom: 8, textTransform: "uppercase" }}>Quick Select</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {QUICK_SELECT_BRANDS.map(name => (
+              <button
+                key={name}
+                onClick={() => selectBrand(name)}
+                data-testid={`quick-select-${name.toLowerCase().replace(/\s+/g, '-')}`}
+                className="card-default"
+                style={{
+                  color: B.navy,
+                  padding: "6px 10px",
+                  borderRadius: 16,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={() => { setNotFoundSearch(""); requestCameraAndScan(true); }}
+          data-testid="try-again-btn"
+          className="btn-brand"
+          style={{
+            width: "100%",
+            padding: "13px",
+            borderRadius: 12,
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            letterSpacing: 0.3
+          }}
+        >
+          <Icon name="camera" size={18} color={B.white} />
+          Try Again
+        </button>
+      </div>
     </div>
   );
 
   // ─── RESULT VIEW (WATER QUALITY REPORT) ─────────────────────────────────────
   if (mode === "result" && brand) return (
-    <div style={{ padding: "16px", fontFamily: "'Nunito', sans-serif" }}>
-      <WaterQualityReport
-        brand={brand}
-        onBack={() => { setBrand(null); setMode("intro"); }}
-        onBridge={onBridge}
-      />
+    <div style={outerStyle}>
+      <style>{`
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.02);opacity:0.9} }
+      `}</style>
+      <div style={{ padding: "16px" }}>
+        <WaterQualityReport
+          brand={brand}
+          onBack={() => { setBrand(null); setMode("intro"); }}
+          onBridge={onBridge}
+        />
+      </div>
     </div>
   );
 
