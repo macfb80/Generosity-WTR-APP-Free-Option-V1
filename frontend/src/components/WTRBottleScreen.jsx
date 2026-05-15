@@ -752,9 +752,7 @@ export default function WTRBottleScreen() {
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
-                Generosity{"\u2122"} Water Intelligence
-              </div>
+              {/* v3.3: eyebrow removed to match Home WTR Hub title treatment */}
               <div style={{ fontSize: 24, fontWeight: 800, color: "#FFFFFF", letterSpacing: -0.5, lineHeight: 1.2 }}>
                 Intelligent WTR BTL
               </div>
